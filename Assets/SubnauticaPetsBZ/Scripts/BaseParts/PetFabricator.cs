@@ -12,9 +12,9 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
     internal class PetFabricator : MonoBehaviour
     {
         // This is the base root of the base n which the fabricator was created
-        public Base Base { get; set; }
+        internal Base Base { get; set; }
 
-        public string BaseId
+        internal string BaseId
         {
             get
             {
@@ -71,7 +71,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         /// <summary>
         /// Spawn a Pet. Optinal callback action is invoked, if provided, with the spawned GameObject
         /// </summary>
-        public void SpawnPet(TechType techType, Action<GameObject> callBack = null)
+        internal void SpawnPet(TechType techType, Action<GameObject> callBack = null)
         {
             StartCoroutine(SpawnPetAsync(techType, callBack));
         }

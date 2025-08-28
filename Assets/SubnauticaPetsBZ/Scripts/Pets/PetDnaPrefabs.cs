@@ -29,11 +29,12 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
             // Register DNA spawn prefabs
             CatDnaPrefab.Register(dnaModelPrefab);
-            AlienRobotDnaPrefab.Register(dnaModelPrefab);
-            BloodCrawlerDnaPrefab.Register(dnaModelPrefab);
-            CaveCrawlerDnaPrefab.Register(dnaModelPrefab);
-            CrabSquidDnaPrefab.Register(dnaModelPrefab);
-
+            PengwingAdultDnaPrefab.Register(dnaModelPrefab);
+            PenglingBabyDnaPrefab.Register(dnaModelPrefab);
+            PinnacaridDnaPrefab.Register(dnaModelPrefab);
+            SnowstalkerBabyDnaPrefab.Register(dnaModelPrefab);
+            TrivalveBlueDnaPrefab.Register(dnaModelPrefab);
+            TrivalveYellowDnaPrefab.Register(dnaModelPrefab);
             ConfigureDataBank();
         }
 
@@ -43,8 +44,8 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         internal static class CatDnaPrefab
         {
             internal static PrefabInfo Info;
-            private const string TextureAssetName = "CatTexture.png";
             private const string ClassId = "CatPetDna";
+            private const string TextureAssetName = "CatTexture.png";
             private const int FindCount = 1;
             private const float FindProbability = 0.3f;
 
@@ -68,150 +69,209 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             }
         }
         /// <summary>
-        /// Alien Robot DNA
+        /// Pengwing Adult DNA
         /// </summary>
-        internal static class AlienRobotDnaPrefab
+        internal static class PengwingAdultDnaPrefab
         {
             internal static PrefabInfo Info;
-            private const string TextureAssetName = "AlienRobotDnaStrandTexture.png";
-            private const string ClassId = "AlienRobotPetDna";
+            private const string ClassId = "PengwingAdultPetDna";
+            private const string TextureAssetName = "PengwingAdultDnaStrandTexture.png";
             private const int FindCount = 1;
-            private const float FindProbability = 0.3f;
+            private const float FindProbability = 0.6f;
 
             /// <summary>
-            /// Register Alien Robot DNA
+            /// Registers Pengwing Adult DNA
             /// </summary>
             internal static void Register(GameObject dnaModelGameObject)
             {
                 Info = RegisterDnaPrefab(ClassId, null, null, TextureAssetName, Color.grey,
                     new LootDistributionData.BiomeData[] {
-                    new LootDistributionData.BiomeData { biome = BiomeType.ActiveLavaZone_Chamber_Floor_Far, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.ActiveLavaZone_Falls_Floor, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.ActiveLavaZone_Falls_Floor_Far, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.BloodKelp_CaveFloor, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.BloodKelp_TechSite_Scatter, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.Dunes_TechSite, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.Dunes_TechSite_Scatter, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.GrandReef_TechSite_Barrier, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.GrassyPlateaus_TechSite, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.Kelp_CaveFloor, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.Kelp_TechSite, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.KooshZone_CaveFloor, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.LostRiverCorridor_LakeFloor, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.LostRiverJunction_LakeFloor, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.SafeShallows_TechSite_Scattered, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.CrashZone_Rock, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest1, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest3, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest5, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest1, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest3, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest5, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_ShipWreck_Ground, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.PurpleVents_ShipWreck_Open, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ShipWreck2_Open, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ShipWreck3_Open, count = FindCount, probability = FindProbability},
+
                     }, dnaModelGameObject);
             }
         }
 
         /// <summary>
-        /// Blood Crawler DNA
+        /// Pengling Baby DNA
         /// </summary>
-        internal static class BloodCrawlerDnaPrefab
+        internal static class PenglingBabyDnaPrefab
         {
             internal static PrefabInfo Info;
-            private const string TextureAssetName = "BloodCrawlerDnaStrandTexture.png";
-            private const string ClassId = "BloodCrawlerPetDna";
+            private const string ClassId = "PenglingBabyPetDna";
+            private const string TextureAssetName = "PenglingBabyDnaStrandTexture.png";
             private const int FindCount = 1;
             private const float FindProbability = 0.3f;
 
             /// <summary>
-            /// Register Blood Crawler DNA
+            /// Register Pengling Baby DNA
             /// </summary>
             /// <param name="dnaModelGameObject"></param>
             internal static void Register(GameObject dnaModelGameObject)
             {
-                Info = RegisterDnaPrefab(ClassId, null, null, TextureAssetName, Color.red,
+                Info = RegisterDnaPrefab(ClassId, null, null, TextureAssetName, Color.magenta,
                     new LootDistributionData.BiomeData[] {
-                        new LootDistributionData.BiomeData { biome = BiomeType.BloodKelp_TrenchFloor, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.BonesField_LakePit_Floor, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.BonesField_Lake_Floor, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.Canyon_Lake_Floor, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.GrandReef_TechSite_Scattered, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.GrandReef_TechSite_Scattered_Crate_Obsolete, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.KooshZone_TechSite, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.Mountains_CaveFloor, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.Mountains_IslandCaveFloor, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.Mountains_TechSite, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.MushroomForest_CaveFloor, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.MushroomForest_GiantTreeInteriorFloor, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.SafeShallows_TechSite_Scattered_Crate_Obsolete, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.CrashZone_TrenchSand, count = FindCount, probability = FindProbability},
-                    }, dnaModelGameObject);
-            }
-        }
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest1, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest2, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest4, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.GlacialBasin_BikeCrashSite, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest2, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest4, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest5, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_ShipWreck_Open, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.MargArea_Ground, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.PurpleVents_ShipWreck_Ground, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ShipWreck1_Open, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ShipWreck3_Open, count = FindCount, probability = FindProbability},
 
-        internal static class CaveCrawlerDnaPrefab
-        {
-            internal static PrefabInfo Info;
-            private const string TextureAssetName = "CaveCrawlerDnaStrandTexture.png";
-            private const string ClassId = "CaveCrawlerPetDna";
-            private const int FindCount = 1;
-            private const float FindProbability = 0.3f;
-            internal static void Register(GameObject dnaModelGameObject)
-            {
-                Info = RegisterDnaPrefab(ClassId, null, null, TextureAssetName, Color.cyan,
-                    new LootDistributionData.BiomeData[] {
-                        new LootDistributionData.BiomeData { biome = BiomeType.Dunes_CaveFloor, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.GhostTree_LakePit_Floor, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.GhostTree_Lake_Floor, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.GrandReef_CaveFloor, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.GrassyPlateaus_CaveFloor, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.GrassyPlateaus_TechSite_Scattered, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.Kelp_TechSite_Scattered, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.MushroomForest_TechSite, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.PrisonAquarium_CaveFloor, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.SafeShallows_CaveFloor, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.SafeShallows_TechSite, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.SeaTreaderPath_CaveFloor, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.SeaTreaderPath_TechSite_Scatter, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.SkeletonCave_Lake_Floor, count = FindCount, probability = FindProbability},
-                        new LootDistributionData.BiomeData { biome = BiomeType.CrashZone_TrenchRock, count = FindCount, probability = FindProbability},
                     }, dnaModelGameObject);
             }
         }
 
         /// <summary>
-        /// Crab Squid DNA
+        /// Snowstalker Baby DNA
         /// </summary>
-        internal static class CrabSquidDnaPrefab
+        internal static class SnowstalkerBabyDnaPrefab
         {
             internal static PrefabInfo Info;
-            private const string TextureAssetName = "CrabSquidDnaStrandTexture.png";
-            private const string ClassId = "CrabSquidPetDna";
+            private const string ClassId = "SnowstalkerBabyPetDna";
+            private const string TextureAssetName = "SnowstalkerBabyDnaStrandTexture.png";
+            private const int FindCount = 1;
+            private const float FindProbability = 0.3f;
+            
+            /// <summary>
+            /// Register Snowstalker Baby DNA
+            /// </summary>
+            /// <param name="dnaModelGameObject"></param>
+            internal static void Register(GameObject dnaModelGameObject)
+            {
+                Info = RegisterDnaPrefab(ClassId, null, null, TextureAssetName, Color.white,
+                    new LootDistributionData.BiomeData[] {
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest1, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest3, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest5, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.GlacialBasin_BikeCrashSite, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest1, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest3, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest5, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_ShipWreck_Ground, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.PurpleVents_ShipWreck_Open, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ShipWreck2_Open, count = FindCount, probability = FindProbability},
+                    }, dnaModelGameObject);
+            }
+        }
+
+        /// <summary>
+        /// Trivalve Blue DNA
+        /// </summary>
+        internal static class TrivalveBlueDnaPrefab
+        {
+            internal static PrefabInfo Info;
+            private const string ClassId = "TrivalveBluePetDna";
+            private const string TextureAssetName = "TrivalveBlueDnaStrandTexture.png";
             private const int FindCount = 1;
             private const float FindProbability = 0.3f;
 
             /// <summary>
-            /// Register Crab Squid DNA
+            /// Register Trivalve Blue DNA
+            /// </summary>
+            internal static void Register(GameObject dnaModelGameObject)
+            {
+                Info = RegisterDnaPrefab(ClassId, null, null, TextureAssetName, Color.blue,
+                    new LootDistributionData.BiomeData[] {
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest1, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest2, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest4, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.GlacialBasin_BikeCrashSite, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest1, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest2, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest4, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_ShipWreck_Open, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.MargArea_Ground, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.PurpleVents_ShipWreck_Ground, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ShipWreck1_Open, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ShipWreck3_Open, count = FindCount, probability = FindProbability},
+                    }, dnaModelGameObject);
+            }
+        }
+
+        /// <summary>
+        /// Trivalve Yellow DNA
+        /// </summary>
+        internal static class TrivalveYellowDnaPrefab
+        {
+            internal static PrefabInfo Info;
+            private const string ClassId = "TrivalveYellowPetDna";
+            private const string TextureAssetName = "TrivalveYellowDnaStrandTexture.png";
+            private const int FindCount = 1;
+            private const float FindProbability = 0.3f;
+
+            /// <summary>
+            /// Register Trivalve Yellow DNA
+            /// </summary>
+            internal static void Register(GameObject dnaModelGameObject)
+            {
+                Info = RegisterDnaPrefab(ClassId, null, null, TextureAssetName, Color.yellow,
+                    new LootDistributionData.BiomeData[] {
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest1, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest3, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest5, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.GlacialBasin_BikeCrashSite, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest1, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest3, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest5, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_ShipWreck_Ground, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.MargArea_Ground, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.PurpleVents_ShipWreck_Open, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ShipWreck2_Open, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ShipWreck3_Open, count = FindCount, probability = FindProbability},
+                    }, dnaModelGameObject);
+            }
+        }
+
+        /// <summary>
+        /// Pinnacarid DNA
+        /// </summary>
+        internal static class PinnacaridDnaPrefab
+        {
+            internal static PrefabInfo Info;
+            private const string ClassId = "PinnacaridPetDna";
+            private const string TextureAssetName = "PinnacaridDnaStrandTexture.png";
+            private const int FindCount = 1;
+            private const float FindProbability = 0.3f;
+
+            /// <summary>
+            /// Register Pinnacarid DNA
             /// </summary>
             /// <param name="dnaModelGameObject"></param>
             internal static void Register(GameObject dnaModelGameObject)
             {
                 Info = RegisterDnaPrefab(ClassId, null, null, TextureAssetName, Color.blue,
-                new LootDistributionData.BiomeData[] {
-                    new LootDistributionData.BiomeData { biome = BiomeType.InactiveLavaZone_CastleChamber_Floor, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.InactiveLavaZone_CastleTunnel_Floor, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.InactiveLavaZone_Chamber_Floor, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.InactiveLavaZone_Chamber_Floor_Far, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.KooshZone_TechSite_Scatter, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.Mountains_TechSite_Scatter, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.SeaTreaderPath_TechSite, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.SparseReef_CaveFloor, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.SparseReef_DeepFloor, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.SparseReef_Techsite, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.SparseReef_Techsite_Scatter, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.TreeCove_LakeFloor, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.UnderwaterIslands_IslandCaveFloor, count = FindCount, probability = FindProbability},
-                    new LootDistributionData.BiomeData { biome = BiomeType.CrashZone_TechSite_Obsolete, count = FindCount, probability = FindProbability},
-                }, dnaModelGameObject);
+                    new LootDistributionData.BiomeData[] {
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest2, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest3, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ArcticKelp_SeamonkeyNest5, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.GlacialBasin_BikeCrashSite, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest1, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest3, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_Crevice_SeamonkeyNest5, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.LilyPads_ShipWreck_Ground, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.PurpleVents_ShipWreck_Open, count = FindCount, probability = FindProbability},
+                        new LootDistributionData.BiomeData { biome = BiomeType.ShipWreck2_Open, count = FindCount, probability = FindProbability},
+                    }, dnaModelGameObject);
             }
         }
 
-        /// <summary>
-        /// Generic method to set up the DNA prefabs
-        /// </summary>
+
         private static PrefabInfo RegisterDnaPrefab(string classId, string displayName, string description, string textureName,
             Color color, LootDistributionData.BiomeData[] lootBiome, GameObject dnaModelPrefab)
         {
@@ -267,11 +327,12 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         private static void ConfigureDataBank()
         {
             PetPrefabConfigUtils.ConfigureDatabankEntry(EncKey, EncPath, DatabankMainImageAssetName, DatabankPopupImageAssetName);
-            Nautilus.Handlers.StoryGoalHandler.RegisterItemGoal(EncKey, Story.GoalType.Encyclopedia, CatDnaPrefab.Info.TechType);
-            Nautilus.Handlers.StoryGoalHandler.RegisterItemGoal(EncKey, Story.GoalType.Encyclopedia, AlienRobotDnaPrefab.Info.TechType);
-            Nautilus.Handlers.StoryGoalHandler.RegisterItemGoal(EncKey, Story.GoalType.Encyclopedia, BloodCrawlerDnaPrefab.Info.TechType);
-            Nautilus.Handlers.StoryGoalHandler.RegisterItemGoal(EncKey, Story.GoalType.Encyclopedia, CaveCrawlerDnaPrefab.Info.TechType);
-            Nautilus.Handlers.StoryGoalHandler.RegisterItemGoal(EncKey, Story.GoalType.Encyclopedia, CrabSquidDnaPrefab.Info.TechType);
+            Nautilus.Handlers.StoryGoalHandler.RegisterItemGoal(EncKey, Story.GoalType.Encyclopedia, PengwingAdultDnaPrefab.Info.TechType);
+            Nautilus.Handlers.StoryGoalHandler.RegisterItemGoal(EncKey, Story.GoalType.Encyclopedia, PenglingBabyDnaPrefab.Info.TechType);
+            Nautilus.Handlers.StoryGoalHandler.RegisterItemGoal(EncKey, Story.GoalType.Encyclopedia, PinnacaridDnaPrefab.Info.TechType);
+            Nautilus.Handlers.StoryGoalHandler.RegisterItemGoal(EncKey, Story.GoalType.Encyclopedia, SnowstalkerBabyDnaPrefab.Info.TechType);
+            Nautilus.Handlers.StoryGoalHandler.RegisterItemGoal(EncKey, Story.GoalType.Encyclopedia, TrivalveYellowDnaPrefab.Info.TechType);
+            Nautilus.Handlers.StoryGoalHandler.RegisterItemGoal(EncKey, Story.GoalType.Encyclopedia, TrivalveBlueDnaPrefab.Info.TechType);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
     /// </summary>
     internal static class PetConsoleFragmentPrefab
     {
-        public static PrefabInfo Info;
+        internal static PrefabInfo Info;
         private const string PrefabAssetName = "PetConsoleDamaged.prefab";
         private const string ClassId = "PetConsoleFragment";
         private const string CloneClassId = "7eaf11d3-5b65-4325-a249-d69c7cc838b0";
@@ -22,7 +22,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         /// <summary>
         /// Initialise Pet Console Fragment prefab
         /// </summary>
-        public static void Register()
+        internal static void Register()
         {
             Info = PrefabInfo
                 .WithTechType(ClassId, null, null, unlockAtStart: false);

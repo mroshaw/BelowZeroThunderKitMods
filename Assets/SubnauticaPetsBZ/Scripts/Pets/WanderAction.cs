@@ -9,10 +9,10 @@ namespace DaftAppleGames.SubnauticaPets.Pets
     internal class WanderAction : PetAction
     {
         [Header("Action Settings")]
-        public float minTravelDistance = 2.0f;
-        public float maxTravelDistance = 10.0f;
-        public float minTravelAngle = 30.0f;
-        public float maxTravelAngle = 140.0f;
+        internal float minTravelDistance = 2.0f;
+        internal float maxTravelDistance = 10.0f;
+        internal float minTravelAngle = 30.0f;
+        internal float maxTravelAngle = 140.0f;
         
         private SimpleMovement _simpleMovement;
         

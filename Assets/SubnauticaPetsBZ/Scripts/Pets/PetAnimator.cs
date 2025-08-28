@@ -89,7 +89,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             }
         }
 
-        public void PlayRandomBodyAnim(bool playSound)
+        internal void PlayRandomBodyAnim(bool playSound)
         {
             if(!_animator || _bodyAnimHashKeys == null || _bodyAnimHashKeys.Length == 0)
             {
@@ -106,12 +106,12 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             _animator.SetTrigger(_bodyAnimHashKeys[animIndex]);
         }
 
-        public void PlayRandomFaceAnimForDuration(float duration)
+        internal void PlayRandomFaceAnimForDuration(float duration)
         {
             StartCoroutine(PlayRandomFaceAnimAsync(duration));
         }
 
-        public void PlayRandomFaceAnim()
+        internal void PlayRandomFaceAnim()
         {
             if(!_animator || _faceAnimHashKeys == null || _faceAnimHashKeys.Length == 0)
             {
@@ -158,7 +158,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         /// Controls movement animation
         /// </summary>
-        public void SetMoving(bool isMoving)
+        internal void SetMoving(bool isMoving)
         {
             _animator.SetBool(IsMovingAnimParameter, isMoving);
         }

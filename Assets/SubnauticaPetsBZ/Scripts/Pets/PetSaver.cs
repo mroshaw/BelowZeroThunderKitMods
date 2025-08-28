@@ -11,27 +11,27 @@ namespace DaftAppleGames.SubnauticaPets.Pets
     /// <summary>
     /// MonoBehaviour class to save and load active Pets
     /// </summary>
-    public class PetSaver : MonoBehaviour
+    internal class PetSaver : MonoBehaviour
     {
         public List<Pet> PetList = new List<Pet>();
 
         /// <summary>
         /// Abstract instance stub for UnityEvent
         /// </summary>
-        public class OnPetRegisteredEvent : UnityEvent<Pet>
+        internal class OnPetRegisteredEvent : UnityEvent<Pet>
         {
         }
 
         /// <summary>
         /// Abstract instance stub for UnityEvent 
         /// </summary>
-        public class OnPetUnregisteredEvent : UnityEvent<Pet>
+        internal class OnPetUnregisteredEvent : UnityEvent<Pet>
         {
         }
 
-        public UnityEvent<Pet> PetRegisteredEvent = new OnPetRegisteredEvent();
-        public UnityEvent<Pet> PetUnregisteredEvent = new OnPetUnregisteredEvent();
-        public UnityEvent PetListUpdatedEvent = new UnityEvent();
+        internal UnityEvent<Pet> PetRegisteredEvent = new OnPetRegisteredEvent();
+        internal UnityEvent<Pet> PetUnregisteredEvent = new OnPetUnregisteredEvent();
+        internal UnityEvent PetListUpdatedEvent = new UnityEvent();
 
         private void OnEnable()
         {
@@ -56,7 +56,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         /// Initialise the Saver
         /// </summary>
-        public void Init()
+        internal void Init()
         {
             PetList = new List<Pet>();
         }
@@ -65,7 +65,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// Register a new Pet to the HashList
         /// </summary>
         /// <param name="pet"></param>
-        public void RegisterPet(Pet pet)
+        internal void RegisterPet(Pet pet)
         {
             if (PetList == null)
             {
@@ -85,7 +85,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// Remove a Pet from the HashList
         /// </summary>
         /// <param name="pet"></param>
-        public void UnregisterPet(Pet pet)
+        internal void UnregisterPet(Pet pet)
         {
             if (PetList.Contains(pet))
             {
@@ -99,7 +99,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         /// Iterate the Pet List and kill
         /// </summary>
-        public void KillAllPets()
+        internal void KillAllPets()
         {
             foreach (Pet pet in PetList.ToArray())
             {
@@ -108,7 +108,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             PetListUpdatedEvent.Invoke();
         }
 
-        public void ForceRefresh()
+        internal void ForceRefresh()
         {
             PetListUpdatedEvent.Invoke();
         }
@@ -117,7 +117,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// Creates a HashSet of current pets, suitable using in a save game
         /// </summary>
         /// <returns></returns>
-        public HashSet<PetDetails> GetPetListAsHashSet()
+        internal HashSet<PetDetails> GetPetListAsHashSet()
         {
             HashSet<PetDetails> hashSet = new HashSet<PetDetails>();
 
@@ -141,7 +141,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// Internal PetDetails class, used to store "minimum" attributes for a pet
         /// so we can serialize and deserialize for saving and loading pet data
         /// </summary>
-        public class PetDetails
+        internal class PetDetails
         {
             public string PrefabId { get; }
             public string PetName { get; set; }
@@ -164,7 +164,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         /// Load and update Pets
         /// </summary>
-        public void LoadData()
+        internal void LoadData()
         {
             StartCoroutine(WaitForDataLoad());
         }

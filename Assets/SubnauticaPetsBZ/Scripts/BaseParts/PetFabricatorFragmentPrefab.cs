@@ -13,12 +13,12 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
     /// </summary>
     internal static class PetFabricatorFragmentPrefab
     {
-        public static PrefabInfo Info;
+        internal static PrefabInfo Info;
         private const string ClassId = "PetFabricatorFragment";
         private const string CloneClassId = "8029a9ce-ab75-46d0-a8ab-63138f6f83e4";
         private const string EncKey = "PetFabricator";
         
-        public static void Register()
+        internal static void Register()
         {
             Info = PrefabInfo
                 .WithTechType("PetFabricatorFragment", null, null, unlockAtStart: false);

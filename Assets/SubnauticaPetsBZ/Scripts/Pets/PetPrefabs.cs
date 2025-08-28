@@ -12,34 +12,35 @@ using UnityEngine;
 
 namespace DaftAppleGames.SubnauticaPets.Pets
 {
-    public static class PetPrefabs
+    internal static class PetPrefabs
     {
         /// <summary>
         /// Set up all the Pet Prefabs
         /// </summary>
-        public static void RegisterAll()
+        internal static void RegisterAll()
         {
-            AlienRobotPrefab.Register();
-            BloodCrawlerPrefab.Register();
-            CaveCrawlerPrefab.Register();
-            CrabSquidPrefab.Register();
+            PenglingBabyPrefab.Register();
+            PengwingAdultPrefab.Register();
+            PinnacaridPrefab.Register();
+            SnowstalkerBabyPrefab.Register();
+            TrivalveBluePrefab.Register();
+            TrivalveYellowPrefab.Register();
         }
-
         /// <summary>
-        /// Alien Robot
+        /// Pengling Baby
         /// </summary>
-        public static class AlienRobotPrefab
+        internal static class PenglingBabyPrefab
         {
             // Init PrefabInfo
-            public static PrefabInfo Info;
-            private const string ClassId = "AlienRobotPet";
-            private const string IconTextureAssetName = "AlienRobotTexture.png";
-            private const string CloneClassId = "4fae8fa4-0280-43bd-bcf1-f3cba97eed77";
+            internal static PrefabInfo Info;
+            private const string ClassId = "PenglingBabyPet";
+            private const string IconTextureAssetName = "PenglingBabyTexture.png";
+            private const string CloneClassId = "807fbbb3-aced-45cd-aba8-db3fb1188f1f";
             
             /// <summary>
-            /// Register Alien Robot
+            /// Set up the Pet Prefab
             /// </summary>
-            public static void Register()
+            internal static void Register()
             {
                 Info = PrefabInfo
                     .WithTechType(ClassId, null, null, unlockAtStart: true)
@@ -53,19 +54,17 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 {
                     obj.SetActive(false);
                     PetPrefabConfigUtils.AddTechTag(obj, Info.TechType);
-                    obj.DestroyComponentsInChildren<LargeWorldEntity>();
                     GameObject modelGameObject = obj.GetComponentInChildren<Animator>(true).gameObject;
-                    PetPrefabConfigUtils.AddVFXFabricating(obj, null, -0.2f, 1.2f, new Vector3(0.0f, 0.0f, 0.0f), 1.0f,
-                        new Vector3(0.0f, 0.0f, 0.0f));
+                    PetPrefabConfigUtils.AddVFXFabricating(obj, null, -0.2f, 0.8f, new Vector3(0.0f, 0.0f, 0.0f), 1.0f, new Vector3(0.0f, 0.0f, 0.0f));
                     PrefabUtils.AddConstructable(obj, Info.TechType, ConstructableFlags.Inside, modelGameObject);
-                    PetPrefabConfigUtils.AddPetHandTarget(obj);
                     obj.DestroyComponentsInChildren<Pickupable>();
+                    PetPrefabConfigUtils.AddPetHandTarget(obj);
+                    PetPrefabConfigUtils.ConfigureSwimming(obj);
                     PetPrefabConfigUtils.ConfigureSkyApplier(obj);
                     PetPrefabConfigUtils.ConfigureAnimator(obj, false);
+                    obj.DestroyComponentsInChildren<CreatureDeath>();
                     PetPrefabConfigUtils.AddPetComponent(obj);
-                    PetPrefabConfigUtils.AddSubnauticaPetComponents(obj);
                     obj.name = ClassId;
-                    obj.SetActive(false);
                     LogUtils.LogDebug(LogArea.Prefabs, $"Done modifying {Info.TechType}");
                 };
 
@@ -76,78 +75,8 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 if (SubnauticaPetsPlugin.ModConfig.ModMode == ModMode.Adventure)
                 {
                     recipe = new RecipeData(
-                    new Ingredient(TechType.Gold, 1),
-                    new Ingredient(TechType.CopperWire, 1),
-                    new Ingredient(TechType.ComputerChip, 1),
-                    new Ingredient(TechType.Titanium, 2),
-                    new Ingredient(PetDnaPrefabs.AlienRobotDnaPrefab.Info.TechType, 3));
-                }
-                else
-                {
-                    recipe = new RecipeData(new Ingredient(TechType.Titanium, 1));
-                }
-
-                CraftingGadget crafting = prefab.SetRecipe(recipe);
-                prefab.Register();
-            }
-        }
-
-        /// <summary>
-        /// Blood Crawler
-        /// </summary>
-        public static class BloodCrawlerPrefab
-        {
-            // Init PrefabInfo
-            public static PrefabInfo Info;
-            private const string ClassId = "BloodCrawlerPet";
-            private const string IconTextureAssetName = "BloodCrawlerTexture.png";
-            private const string CloneClassId = "830a8fa0-d92d-4683-a193-7531e6968042";
-            
-            /// <summary>
-            /// Register Blood Crawler
-            /// </summary>
-            public static void Register()
-            {
-                Info = PrefabInfo
-                    .WithTechType(ClassId, null, null, unlockAtStart: true)
-                    .WithIcon(CustomAssetBundleUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
-
-                CustomPrefab prefab = new CustomPrefab(Info);
-                CloneTemplate cloneTemplate = new CloneTemplate(Info, CloneClassId);
-
-                // Modify the cloned model
-                cloneTemplate.ModifyPrefab += obj =>
-                {
-                    obj.SetActive(false);
-                    PetPrefabConfigUtils.AddTechTag(obj, Info.TechType);
-                    obj.DestroyComponentsInChildren<LargeWorldEntity>();
-                    GameObject modelGameObject = obj.GetComponentInChildren<Animator>(true).gameObject;
-                    PetPrefabConfigUtils.AddVFXFabricating(obj, null, -0.2f, 1.2f, new Vector3(0.0f, 0.0f, 0.0f), 0.3f,
-                        new Vector3(0.0f, 0.0f, 0.0f));
-                    PrefabUtils.AddConstructable(obj, Info.TechType, ConstructableFlags.Inside, modelGameObject);
-                    PetPrefabConfigUtils.AddScaleOnStart(obj, 0.3f);
-                    PetPrefabConfigUtils.AddPetHandTarget(obj);
-                    obj.DestroyComponentsInChildren<Pickupable>();
-                    PetPrefabConfigUtils.ConfigureSkyApplier(obj);
-                    PetPrefabConfigUtils.ConfigureAnimator(obj, false);
-                    PetPrefabConfigUtils.AddPetComponent(obj);
-                    PetPrefabConfigUtils.AddSubnauticaPetComponents(obj);
-                    obj.name = ClassId;
-                    obj.SetActive(false);
-                    LogUtils.LogDebug(LogArea.Prefabs, $"Done modifying {Info.TechType}");
-                };
-
-                prefab.SetGameObject(cloneTemplate);
-
-                // Set the recipe, depends on whether in "Adventure" or "Creative" mode.
-                RecipeData recipe = null;
-                if (SubnauticaPetsPlugin.ModConfig.ModMode == ModMode.Adventure)
-                {
-                    recipe = new RecipeData(
-                    new Ingredient(TechType.Gold, 1),
-                    new Ingredient(TechType.AcidMushroom, 1),
-                    new Ingredient(TechType.Salt, 1),
-                    new Ingredient(PetDnaPrefabs.BloodCrawlerDnaPrefab.Info.TechType, 3));
+                        new Ingredient(TechType.Gold, 1),
+                        new Ingredient(PetDnaPrefabs.PenglingBabyDnaPrefab.Info.TechType, 5));
                 }
                 else
                 {
@@ -159,20 +88,20 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         }
 
         /// <summary>
-        /// Cave Crawler
+        /// Pengwing Adult
         /// </summary>
-        public static class CaveCrawlerPrefab
+        internal static class PengwingAdultPrefab
         {
             // Init PrefabInfo
-            public static PrefabInfo Info;
-            private const string ClassId = "CaveCrawlerPet";
-            private const string IconTextureAssetName = "CaveCrawlerTexture.png";
-            private const string CloneClassId = "3e0a11f1-e2b2-4c4f-9a8e-0b0a77dcc065";
+            internal static PrefabInfo Info;
+            private const string ClassId = "PengwingAdultPet";
+            private const string IconTextureAssetName = "PengwingAdultTexture.png";
+            private const string CloneClassId = "74ded0e7-d394-4703-9e53-4384b37f9433";
             
             /// <summary>
-            /// Register Cave Crawler
+            /// Set up the Pengwing Adult Prefab
             /// </summary>
-            public static void Register()
+            internal static void Register()
             {
                 Info = PrefabInfo
                     .WithTechType(ClassId, null, null, unlockAtStart: true)
@@ -186,19 +115,17 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 {
                     obj.SetActive(false);
                     PetPrefabConfigUtils.AddTechTag(obj, Info.TechType);
-                    obj.DestroyComponentsInChildren<LargeWorldEntity>();
                     GameObject modelGameObject = obj.GetComponentInChildren<Animator>(true).gameObject;
-                    PetPrefabConfigUtils.AddVFXFabricating(obj, null, -0.2f, 0.5f, new Vector3(0.0f, 0.0f, 0.0f), 1.0f,
-                        new Vector3(0.0f, 0.0f, 0.0f));
+                    PetPrefabConfigUtils.AddVFXFabricating(obj, null, -0.2f, 1.2f, new Vector3(0.0f, 0.0f, 0.0f), 1.0f, new Vector3(0.0f, 0.0f, 0.0f));
                     PrefabUtils.AddConstructable(obj, Info.TechType, ConstructableFlags.Inside, modelGameObject);
+                    PetPrefabConfigUtils.UpdatePickupable(obj, false);
                     PetPrefabConfigUtils.AddPetHandTarget(obj);
-                    obj.DestroyComponentsInChildren<Pickupable>();
+                    PetPrefabConfigUtils.ConfigureSwimming(obj);
                     PetPrefabConfigUtils.ConfigureSkyApplier(obj);
                     PetPrefabConfigUtils.ConfigureAnimator(obj, false);
+                    obj.DestroyComponentsInChildren<CreatureDeath>();
                     PetPrefabConfigUtils.AddPetComponent(obj);
-                    PetPrefabConfigUtils.AddSubnauticaPetComponents(obj);
                     obj.name = ClassId;
-                    obj.SetActive(false);
                     LogUtils.LogDebug(LogArea.Prefabs, $"Done modifying {Info.TechType}");
                 };
 
@@ -210,9 +137,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 {
                     recipe = new RecipeData(
                     new Ingredient(TechType.Gold, 1),
-                    new Ingredient(TechType.Sulphur, 1),
-                    new Ingredient(TechType.Salt, 1),
-                    new Ingredient(PetDnaPrefabs.CaveCrawlerDnaPrefab.Info.TechType, 3));
+                    new Ingredient(PetDnaPrefabs.PengwingAdultDnaPrefab.Info.TechType, 3));
                 }
                 else
                 {
@@ -224,20 +149,20 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         }
 
         /// <summary>
-        /// Crab Squid
+        /// Pinnacarid
         /// </summary>
-        public static class CrabSquidPrefab
+        internal static class PinnacaridPrefab
         {
             // Init PrefabInfo
-            public static PrefabInfo Info;
-            private const string ClassId = "CrabSquidPet";
-            private const string IconTextureAssetName = "CrabSquidTexture.png";
-            private const string CloneClassId = "4c2808fe-e051-44d2-8e64-120ddcdc8abb";
+            internal static PrefabInfo Info;
+            private const string ClassId = "PinnacaridPet";
+            private const string IconTextureAssetName = "PinnacaridTexture.png";
+            private const string CloneClassId = "f9eccfe2-a06f-4c06-bc57-01c2e50ffbe8";
             
             /// <summary>
-            /// Register Crab Squid
+            /// Set up the Pinnacarid Prefab
             /// </summary>
-            public static void Register()
+            internal static void Register()
             {
                 Info = PrefabInfo
                     .WithTechType(ClassId, null, null, unlockAtStart: true)
@@ -251,22 +176,15 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 {
                     obj.SetActive(false);
                     PetPrefabConfigUtils.AddTechTag(obj, Info.TechType);
-                    obj.DestroyComponentsInChildren<LargeWorldEntity>();
                     GameObject modelGameObject = obj.GetComponentInChildren<Animator>(true).gameObject;
-                    PetPrefabConfigUtils.AddVFXFabricating(obj, null, -0.2f, 1.2f, new Vector3(0.0f, 0.0f, 0.0f), 0.07f,
-                        new Vector3(0.0f, 0.0f, 0.0f));
+                    PetPrefabConfigUtils.AddVFXFabricating(obj, null, -0.2f, 0.6f, new Vector3(0.0f, 0.0f, 0.0f), 1.0f, new Vector3(0.0f, 0.0f, 0.0f));
                     PrefabUtils.AddConstructable(obj, Info.TechType, ConstructableFlags.Inside, modelGameObject);
                     obj.DestroyComponentsInChildren<Pickupable>();
-                    obj.DestroyComponentsInChildren<EMPAttack>();
-                    obj.DestroyComponentsInChildren<AggressiveWhenSeeTarget>();
-                    obj.DestroyComponentsInChildren<MeleeAttack>();
                     PetPrefabConfigUtils.AddPetHandTarget(obj);
+                    PetPrefabConfigUtils.ConfigureSwimming(obj);
                     PetPrefabConfigUtils.ConfigureSkyApplier(obj);
                     PetPrefabConfigUtils.ConfigureAnimator(obj, false);
-                    PetPrefabConfigUtils.AddScaleOnStart(obj, 0.07f);
-                    PetPrefabConfigUtils.ConfigureAnimator(obj, false);
                     PetPrefabConfigUtils.AddPetComponent(obj);
-                    PetPrefabConfigUtils.AddSubnauticaPetComponents(obj);
                     obj.name = ClassId;
                     obj.SetActive(false);
                     LogUtils.LogDebug(LogArea.Prefabs, $"Done modifying {Info.TechType}");
@@ -280,9 +198,185 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 {
                     recipe = new RecipeData(
                     new Ingredient(TechType.Gold, 1),
-                    new Ingredient(TechType.JellyPlant, 1),
-                    new Ingredient(TechType.Salt, 1),
-                    new Ingredient(PetDnaPrefabs.CrabSquidDnaPrefab.Info.TechType, 3));
+                    new Ingredient(PetDnaPrefabs.PinnacaridDnaPrefab.Info.TechType, 3));
+                }
+                else
+                {
+                    recipe = new RecipeData(new Ingredient(TechType.Titanium, 1));
+                }
+                CraftingGadget crafting = prefab.SetRecipe(recipe);
+                prefab.Register();
+            }
+        }
+
+        /// <summary>
+        /// Snowstalker Baby
+        /// </summary>
+        internal static class SnowstalkerBabyPrefab
+        {
+            // Init PrefabInfo
+            internal static PrefabInfo Info;
+            private const string ClassId = "SnowstalkerBabyPet";
+            private const string IconTextureAssetName = "SnowstalkerBabyTexture.png";
+            private const string CloneClassId = "78d3dbce-856f-4eba-951c-bd99870554e2";
+
+            /// <summary>
+            /// Set up the Snowstalker Baby Prefab
+            /// </summary>
+            internal static void Register()
+            {
+                Info = PrefabInfo
+                    .WithTechType(ClassId, null, null, unlockAtStart: true)
+                    .WithIcon(CustomAssetBundleUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
+
+                CustomPrefab prefab = new CustomPrefab(Info);
+                CloneTemplate cloneTemplate = new CloneTemplate(Info, CloneClassId);
+
+                // Modify the cloned model
+                cloneTemplate.ModifyPrefab += obj =>
+                {
+                    obj.SetActive(false);
+                    PetPrefabConfigUtils.AddTechTag(obj, Info.TechType);
+                    GameObject modelGameObject = obj.GetComponentInChildren<Animator>(true).gameObject;
+                    PetPrefabConfigUtils.AddVFXFabricating(obj, null, -0.2f, 1.0f, new Vector3(0.0f, 0.0f, 0.0f), 1.0f, new Vector3(0.0f, 0.0f, 0.0f));
+                    PrefabUtils.AddConstructable(obj, Info.TechType, ConstructableFlags.Inside, modelGameObject);
+                    obj.DestroyComponentsInChildren<Pickupable>();
+                    PetPrefabConfigUtils.AddPetHandTarget(obj);
+                    PetPrefabConfigUtils.ConfigureSwimming(obj);
+                    PetPrefabConfigUtils.ConfigureSkyApplier(obj);
+                    PetPrefabConfigUtils.ConfigureAnimator(obj, false);
+                    PetPrefabConfigUtils.ConfigureMovement(obj);
+                    PetPrefabConfigUtils.CleanNavUpMesh(obj);
+                    PetPrefabConfigUtils.AddPetComponent(obj);
+                    obj.name = ClassId;
+                    LogUtils.LogDebug(LogArea.Prefabs, $"Done modifying {Info.TechType}");
+                };
+
+                prefab.SetGameObject(cloneTemplate);
+
+                // Set the recipe, depends on whether in "Adventure" or "Creative" mode.
+                RecipeData recipe = null;
+                if (SubnauticaPetsPlugin.ModConfig.ModMode == ModMode.Adventure)
+                {
+                    recipe = new RecipeData(
+                   new Ingredient(TechType.Gold, 1),
+                   new Ingredient(PetDnaPrefabs.SnowstalkerBabyDnaPrefab.Info.TechType, 3));
+                }
+                else
+                {
+                    recipe = new RecipeData(new Ingredient(TechType.Titanium, 1));
+                }
+                CraftingGadget crafting = prefab.SetRecipe(recipe);
+                prefab.Register();
+            }
+        }
+
+        private static void ConfigureTrivalve(GameObject obj, PrefabInfo Info, string objName, string classId)
+        {
+            obj.SetActive(false);
+            PetPrefabConfigUtils.AddTechTag(obj, Info.TechType);
+            GameObject modelGameObject = obj.GetComponentInChildren<Animator>(true).gameObject;
+            PetPrefabConfigUtils.AddVFXFabricating(obj, null, -0.2f, 0.8f, new Vector3(0.0f, 0.0f, 0.0f), 1.0f, new Vector3(0.0f, 0.0f, 0.0f));
+            PrefabUtils.AddConstructable(obj, Info.TechType, ConstructableFlags.Inside, modelGameObject);
+            obj.DestroyComponentsInChildren<Pickupable>();
+            // obj.DisableComponentsInChildren<LargeWorldEntity>();
+            PetPrefabConfigUtils.AddPetHandTarget(obj);
+            PetPrefabConfigUtils.ConfigureSwimming(obj);
+            PetPrefabConfigUtils.ConfigureSkyApplier(obj);
+            PetPrefabConfigUtils.ConfigureAnimator(obj, false);
+            PetPrefabConfigUtils.AddPetComponent(obj);
+            obj.name = objName;
+            obj.SetActive(false);
+            LogUtils.LogDebug(LogArea.Prefabs, $"Done modifying {Info.TechType}");
+
+        }
+
+        /// <summary>
+        /// Trivalve Blue
+        /// </summary>
+        internal static class TrivalveBluePrefab
+        {
+            // Init PrefabInfo
+            internal static PrefabInfo Info;
+            private const string ClassId = "TrivalveBluePet";
+            private const string IconTextureAssetName = "TrivalveBlueTexture.png";
+            private const string CloneClassId = "f5a2317f-6116-4fc6-8e81-824fd8ba9684";
+
+            /// <summary>
+            /// Set up the Trivalve Blue Prefab
+            /// </summary>
+            internal static void Register()
+            {
+                Info = PrefabInfo
+                    .WithTechType(ClassId, null, null, unlockAtStart: true)
+                    .WithIcon(CustomAssetBundleUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
+
+                CustomPrefab prefab = new CustomPrefab(Info);
+                CloneTemplate cloneTemplate = new CloneTemplate(Info, CloneClassId);
+
+                // Modify the cloned model
+                cloneTemplate.ModifyPrefab += obj =>
+                {
+                    ConfigureTrivalve(obj, Info, ClassId, ClassId);
+                };
+
+                prefab.SetGameObject(cloneTemplate);
+
+                // Set the recipe, depends on whether in "Adventure" or "Creative" mode.
+                RecipeData recipe = null;
+                if (SubnauticaPetsPlugin.ModConfig.ModMode == ModMode.Adventure)
+                {
+                    recipe = new RecipeData(
+                   new Ingredient(TechType.Gold, 1),
+                   new Ingredient(PetDnaPrefabs.TrivalveBlueDnaPrefab.Info.TechType, 3));
+                }
+                else
+                {
+                    recipe = new RecipeData(new Ingredient(TechType.Titanium, 1));
+                }
+                CraftingGadget crafting = prefab.SetRecipe(recipe);
+                prefab.Register();
+            }
+        }
+
+        /// <summary>
+        /// Trivalve Blue
+        /// </summary>
+        internal static class TrivalveYellowPrefab
+        {
+            // Init PrefabInfo
+            internal static PrefabInfo Info;
+            private const string ClassId = "TrivalveYellowPet";
+            private const string IconTextureAssetName = "TrivalveYellowTexture.png";
+            private const string CloneClassId = "e8f2bfd4-49c6-45d1-a029-489b492515a9";
+            
+            /// <summary>
+            /// Set up the Trivalve Blue Prefab
+            /// </summary>
+            internal static void Register()
+            {
+                Info = PrefabInfo
+                    .WithTechType(ClassId, null, null, unlockAtStart: true)
+                    .WithIcon(CustomAssetBundleUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
+
+                CustomPrefab prefab = new CustomPrefab(Info);
+                CloneTemplate cloneTemplate = new CloneTemplate(Info, CloneClassId);
+
+                // Modify the cloned model
+                cloneTemplate.ModifyPrefab += obj =>
+                {
+                    ConfigureTrivalve(obj, Info, ClassId, ClassId);
+                };
+
+                prefab.SetGameObject(cloneTemplate);
+
+                // Set the recipe, depends on whether in "Adventure" or "Creative" mode.
+                RecipeData recipe = null;
+                if (SubnauticaPetsPlugin.ModConfig.ModMode == ModMode.Adventure)
+                {
+                    recipe = new RecipeData(
+                    new Ingredient(TechType.Gold, 1),
+                    new Ingredient(PetDnaPrefabs.TrivalveYellowDnaPrefab.Info.TechType, 3));
                 }
                 else
                 {

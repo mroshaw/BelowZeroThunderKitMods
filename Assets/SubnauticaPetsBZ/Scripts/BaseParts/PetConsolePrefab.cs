@@ -15,7 +15,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
     /// </summary>
     internal static class PetConsolePrefab
     {
-        public static PrefabInfo Info;
+        internal static PrefabInfo Info;
         private const string ClassId = "PetConsole";
         private const TechType CloneTechType= TechType.PictureFrame;
         private const string IconAssetName = "PetConsoleIconTexture.png";
@@ -27,7 +27,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         /// <summary>
         /// Register Pet Console
         /// </summary>
-        public static void Register()
+        internal static void Register()
         {
             // Unlock at start if in Creative mode
             Info = PrefabInfo
@@ -93,14 +93,8 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
                 out Button killButton, out Button killConfirmButton,
                 out Button killAllButton, out Button killAllConfirmButton,
                 out TMP_InputField petNameTextInput, out GameObject petsScrollViewContent, out Button petListButtonTemplate);
-            petConsole.renameButton = renameButton;
-            petConsole.killButton = killButton;
-            petConsole.killConfirmButton = killConfirmButton;
-            petConsole.killAllButton = killAllButton;
-            petConsole.killAllConfirmButton = killAllConfirmButton;
-            petConsole.petNameTextInput = petNameTextInput;
-            petConsole.petListButtonTemplate = petListButtonTemplate;
-            petConsole.petsScrollViewContent = petsScrollViewContent;
+            
+            petConsole.ConfigureUi(renameButton, killButton, killConfirmButton, killAllButton, killAllConfirmButton,petNameTextInput, petListButtonTemplate, petsScrollViewContent);
         }
 
         /// <summary>

@@ -15,7 +15,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         /// Initialise the component
         /// </summary>
-        public void Start()
+        private void Start()
         {
             _pet = GetComponent<Pet>();
             if (!_pet)
@@ -27,7 +27,6 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         /// Handles a Mouse Hover over a pet
         /// </summary>
-        /// <param name="hand"></param>
         public void OnHandHover(GUIHand hand)
         {
             if (!_pet)
@@ -70,7 +69,6 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         /// Handles a click on a pet
         /// </summary>
-        /// <param name="hand"></param>
         public void OnHandClick(GUIHand hand)
         {
             if (!_pet)

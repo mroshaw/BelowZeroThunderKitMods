@@ -15,16 +15,14 @@ namespace DaftAppleGames.SubnauticaPets.Patches
         /// <summary>
         /// Patch in names and force enable icons when setting up map room TechTypes
         /// </summary>
-        /// <param name="__instance"></param>
-        /// <param name="techType"></param>
         [HarmonyPatch(nameof(uGUI_MapRoomResourceNode.SetTechType))]
         [HarmonyPostfix]
         public static void SetTechType_Postfix(uGUI_MapRoomResourceNode __instance, TechType techType)
         {
-            if (techType != PetDnaPrefabs.AlienRobotDnaPrefab.Info.TechType && techType != PetDnaPrefabs.CaveCrawlerDnaPrefab.Info.TechType &&
-                techType != PetDnaPrefabs.BloodCrawlerDnaPrefab.Info.TechType && techType != PetDnaPrefabs.CrabSquidDnaPrefab.Info.TechType &&
+            if (techType != PetDnaPrefabs.PengwingAdultDnaPrefab.Info.TechType && techType != PetDnaPrefabs.PenglingBabyDnaPrefab.Info.TechType &&
+                techType != PetDnaPrefabs.PinnacaridDnaPrefab.Info.TechType && techType != PetDnaPrefabs.SnowstalkerBabyDnaPrefab.Info.TechType &&
+                techType != PetDnaPrefabs.TrivalveBlueDnaPrefab.Info.TechType && techType != PetDnaPrefabs.TrivalveYellowDnaPrefab.Info.TechType &&
                 techType != PetDnaPrefabs.CatDnaPrefab.Info.TechType)
-
             {
                 return;
             }

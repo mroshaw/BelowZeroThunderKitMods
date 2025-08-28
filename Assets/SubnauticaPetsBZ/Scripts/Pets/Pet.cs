@@ -10,7 +10,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
     /// MonoBehaviour component providing Pet behaviours and properties.
     /// Can be used as a base to be inherited by Creature specific classes
     /// </summary>
-    public class Pet : MonoBehaviour
+    internal class Pet : MonoBehaviour
     {
         // Public properties
         internal Base Base { get; set; }
@@ -26,19 +26,19 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         /// The TechType or type of Pet
         /// </summary>
-        public TechType TechType => _techTag.type;
+        internal TechType TechType => _techTag.type;
 
         /// <summary>
         /// The PrefabIdentifier. Used to load and re-configure saved pets
         /// </summary>
-        public string PrefabId => _prefabIdentifier.Id;
+        internal string PrefabId => _prefabIdentifier.Id;
 
-        public bool IsDead { get; private set; } = false;
+        internal bool IsDead { get; private set; } = false;
 
         /// <summary>
         /// Gets a "display friendly" version of the Pet Type for display
         /// </summary>
-        public string PetTypeString
+        internal string PetTypeString
         {
             get
             {
@@ -59,12 +59,12 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         /// Gets a "display friendly" version of the Pet Name
         /// </summary>
-        public string PetNameString => PetName.AddSpacesInCamelCase();
+        internal string PetNameString => PetName.AddSpacesInCamelCase();
 
         /// <summary>
         /// Public getter and setter for Pet Name
         /// </summary>
-        public string PetName { set; get; }
+        internal string PetName { set; get; }
 
         // Private components
         private PetStateController _petStateController;
@@ -153,6 +153,9 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             }
         }
 
+        /// <summary>
+        /// Ensures the Pet gameobject is parented to the base
+        /// </summary>
         private void ParentToBase()
         {
             if (!Base || transform.parent == Base.transform)
@@ -165,6 +168,9 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             _skyApplier.SetSky(Skies.BaseInterior);
         }
 
+        /// <summary>
+        /// Determine which base the pet is currently in
+        /// </summary>
         private void DeriveBase()
         {
             LogUtils.LogDebug(LogArea.MonoPets, $"In DeriveBase for {PetName}");
@@ -213,8 +219,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         /// Wait for data to be loaded, then update if this is a loaded pet
         /// </summary>
-        /// <returns></returns>
-        public void LoadPetData()
+        internal void LoadPetData()
         {
             foreach (PetSaver.PetDetails petDetails in SubnauticaPetsPlugin.LoadedPetDetailsHashSet)
             {
@@ -230,7 +235,6 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         /// Write Pet data to the log
         /// </summary>
-        /// <param name="identifier"></param>
         private void LogPetData(string identifier)
         {
             LogUtils.LogDebug(LogArea.MonoPets, $"{identifier}: GameObject is: {gameObject.name}, ObjectId is: {gameObject.GetInstanceID()}, " +
@@ -315,7 +319,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         /// Move the pet towards the player location
         /// </summary>
-        public void MoveToPlayer()
+        internal void MoveToPlayer()
         {
             if (!_canMove)
             {
@@ -347,7 +351,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// Rescans the creature for valid actions. Used after adding or removing
         /// new actions.
         /// </summary>
-        public void UpdateActions()
+        internal void UpdateActions()
         {
             Creature creature = GetComponent<Creature>();
             if (creature)
@@ -359,7 +363,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         /// Listen for the OnKill message
         /// </summary>
-        public void OnKill()
+        internal void OnKill()
         {
             if (IsDead)
             {
@@ -390,7 +394,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         /// Kills the pet by applying damage
         /// </summary>
-        public void Kill()
+        internal void Kill()
         {
             if (_liveMixin)
             {
@@ -408,7 +412,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// Find and Kill all pets. For use to clear out all pets in case
         /// of some sort of catastrophic failure.
         /// </summary>
-        public static void KillAllPets()
+        internal static void KillAllPets()
         {
             foreach (Pet pet in GameObject.FindObjectsOfType<Pet>())
             {
@@ -421,8 +425,9 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// </summary>
         internal static bool IsPetTechType(TechType techType)
         {
-            return (techType == PetPrefabs.AlienRobotPrefab.Info.TechType || techType == PetPrefabs.CaveCrawlerPrefab.Info.TechType ||
-                    techType == PetPrefabs.BloodCrawlerPrefab.Info.TechType || techType == PetPrefabs.CrabSquidPrefab.Info.TechType ||
+            return (techType == PetPrefabs.PenglingBabyPrefab.Info.TechType || techType == PetPrefabs.PengwingAdultPrefab.Info.TechType ||
+                    techType == PetPrefabs.SnowstalkerBabyPrefab.Info.TechType || techType == PetPrefabs.PinnacaridPrefab.Info.TechType ||
+                    techType == PetPrefabs.TrivalveYellowPrefab.Info.TechType || techType == PetPrefabs.TrivalveBluePrefab.Info.TechType ||
                     techType == CustomPetPrefabs.CatPetPrefab.Info.TechType || techType == CustomPetPrefabs.DogPetPrefab.Info.TechType ||
                     techType == CustomPetPrefabs.RabbitPetPrefab.Info.TechType || techType == CustomPetPrefabs.SealPetPrefab.Info.TechType ||
                     techType == CustomPetPrefabs.WalrusPetPrefab.Info.TechType || techType == CustomPetPrefabs.FoxPetPrefab.Info.TechType);

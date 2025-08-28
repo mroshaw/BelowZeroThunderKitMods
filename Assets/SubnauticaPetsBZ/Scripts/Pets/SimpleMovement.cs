@@ -9,9 +9,9 @@ namespace DaftAppleGames.SubnauticaPets.Pets
     internal class SimpleMovement : MonoBehaviour
     {
         [Header("Movement Settings")]
-        public float moveSpeed = 0.8f;
-        public float rotateSpeed = 4.0f;
-        public float arrivalTolerance = 0.05f;
+        internal float moveSpeed = 0.8f;
+        internal float rotateSpeed = 4.0f;
+        internal float arrivalTolerance = 0.05f;
 
         [Header("Debug")]
         [Header("Debug Movement")] [SerializeField] private Transform targetMarker;
@@ -28,7 +28,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         private PetAnimator _petAnimator;
         private Rigidbody _rigidbody;
         
-        public class ControllerColliderHitEvent : UnityEvent<Vector3>
+        internal class ControllerColliderHitEvent : UnityEvent<Vector3>
         {
         }
         

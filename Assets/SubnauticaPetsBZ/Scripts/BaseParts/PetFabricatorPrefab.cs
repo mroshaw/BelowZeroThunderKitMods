@@ -15,7 +15,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
     internal static class PetFabricatorPrefab
     {
         // Pubic PrefabInfo, for anything that needs it
-        public static PrefabInfo Info;
+        internal static PrefabInfo Info;
         private const string ClassId = "PetFabricator";
         private const string IconAssetName = "PetFabricatorIconTexture.png";
         private const string EncPath = "Tech/Habitats";
@@ -25,7 +25,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         /// <summary>
         /// Makes the new Pet Fabricator available for use.
         /// </summary>
-        public static void Register()
+        internal static void Register()
         {
             // Unlock at start if in Creative mode
             Info = PrefabInfo
@@ -35,10 +35,12 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             CustomPrefab fabricatorPrefab = new CustomPrefab(Info);
 
             FabricatorGadget fabGadget = fabricatorPrefab.CreateFabricator(out CraftTree.Type treeType)
-                .AddCraftNode(PetPrefabs.AlienRobotPrefab.Info.TechType)
-                .AddCraftNode(PetPrefabs.BloodCrawlerPrefab.Info.TechType)
-                .AddCraftNode(PetPrefabs.CaveCrawlerPrefab.Info.TechType)
-                .AddCraftNode(PetPrefabs.CrabSquidPrefab.Info.TechType);
+                .AddCraftNode(PetPrefabs.PenglingBabyPrefab.Info.TechType)
+                .AddCraftNode(PetPrefabs.PengwingAdultPrefab.Info.TechType)
+                .AddCraftNode(PetPrefabs.PinnacaridPrefab.Info.TechType)
+                .AddCraftNode(PetPrefabs.SnowstalkerBabyPrefab.Info.TechType)
+                .AddCraftNode(PetPrefabs.TrivalveBluePrefab.Info.TechType)
+                .AddCraftNode(PetPrefabs.TrivalveYellowPrefab.Info.TechType);
 
             // If enabled, add the "bonus pets" to the fabricator
             if (SubnauticaPetsPlugin.ModConfig.EnableBonusPets)
@@ -74,10 +76,12 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
                     new Ingredient(TechType.Titanium, 5),
                     new Ingredient(TechType.ComputerChip, 1),
                     new Ingredient(TechType.CopperWire, 2),
-                    new Ingredient(PetDnaPrefabs.CrabSquidDnaPrefab.Info.TechType, 1),
-                    new Ingredient(PetDnaPrefabs.AlienRobotDnaPrefab.Info.TechType, 1),
-                    new Ingredient(PetDnaPrefabs.BloodCrawlerDnaPrefab.Info.TechType, 1),
-                    new Ingredient(PetDnaPrefabs.CaveCrawlerDnaPrefab.Info.TechType, 1));
+                    new Ingredient(PetDnaPrefabs.PengwingAdultDnaPrefab.Info.TechType, 1),
+                    new Ingredient(PetDnaPrefabs.PenglingBabyDnaPrefab.Info.TechType, 1),
+                    new Ingredient(PetDnaPrefabs.SnowstalkerBabyDnaPrefab.Info.TechType, 1),
+                    new Ingredient(PetDnaPrefabs.TrivalveBlueDnaPrefab.Info.TechType, 1),
+                    new Ingredient(PetDnaPrefabs.TrivalveYellowDnaPrefab.Info.TechType, 1),
+                    new Ingredient(PetDnaPrefabs.PinnacaridDnaPrefab.Info.TechType, 1));
             }
             else
             {
