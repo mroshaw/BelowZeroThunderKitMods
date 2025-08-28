@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9057f7f601990a4883b2cb295c4f43e, type: 3}
+  m_Name: ThunderKitSettings
+  m_EditorClassIdentifier: 
+  FirstLoad: 1
+  ShowOnStartup: 1
+  GameExecutable: SubnauticaZero.exe
+  GamePath: E:\Games\Steam\steamapps\common\SubnauticaZero
+  Is64Bit: 1
+  DateTimeFormat: HH:mm:ss:fff
+  CreatedDateFormat: MMM/dd HH:mm:ss
+  ShowLogWindow: 1
+  LogPackageSourceTimings: 0
+  GenerateAssetsProject: 0
+  FixLocalDiskPackages: 0
+  ImageCachePath: Library/MarkdownImageCache
+  CachedImageCount: 0
+  CacheSize: 0
+  MarkdownOpenMode: 1
+  SelectedPipeline: {fileID: 11400000, guid: 89eed8e7c6029014489a91df2b3e3f65, type: 2}
+  SelectedManifest: {fileID: 11400000, guid: 1046126c490d7384799f2de26323218c, type: 2}
+  QuickAccessPipelines:
+  - {fileID: 11400000, guid: 89eed8e7c6029014489a91df2b3e3f65, type: 2}
+  - {fileID: 11400000, guid: 741448fb2afca194f8dd1c2360792c6a, type: 2}
+  - {fileID: 11400000, guid: fa17dc9a02592f14b91a28a9c945a010, type: 2}
+  - {fileID: 11400000, guid: b1055352ac6da344ebb2c04104bd487d, type: 2}
+  QuickAccessManifests:
+  - {fileID: 11400000, guid: 1046126c490d7384799f2de26323218c, type: 2}
+  ImportConfiguration: {fileID: 11400000, guid: 466b2caca7d94814d81d3294514a6c26,
+    type: 2}

@@ -73,3 +73,17 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# .idea
+/.idea/
+
+# ThunderKit stage/temp
+/ThunderKit/
+/[Aa]ssets/ThunderKitSettings/Logs/
+
+# Packages
+/[Pp]ackages/
+
+# Third Party Assets
+/[Aa]ssets/ThirdPartyAssets.meta
+/[Aa]ssets/ThirdPartyAssets/
