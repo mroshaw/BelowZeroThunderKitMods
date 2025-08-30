@@ -1,0 +1,24 @@
+{
+    "name": "SubnauticaPets_BZ",
+    "references": [
+        "GUID:343deaaf83e0cee4ca978e7df0b80d21",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "0Harmony.dll",
+        "BepInEx.dll",
+        "Assembly-CSharp_publicized.dll",
+        "Assembly-CSharp-firstpass_publicized.dll",
+        "Nautilus.dll",
+        "FMODUnity.dll",
+        "Unity.Addressables.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

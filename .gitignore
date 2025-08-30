@@ -87,3 +87,5 @@ crashlytics-build.properties
 # Third Party Assets
 /[Aa]ssets/ThirdPartyAssets.meta
 /[Aa]ssets/ThirdPartyAssets/
+/[Aa]ssets/SubnauticaRefAssets.meta
+/[Aa]ssets/SubnauticaRefAssets
