@@ -34,7 +34,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             // Init PrefabInfo
             internal static PrefabInfo Info;
             private const string ClassId = "PenglingBabyPet";
-            private const string IconTextureAssetName = "PenglingBabyTexture.png";
+            private const string IconTextureAssetName = "PenglingBabyIcon_Small.png";
             private const string CloneClassId = "807fbbb3-aced-45cd-aba8-db3fb1188f1f";
             
             /// <summary>
@@ -97,7 +97,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             // Init PrefabInfo
             internal static PrefabInfo Info;
             private const string ClassId = "PengwingAdultPet";
-            private const string IconTextureAssetName = "PengwingAdultTexture.png";
+            private const string IconTextureAssetName = "PengwingAdultIcon_Small.png";
             private const string CloneClassId = "74ded0e7-d394-4703-9e53-4384b37f9433";
             
             /// <summary>
@@ -160,7 +160,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             // Init PrefabInfo
             internal static PrefabInfo Info;
             private const string ClassId = "PinnacaridPet";
-            private const string IconTextureAssetName = "PinnacaridTexture.png";
+            private const string IconTextureAssetName = "PinnacaridIcon_Small.png";
             private const string CloneClassId = "f9eccfe2-a06f-4c06-bc57-01c2e50ffbe8";
             
             /// <summary>
@@ -223,7 +223,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             // Init PrefabInfo
             internal static PrefabInfo Info;
             private const string ClassId = "SnowstalkerBabyPet";
-            private const string IconTextureAssetName = "SnowstalkerBabyTexture.png";
+            private const string IconTextureAssetName = "SnowstalkerBabyIcon_Small.png";
             private const string CloneClassId = "78d3dbce-856f-4eba-951c-bd99870554e2";
 
             /// <summary>
@@ -307,7 +307,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             // Init PrefabInfo
             internal static PrefabInfo Info;
             private const string ClassId = "TrivalveBluePet";
-            private const string IconTextureAssetName = "TrivalveBlueTexture.png";
+            private const string IconTextureAssetName = "TrivalveBlueIcon_Small.png";
             private const string CloneClassId = "f5a2317f-6116-4fc6-8e81-824fd8ba9684";
 
             /// <summary>
@@ -357,7 +357,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             // Init PrefabInfo
             internal static PrefabInfo Info;
             private const string ClassId = "TrivalveYellowPet";
-            private const string IconTextureAssetName = "TrivalveYellowTexture.png";
+            private const string IconTextureAssetName = "TrivalveYellowIcon_Small.png";
             private const string CloneClassId = "e8f2bfd4-49c6-45d1-a029-489b492515a9";
             
             /// <summary>

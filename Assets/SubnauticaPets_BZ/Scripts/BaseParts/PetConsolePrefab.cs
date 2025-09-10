@@ -4,9 +4,8 @@ using Nautilus.Assets;
 using Nautilus.Assets.Gadgets;
 using Nautilus.Assets.PrefabTemplates;
 using Nautilus.Crafting;
-using TMPro;
+using Nautilus.Utility;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace DaftAppleGames.SubnauticaPets.BaseParts
 {
@@ -22,14 +21,16 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         private const string EncPath = "Tech/Habitats";
         private const string DatabankPopupImageAssetName = "PetConsoleDataBankPopupImageTexture.png";
         private const string DatabankMainImageAssetName = "PetConsoleDataBankMainImageTexture.png";
-        private const string RotatingIconAssetName = "PetConsoleRotatingIconTexture.png";
+        private const string ConsolePrefabAssetName = "PetConsoleUI.prefab";
+        
+        private const string ConsoleAlertAudioAssetName = "ConsoleAlert.wav";
+        private const string ConsoleRenameAudioAssetName = "ConsoleRename.wav";
         
         /// <summary>
         /// Register Pet Console
         /// </summary>
         internal static void Register()
         {
-            // Unlock at start if in Creative mode
             Info = PrefabInfo
                 .WithTechType(ClassId, null, null, unlockAtStart: false)
                 .WithIcon(CustomAssetBundleUtils.GetObjectFromAssetBundle<Sprite>(IconAssetName) as Sprite);
@@ -44,8 +45,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
                     ConfigurePrefab(prefabGameObject);
                 }
             };
-            consolePrefab.SetGameObject(consoleTemplate);
-
+            
             // Define the recipe for the new Console, depends on whether in "Adventure" or "Creative" mode.
             RecipeData recipe;
             if (SubnauticaPetsPlugin.ModConfig.ModMode == ModMode.Adventure)
@@ -73,181 +73,55 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
                     CustomAssetBundleUtils.GetObjectFromAssetBundle<Sprite>(DatabankPopupImageAssetName) as Sprite,
                     CustomAssetBundleUtils.GetObjectFromAssetBundle<Texture2D>(DatabankMainImageAssetName) as Texture2D);
 
+            consolePrefab.SetGameObject(consoleTemplate);
             consolePrefab.Register();
+            LogUtils.LogDebug(LogArea.Prefabs, "Pet Console Registered Successfully!");
         }
 
         private static void ConfigurePrefab(GameObject prefabGameObject)
         {
+            // Get rid of the existing UI
             prefabGameObject.SetActive(false);
-            prefabGameObject.ApplyNewMeshTexture("PetConsoleTexture", "submarine_Picture_Frame");
             prefabGameObject.DestroyComponentsInChildren<PictureFrame>();
-
-            // Set up the UI
-            PetConsole petConsole = prefabGameObject.AddComponent<PetConsole>();
-
             GameObject screen = prefabGameObject.transform.Find("Screen").gameObject;
-            screen.SetActive(false);
+            Object.Destroy(screen);
 
-            CreatePetConsoleUi(prefabGameObject, out Button renameButton,
-                out Button killButton, out Button killConfirmButton,
-                out Button killAllButton, out Button killAllConfirmButton,
-                out TMP_InputField petNameTextInput, out GameObject petsScrollViewContent, out Button petListButtonTemplate);
+            // Get Console UI Prefab from Asset Bundle and add to the picture frame
+            GameObject petConsoleInstance =
+                CustomAssetBundleUtils.GetPrefabInstanceFromAssetBundle(ConsolePrefabAssetName, true);
+            petConsoleInstance.transform.SetParent(prefabGameObject.transform);
+            petConsoleInstance.transform.localPosition = new Vector3(0, 0, 0.018f);
+            petConsoleInstance.transform.localRotation = new Quaternion(0, 180, 0, 1);
+            petConsoleInstance.transform.localScale = new Vector3(0.002f, 0.002f, 1f);
             
-            petConsole.ConfigureUi(renameButton, killButton, killConfirmButton, killAllButton, killAllConfirmButton,petNameTextInput, petListButtonTemplate, petsScrollViewContent);
-        }
-
-        /// <summary>
-        /// Create the UI
-        /// </summary>
-        private static void CreatePetConsoleUi(GameObject targetGameObject,
-            out Button renameButton,
-            out Button killButton, out Button killConfirmButton,
-            out Button killAllButton, out Button killAllConfirmButton,
-            out TMP_InputField petNameTextInput, out GameObject petsScrollViewContent, out Button petListButtonTemplate)
-        {
-            // Get MoonpoolUpgradeConsole prefab instance as a base for copying out controls
-            GameObject consolePrefabGameObject = Base.pieces[(int)Base.Piece.MoonpoolUpgradeConsoleShort].prefab.gameObject;
-            GameObject consoleClone = GameObject.Instantiate(consolePrefabGameObject);
-
-            GameObject editScreenGameObject = consoleClone.FindChild("EditScreen");
-            editScreenGameObject.transform.SetParent(targetGameObject.transform);
-            editScreenGameObject.transform.localPosition = new Vector3(0, 0, 0.02f);
-            editScreenGameObject.transform.localRotation = new Quaternion(0, 180, 0, 0);
-            editScreenGameObject.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
-            GameObject.Destroy(consoleClone);
-
-            // Init UI
-            GameObject newScreenGameObject = CreateConsoleScreen(editScreenGameObject);
-            CreateConsoleButtons(editScreenGameObject, newScreenGameObject,
-                out killButton, out killConfirmButton,
-                out killAllButton, out killAllConfirmButton,
-                out renameButton);
-            CreateTextEntry(editScreenGameObject, newScreenGameObject, out petNameTextInput);
-            UiUtils.CreateScrollView(editScreenGameObject, newScreenGameObject, "Pet List Scroll View", new Vector3(-145, -50, 0), new Vector2(360.0f, 200.0f), out petsScrollViewContent);
-            editScreenGameObject.AddComponent<PetConsoleInput>();
-            CreatePetListButtonTemplate(editScreenGameObject, targetGameObject, out petListButtonTemplate);
-            // AddRotatingIcon(editScreenGameObject);
-        }
-
-        /// <summary>
-        /// Create the new button controls
-        /// </summary>
-        private static void CreateConsoleButtons(GameObject sourceUiScreen, GameObject targetUiScreen,
-            out Button killButton, out Button killConfirmButton,
-            out Button killAllButton, out Button killAllConfirmButton,
-            out Button renameButton)
-        {
-            // Rename button
-            renameButton = UiUtils.CreateButton(sourceUiScreen, "Button",
-                "RenamePetButton", "Button_Rename", targetUiScreen,
-                new Vector3(160, 20, 0), false);
-
-            // Kill button
-            killButton = UiUtils.CreateButton(sourceUiScreen, "Button",
-                "KillPetButton", "Button_Kill", targetUiScreen,
-                new Vector3(160, -50, 0), false);
-
-            // Kill confirm button
-            killConfirmButton = UiUtils.CreateButton(sourceUiScreen, "Button",
-                "KillAllPetsConfirmButton", "Button_AreYouSure", targetUiScreen,
-                new Vector3(160, -50, 0), true);
-
-            // Kill All button
-            killAllButton = UiUtils.CreateButton(sourceUiScreen, "Button",
-                "KillAllPetsButton", "Button_KillAll", targetUiScreen,
-                new Vector3(160, -120, 0), false);
-
-            // Kill All Confirm button
-            killAllConfirmButton = UiUtils.CreateButton(sourceUiScreen, "Button",
-                "KillAllPetsConfirmButton", "Button_AreYouSure", targetUiScreen,
-                new Vector3(160, -120, 0), true);
-
-            // Set up the colour and state of the 'Confirm' buttons
-            ConfigureConfirmButton(killConfirmButton);
-            ConfigureConfirmButton(killAllConfirmButton);
-        }
-
-        private static void ConfigureConfirmButton(Button confirmButton)
-        {
-            confirmButton.GetComponent<Image>().color = Color.red;
-            confirmButton.GetComponentInChildren<TextMeshProUGUI>().color = Color.white;
-            confirmButton.gameObject.SetActive(false);
-        }
-
-        /// <summary>
-        /// Create the new Text Entry controls
-        /// </summary>
-        private static void CreateTextEntry(GameObject sourceUiScreen, GameObject targetUiScreen, out TMP_InputField inputField)
-        {
-            // Rename pet label
-            GameObject petNameLabel = UiUtils.CreateLabel(sourceUiScreen, "Name Label", "PetNameLabel", "Label_PetName",
-                targetUiScreen, new Vector3(-180, 100, 0));
-            // Rename pet field
-            inputField = UiUtils.CreateTextEntry(sourceUiScreen, "InputField", "PetNameField", "Tip_ClickToEdit",
-                targetUiScreen, new Vector3(110, 100, 0));
-        }
-
-        private static void CreatePetListButtonTemplate(GameObject sourceUiScreen, GameObject targetUiScreen, out Button petListButtonTemplate)
-        {
-            petListButtonTemplate = UiUtils.CreateButton(sourceUiScreen, "Button",
-                $"SelectPetButtonTemplate", $"Template",
-                targetUiScreen, new Vector3(0, 0, 0), true);
-            petListButtonTemplate.gameObject.SetActive(false);
-        }
-
-        /// <summary>
-        /// Adds a little rotating icon to the top left of the console
-        /// </summary>
-        private static void AddRotatingIcon(GameObject targetGameObject)
-        {
-            GameObject iconGameObject = new GameObject("ConsoleIcon")
+            // Add a Constructable Listener and enable the console screen when constructed
+            prefabGameObject.EnsureComponent<ConsoleConstructedNotifier>();
+            LogUtils.LogDebug(LogArea.Prefabs, "ConsoleConstructedNotifier added...");
+            
+            // Add Audio FMOD components
+            GameObject alertEmitterGo = new GameObject("AlertEmitter")
             {
                 transform =
                 {
-                    localPosition = new Vector3(-50, 25, 0),
-                    localRotation = new Quaternion(0, 0, 0, 0),
-                    localScale = new Vector3(0.1f, 0.1f, 0.1f)
+                    parent = petConsoleInstance.transform,
+                    localPosition = Vector3.zero
                 }
             };
-            iconGameObject.transform.SetParent(targetGameObject.transform);
 
-            Image iconImage = iconGameObject.AddComponent<Image>();
-            iconImage.sprite = CustomAssetBundleUtils.GetObjectFromAssetBundle<Sprite>(RotatingIconAssetName) as Sprite;
-            RotateIcon iconRotate = iconGameObject.AddComponent<RotateIcon>();
-        }
-
-        /// <summary>
-        /// Disables "original" UI elements in the source UI
-        /// Returns a "new" clean one for use in the mod
-        /// </summary>
-        private static GameObject CreateConsoleScreen(GameObject sourceUi)
-        {
-            // Disable "Screen", "Active" and "Inactive"
-            GameObject activeScreen = sourceUi.transform.Find("Active").gameObject;
-            GameObject inactiveScreen = sourceUi.transform.Find("Inactive").gameObject;
-            activeScreen.SetActive(false);
-            inactiveScreen.SetActive(false);
-            SubNameInput subNameInput = sourceUi.GetComponent<SubNameInput>();
-            Object.Destroy(subNameInput);
-            GameObject newScreen = Object.Instantiate(activeScreen);
-            newScreen.name = "PetConsolePanel";
-            newScreen.transform.SetParent(sourceUi.transform);
-            newScreen.transform.position = inactiveScreen.transform.position;
-            newScreen.transform.rotation = inactiveScreen.transform.rotation;
-            newScreen.transform.localScale = inactiveScreen.transform.localScale;
-
-            // Deactivate all existing content
-            foreach (Transform child in newScreen.transform)
+            GameObject renameEmitterGo = new GameObject("RenameEmitter")
             {
-                child.gameObject.SetActive(false);
-            }
-            Image backgroundImage = newScreen.GetComponent<Image>();
-            if (backgroundImage)
-            {
-                backgroundImage.enabled = false;
-            }
-            newScreen.SetActive(true);
-            return newScreen;
+                transform =
+                {
+                    parent = petConsoleInstance.transform,
+                    localPosition = Vector3.zero
+                }
+            };
+
+            FMOD_CustomEmitter alertEmitter = alertEmitterGo.AddComponent<FMOD_CustomEmitter>();
+            CustomAudioUtils.ConfigureEmitter(alertEmitter, ConsoleAlertAudioAssetName, AudioUtils.BusPaths.SurfaceAmbient, 5.0f);
+            
+            FMOD_CustomEmitter renameEmitter = renameEmitterGo.AddComponent<FMOD_CustomEmitter>();
+            CustomAudioUtils.ConfigureEmitter(renameEmitter, ConsoleRenameAudioAssetName, AudioUtils.BusPaths.SurfaceAmbient, 5.0f);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace DaftAppleGames.SubnauticaPets
     {
         private const string MyGuid = "com.daftapplegames.subnauticapets2";
         private const string PluginName = "SubnauticaPets2";
-        private const string VersionString = "2.7.0";
+        internal const string VersionString = "2.8.0";
 
         private static Version LatestSaveDataVersion = new Version(1, 0, 0, 0);
 
