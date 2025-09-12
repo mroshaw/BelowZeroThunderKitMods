@@ -121,12 +121,12 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: cc0e38d0f33088545a84249b4421dce3,
+      objectReference: {fileID: 21300000, guid: b1497734f9c2f0f43a9160df9bfc47e7,
         type: 3}
     - target: {fileID: 6814725863952440190, guid: d56aec4ffd910634fa7d5d8c05e417b2,
         type: 3}
       propertyPath: m_Name
-      value: AlienRobotListTemplate
+      value: PinnacaridListTemplate
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d56aec4ffd910634fa7d5d8c05e417b2, type: 3}

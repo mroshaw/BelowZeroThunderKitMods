@@ -16,9 +16,11 @@ namespace DaftAppleGames.SubnauticaPets.Patches
         static bool Start_Prefix (Player __instance)
         {
             // FOR DEV ONLY! REMOVE BEFORE BUILD!!
+            /*
             Debug.Log("In Player Start");
             LogUtils.LogInfo("Added FragmentSpawner to player!");
             __instance.gameObject.AddComponent<FragmentSpawner>();
+            */
             
             __instance.StartCoroutine(CheckUnlockStateSync(__instance));
 

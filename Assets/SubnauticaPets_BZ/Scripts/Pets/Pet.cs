@@ -16,7 +16,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         internal Base Base { get; set; }
         internal PetHappiness Happiness { get; private set; }
         internal string BaseId => Base != null ? Base.GetComponent<PrefabIdentifier>().Id : "NO BASE!";
-
+        
         internal float timeBeforePetNeutral = 1800.0f;
         internal float timeBeforePetSad = 3600.0f;
         internal float timeBeforePetDevastated = 5400.0f;
@@ -53,8 +53,6 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 }
             }
         }
-
-        private static readonly int Dead = Animator.StringToHash("dead");
 
         /// <summary>
         /// Gets a "display friendly" version of the Pet Name

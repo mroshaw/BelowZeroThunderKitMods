@@ -12,7 +12,6 @@ namespace DaftAppleGames.SubnauticaPets.UserInterface
         [SerializeField] private TMP_Text versionText;
         // Enforce a small delay to prevent immediately closing the dialog
         [SerializeField] private float delayBeforeInput = 0.5f;
-        [SerializeField] private float distanceFromCamera = 1.0f;
         
         private AudioSource _audioSource;
         private bool _visible;

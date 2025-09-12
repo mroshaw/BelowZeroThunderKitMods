@@ -36,5 +36,3 @@ MonoBehaviour:
   executable: <Steam.exe>
   arguments:
   - -applaunch 848450
-  - --doorstop-enable true
-  - --doorstop-target "<PWD>/<BepInEx.Preloader.dll>"

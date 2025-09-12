@@ -121,12 +121,12 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 5baa4abef2f5da34e9a5523375fb02c8,
+      objectReference: {fileID: 21300000, guid: 226d6d609c86a42429c9c12d58137a1c,
         type: 3}
     - target: {fileID: 6814725863952440190, guid: d56aec4ffd910634fa7d5d8c05e417b2,
         type: 3}
       propertyPath: m_Name
-      value: CaveCrawlerListTemplate
+      value: BabySnowStalkerListTemplate
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d56aec4ffd910634fa7d5d8c05e417b2, type: 3}

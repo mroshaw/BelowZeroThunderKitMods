@@ -11,6 +11,8 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         private bool _inRandomAnim = false;
 
         private static readonly int IsMovingAnimParameter = Animator.StringToHash("IsMoving");
+        private static readonly int IsSleepingAnimParameter = Animator.StringToHash("IsSleeping");
+        
         private static readonly string[] BodyAnims = { "Sit", "Spin", "Roll", "Flinch" };
         private static readonly string[] FaceAnims =  { "Eyes_Annoyed",
                                                 "Eyes_Blink",
@@ -83,10 +85,6 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 _animator.SetBool(DeadAnim, true);
                 return;
             }
-            if (!_inRandomAnim)
-            {
-                SetFaceAnimState();
-            }
         }
 
         internal void PlayRandomBodyAnim(bool playSound)
@@ -113,17 +111,18 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
         internal void PlayRandomFaceAnim()
         {
-            if(!_animator || _faceAnimHashKeys == null || _faceAnimHashKeys.Length == 0)
+            if(!_animator || _faceAnimHashKeys == null || _faceAnimHashKeys.Length == 0 || _animator.GetBool(IsSleepingAnimParameter))
             {
                 return;
             }
             int animIndex = Random.Range(0, _numFaceAnims);
-            LogUtils.LogDebug(LogArea.MonoPets, $"Playing random face anim at index: {animIndex}");
+            // LogUtils.LogDebug(LogArea.MonoPets, $"Playing random face anim at index: {animIndex}");
             _animator.Play(_faceAnimHashKeys[animIndex]);
         }
 
         private IEnumerator PlayRandomFaceAnimAsync(float duration)
         {
+
             _inRandomAnim = true;
             PlayRandomFaceAnim();
             yield return new WaitForSeconds(duration);
@@ -152,6 +151,19 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 case PetHappiness.Dead:
                     _animator.Play(EyesHappy);
                     break;
+            }
+        }
+
+        internal void SetSleeping(bool isSleeping)
+        {
+            _animator.SetBool(IsSleepingAnimParameter, isSleeping);
+            if (isSleeping)
+            {
+                _animator.Play(EyesSleep);
+            }
+            else
+            {
+                _animator.Play(EyesHappy);
             }
         }
         

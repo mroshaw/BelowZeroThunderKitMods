@@ -121,12 +121,12 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: d1dd3575521000943ba117cc06ed155d,
+      objectReference: {fileID: 21300000, guid: f99e5c90fa57d3542b9591f0fd2be517,
         type: 3}
     - target: {fileID: 6814725863952440190, guid: d56aec4ffd910634fa7d5d8c05e417b2,
         type: 3}
       propertyPath: m_Name
-      value: CrabSquidListTemplate
+      value: AdultPenglingListTemplate
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d56aec4ffd910634fa7d5d8c05e417b2, type: 3}

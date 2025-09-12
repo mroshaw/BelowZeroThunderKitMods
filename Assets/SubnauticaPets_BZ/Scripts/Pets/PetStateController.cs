@@ -2,14 +2,13 @@
 
 namespace DaftAppleGames.SubnauticaPets.Pets
 {
-    public enum PetState { Idle, Wandering, MovingTo, Dead }
+    public enum PetState { Idle, Wandering, MovingTo, Sleeping, Dead }
     
     /// <summary>
     /// Simple State Controller for pet actions
     /// </summary>
     internal class PetStateController : MonoBehaviour
     {
-
         [SerializeField] private PetState currState;
         private PetAction _currentAction;
         
@@ -17,6 +16,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         private IdleAction _idleAction;
         private MoveToAction _moveToAction;
         private KilledAction _killedAction;
+        private SleepAction _sleepAction;
         
         private void Awake()
         {
@@ -24,6 +24,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             _idleAction = GetComponent<IdleAction>();
             _moveToAction = GetComponent<MoveToAction>();
             _killedAction = GetComponent<KilledAction>();
+            _sleepAction = GetComponent<SleepAction>();
         }
         
         private void Start()
@@ -32,11 +33,13 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             _wanderAction.Init();
             _moveToAction.Init();
             _killedAction.Init();
+            _sleepAction.Init();
             
             _wanderAction.OnActionCompleted.AddListener(WanderActionComplete);
             _idleAction.OnActionCompleted.AddListener(IdleActionComplete);
             _moveToAction.OnActionCompleted.AddListener(MoveToActionComplete);
             _killedAction.OnActionCompleted.AddListener(KilledActionComplete);
+            _sleepAction.OnActionCompleted.AddListener(SleepActionComplete);
             
             SetNewState(PetState.Idle);
         }
@@ -54,6 +57,9 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             {
                 case PetState.Idle:
                     SetNewAction(_idleAction);
+                    break;
+                case PetState.Sleeping:
+                    SetNewAction(_sleepAction);
                     break;
                 case PetState.Wandering:
                     SetNewAction(_wanderAction);
@@ -101,6 +107,11 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             _currentAction = null;
         }
         
+        private void SleepActionComplete()
+        {
+            SetNewState(PetState.Idle);
+        }      
+        
         private void SetNewAction(PetAction newAction)
         {
             _currentAction?.EndAction();
@@ -110,11 +121,22 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         
         private void Update()
         {
+            CheckForForcedState();
+            
             if (!_currentAction)
             {
                 return;
             }
             _currentAction.UpdateAction();
+        }
+
+        private void CheckForForcedState()
+        {
+            // Go to sleep
+            if (currState != PetState.Sleeping && _sleepAction.ShouldBeSleeping())
+            {
+                SetNewState(PetState.Sleeping);
+            }
         }
     }
 }
