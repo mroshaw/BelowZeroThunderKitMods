@@ -8,7 +8,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
     {
         private Animator _animator;
         private Pet _pet;
-        private bool _inRandomAnim = false;
+        private bool _inRandomAnim;
 
         private static readonly int IsMovingAnimParameter = Animator.StringToHash("IsMoving");
         private static readonly int IsSleepingAnimParameter = Animator.StringToHash("IsSleeping");
@@ -80,10 +80,9 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 return;
             }
 
-            if (_pet.IsDead)
+            if (_pet.IsDead && !_animator.GetBool(DeadAnim))
             {
                 _animator.SetBool(DeadAnim, true);
-                return;
             }
         }
 
@@ -128,32 +127,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             yield return new WaitForSeconds(duration);
             _inRandomAnim = false;
         }
-
-        private void SetFaceAnimState()
-        {
-            switch (_pet.Happiness)
-            {
-                case PetHappiness.Ecstatic:
-                    _animator.Play(EyesEcstatic);
-                    break;
-                case PetHappiness.Happy:
-                    _animator.Play(EyesHappy);
-                    break;
-                case PetHappiness.Neutral:
-                    _animator.Play(EyesHappy);
-                    break;
-                case PetHappiness.Sad:
-                    _animator.Play(EyesSad);
-                    break;
-                case PetHappiness.Devastated:
-                    _animator.Play(EyesHappy);
-                    break;
-                case PetHappiness.Dead:
-                    _animator.Play(EyesHappy);
-                    break;
-            }
-        }
-
+        
         internal void SetSleeping(bool isSleeping)
         {
             _animator.SetBool(IsSleepingAnimParameter, isSleeping);

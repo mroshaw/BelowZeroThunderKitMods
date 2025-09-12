@@ -9,9 +9,9 @@ namespace DaftAppleGames.SubnauticaPets.Pets
     internal class SimpleMovement : MonoBehaviour
     {
         [Header("Movement Settings")]
-        internal float moveSpeed = 0.8f;
-        internal float rotateSpeed = 4.0f;
-        internal float arrivalTolerance = 0.05f;
+        [SerializeField] private float moveSpeed = 0.8f;
+        [SerializeField] private float rotateSpeed = 4.0f;
+        [SerializeField] private float arrivalTolerance = 0.05f;
 
         [Header("Debug")]
         [Header("Debug Movement")] [SerializeField] private Transform targetMarker;
@@ -72,6 +72,11 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             SetMoveDirection();
             MoveToTarget();
             RotateToTarget();
+        }
+
+        internal void SetMoveSpeed(float newMoveSpeed)
+        {
+            moveSpeed = newMoveSpeed;
         }
         
         internal void MoveToNewTarget(Vector3 target)

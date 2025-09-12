@@ -22,18 +22,12 @@ namespace DaftAppleGames.SubnauticaPets.Patches
             // Below Zero
             Transform poolColliderTransform = __instance.transform.Find("blockfish");
 
-            int layer;
-            if (poolColliderTransform)
+            if (!poolColliderTransform)
             {
-                layer = poolColliderTransform.gameObject.layer;
+                LogUtils.LogError(LogArea.Patches, "Couldn't find 'blockfish' object on Moonpool!");
+                return;
             }
-            else
-            {
-                // Subnautica
-                poolColliderTransform = __instance.transform.Find("entrance");
-                layer =  LayerMask.NameToLayer("OnlyVehicle");
-            }
-
+            int layer = poolColliderTransform.gameObject.layer;
             if (!poolColliderTransform)
             {
                 LogUtils.LogError(LogArea.Patches, $"Could not patch MoonPool on {__instance.gameObject.name}! Couldn't find pool collider transform!");
@@ -45,7 +39,6 @@ namespace DaftAppleGames.SubnauticaPets.Patches
             petColliderGameObject.name = "petcollider";
             petColliderGameObject.layer = layer;
             petColliderGameObject.tag = poolColliderTransform.gameObject.tag;
-            
             petColliderGameObject.transform.SetParent(__instance.transform);
             petColliderGameObject.transform.position = fishCollider.transform.position + new Vector3(0, -1f, 0);
             petColliderGameObject.transform.rotation = fishCollider.transform.rotation;

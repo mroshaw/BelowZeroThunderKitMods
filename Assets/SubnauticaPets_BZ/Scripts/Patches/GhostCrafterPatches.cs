@@ -5,7 +5,6 @@ using static DaftAppleGames.SubnauticaPets.SubnauticaPetsPlugin;
 
 namespace DaftAppleGames.SubnauticaPets.Patches
 {
-
     /// <summary>
     /// Patch the Workbench to do things different when spawning a pet
     /// </summary>

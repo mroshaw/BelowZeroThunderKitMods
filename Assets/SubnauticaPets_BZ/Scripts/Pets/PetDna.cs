@@ -10,8 +10,8 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         private void Start()
         {
             // Set random rotation
-            Quaternion newRotation = Quaternion.Euler(Random.Range(0, 180), 0, Random.Range(0, 180));
-            transform.localRotation = newRotation;
+            // Quaternion newRotation = Quaternion.Euler(Random.Range(0, 180), 0, Random.Range(0, 180));
+            // transform.localRotation = newRotation;
         }
     }
 }

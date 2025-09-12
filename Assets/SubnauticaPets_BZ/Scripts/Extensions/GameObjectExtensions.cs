@@ -99,10 +99,11 @@ namespace DaftAppleGames.SubnauticaPets.Extensions
             {
                 foreach (Transform child in targetGameObject.GetComponentsInChildren<Transform>(true))
                 {
-                    child.gameObject.layer = LayerMask.NameToLayer("Vehicle");
+                    child.gameObject.layer = LayerMask.NameToLayer(layerName);
                 }
             }
             LogUtils.LogDebug(LogArea.Prefabs, $"Layer of {targetGameObject} is now {LayerMask.LayerToName(targetGameObject.layer)}");
         }
     }
+
 }

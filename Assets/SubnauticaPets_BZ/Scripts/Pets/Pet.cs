@@ -14,15 +14,8 @@ namespace DaftAppleGames.SubnauticaPets.Pets
     {
         // Public properties
         internal Base Base { get; set; }
-        internal PetHappiness Happiness { get; private set; }
         internal string BaseId => Base != null ? Base.GetComponent<PrefabIdentifier>().Id : "NO BASE!";
         
-        internal float timeBeforePetNeutral = 1800.0f;
-        internal float timeBeforePetSad = 3600.0f;
-        internal float timeBeforePetDevastated = 5400.0f;
-        
-        private float _timeSinceLastInteraction;
-
         /// <summary>
         /// The TechType or type of Pet
         /// </summary>
@@ -33,7 +26,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// </summary>
         internal string PrefabId => _prefabIdentifier.Id;
 
-        internal bool IsDead { get; private set; } = false;
+        internal bool IsDead { get; private set; }
 
         /// <summary>
         /// Gets a "display friendly" version of the Pet Type for display
@@ -79,7 +72,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         private Ray _rayOrigin = new Ray();
         private BaseRoot _baseRootCache;
 
-        private bool _canMove = false;
+        private bool _canMove;
 
         private const float DelayBeforeDestroy = 10.0f;
 
@@ -129,28 +122,6 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             SubnauticaPetsPlugin.PetSaver.RegisterPet(this);
         }
         
-        private void SetPetHappiness()
-        {
-            _timeSinceLastInteraction += Time.deltaTime;
-
-            if (_timeSinceLastInteraction < timeBeforePetNeutral)
-            {
-                Happiness = PetHappiness.Happy;
-            }
-            else if (_timeSinceLastInteraction < timeBeforePetSad)
-            {
-                Happiness = PetHappiness.Neutral;
-            }
-            else if (_timeSinceLastInteraction < timeBeforePetDevastated)
-            {
-                Happiness = PetHappiness.Sad;
-            }
-            else
-            {
-                Happiness = PetHappiness.Devastated;
-            }
-        }
-
         /// <summary>
         /// Ensures the Pet gameobject is parented to the base
         /// </summary>
@@ -162,7 +133,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             }
 
             LogUtils.LogDebug(LogArea.MonoPets, $"Fixing parent for {PetName}");
-            transform.SetParent(base.transform);
+            transform.SetParent(Base.transform);
             _skyApplier.SetSky(Skies.BaseInterior);
         }
 
@@ -374,9 +345,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             {
                 _petStateController.Kill();
             }
-
-            Happiness = PetHappiness.Dead;
-
+            
             SubnauticaPetsPlugin.PetSaver.UnregisterPet(this);
             LogUtils.LogDebug(LogArea.MonoPets, $"Picked up the OnKill message in {gameObject.name}");
 

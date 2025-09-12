@@ -220,7 +220,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             if (movement == null)
             {
                 movement = targetGameObject.AddComponent<SimpleMovement>();
-                movement.moveSpeed = 1.0f;
+                movement.SetMoveSpeed(1.0f);
             }
 
             LogUtils.LogDebug(LogArea.PetConfigUtils, "AddSimpleMovement done.");
@@ -481,10 +481,6 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             AddPetComponent(prefabGameObject);
             AddCustomPetComponents(prefabGameObject, audioClipName, AudioUtils.BusPaths.SurfaceCreatures, 10.0f);
             AddPetHandTarget(prefabGameObject);
-            AddSubnauticaPetComponents(prefabGameObject);
-
-            // ONLY required for Subnautica, to prevent Pets from falling into MoonPools
-            prefabGameObject.SetLayer("Vehicle", true);
 
             prefab.SetGameObject(prefabGameObject);
 
@@ -536,23 +532,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             targetGameObject.DestroyComponentsInChildren<AttackLastTarget>();
             LogUtils.LogDebug(LogArea.PetConfigUtils, "DestroyAttackLastTarget done.");
         }
-
-        /// <summary>
-        /// Custom components for all Subnautica game pets
-        /// </summary>
-        internal static void AddSubnauticaPetComponents(GameObject targetGameObject)
-        {
-            AddCleanUpSerializer(targetGameObject);
-        }
-
-        /// <summary>
-        /// Ensures the Pet is on the correct Layer for MoonPool collision detection
-        /// </summary>
-        internal static void AddCleanUpSerializer(GameObject targetGameObject)
-        {
-            targetGameObject.EnsureComponent<CleanUpSerializer>();
-        }
-
+        
         /// <summary>
         /// Configure Swimming components
         /// </summary>
