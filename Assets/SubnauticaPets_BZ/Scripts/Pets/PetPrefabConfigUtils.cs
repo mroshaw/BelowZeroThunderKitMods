@@ -479,7 +479,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
             // Custom Pet Components
             AddPetComponent(prefabGameObject);
-            AddCustomPetComponents(prefabGameObject, audioClipName, AudioUtils.BusPaths.SurfaceCreatures, 10.0f);
+            AddCustomPetComponents(prefabGameObject, audioClipName, AudioUtils.BusPaths.UnderwaterCreatures, 10.0f);
             AddPetHandTarget(prefabGameObject);
 
             prefab.SetGameObject(prefabGameObject);
