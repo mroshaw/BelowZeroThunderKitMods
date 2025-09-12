@@ -19,8 +19,8 @@ namespace DaftAppleGames.SubnauticaPets.Patches
             /*
             Debug.Log("In Player Start");
             LogUtils.LogInfo("Added FragmentSpawner to player!");
-            __instance.gameObject.AddComponent<FragmentSpawner>();
             */
+            __instance.gameObject.AddComponent<FragmentSpawner>();
             
             __instance.StartCoroutine(CheckUnlockStateSync(__instance));
 

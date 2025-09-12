@@ -21,7 +21,8 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
 
         private const KeyCode SpawnModifierKeyCode = KeyCode.LeftControl;
         private const KeyCode SpawnConsoleFragmentKeyCode = KeyCode.Keypad0;
-        private const KeyCode SpawnFabricatorFragmentKeyCode = KeyCode.Keypad1;
+        private const KeyCode SpawnFabricatorFragmentFlatKeyCode = KeyCode.Keypad1;
+        private const KeyCode SpawnFabricatorFragmentUprightKeyCode = KeyCode.Keypad2;
 
         private Camera _playerCamera;
         
@@ -51,13 +52,19 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             if (Input.GetKey(SpawnModifierKeyCode) && Input.GetKeyDown(SpawnConsoleFragmentKeyCode))
             {
                 Debug.Log("Spawning console fragment");
-                SpawnFragmentInstance(consoleFragmentPrefab);
+                SpawnFragmentInstance(consoleFragmentPrefab, new Vector3(0, 0, 0));
             }
 
-            if (Input.GetKey(SpawnModifierKeyCode) && Input.GetKeyDown(SpawnFabricatorFragmentKeyCode))
+            if (Input.GetKey(SpawnModifierKeyCode) && Input.GetKeyDown(SpawnFabricatorFragmentFlatKeyCode))
             {
                 Debug.Log("Spawning fabricator fragment");
-                SpawnFragmentInstance(fabricatorFragmentPrefab);
+                SpawnFragmentInstance(fabricatorFragmentPrefab, new Vector3(180, 0, 0));
+            }
+            
+            if (Input.GetKey(SpawnModifierKeyCode) && Input.GetKeyDown(SpawnFabricatorFragmentUprightKeyCode))
+            {
+                Debug.Log("Spawning fabricator fragment");
+                SpawnFragmentInstance(fabricatorFragmentPrefab, new Vector3(270, 0, 0));
             }
         }
 
@@ -65,15 +72,17 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         /// Spawns a new test fragment instance and waits for it to settle.
         /// Once settled, report the position and rotation in the log
         /// </summary>
-        private void SpawnFragmentInstance(GameObject fragmentPrefab)
+        private void SpawnFragmentInstance(GameObject fragmentPrefab, Vector3 rotationEuler)
         {
             GameObject fragmentInstance = Instantiate(fragmentPrefab);
             fragmentInstance.name = fragmentPrefab.name + "(Clone)";
             Vector3 spawnPosition = transform.position + spawnOffset;
-            Quaternion  spawnRotation = _playerCamera.transform.rotation;
+            Quaternion spawnRotation = _playerCamera.transform.rotation;
             
             fragmentInstance.transform.position = spawnPosition;
             fragmentInstance.transform.rotation = spawnRotation;
+
+            fragmentInstance.transform.Rotate(rotationEuler);
             
             FreezeOnSettle freeze = fragmentInstance.GetComponent<FreezeOnSettle>();
             freeze.OnFrozen.AddListener(FragmentSettled);
@@ -86,8 +95,9 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         /// </summary>
         private void FragmentSettled(GameObject fragmentGameObject, Vector3 position, Quaternion rotation)
         {
-            LogUtils.LogInfo($"{fragmentGameObject} Settled at Position: {position}, Rotation: {rotation}");
-            LogUtils.LogInfo($"new SpawnLocation(new Vector3({position.x:f2}f, {position.y:f2}f, {position.z:f2}f), new Vector3({rotation.x:f2}f, {rotation.y:f2}f, {rotation.z:f2}f)), // warp {position.x:f2} {position.y:f2} {position.z:f2}");
+            Vector3 rotationEuler = rotation.eulerAngles;
+            LogUtils.LogInfo($"{fragmentGameObject} Settled at Position: {position}, Rotation: {rotationEuler}");
+            LogUtils.LogInfo($"new SpawnLocation(new Vector3({position.x:f2}f, {position.y:f2}f, {position.z:f2}f), new Vector3({rotationEuler.x:f2}f, {rotationEuler.y:f2}f, {rotationEuler.z:f2}f)), // warp {Camera.main.transform.position.x:f2} {Camera.main.transform.position.y:f2} {Camera.main.transform.position.z:f2}");
         }
 
         private void AddSpin(GameObject fragmentInstance)

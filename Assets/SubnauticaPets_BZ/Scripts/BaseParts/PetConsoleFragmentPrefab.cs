@@ -1,4 +1,5 @@
-﻿using DaftAppleGames.SubnauticaPets.Pets;
+﻿using DaftAppleGames.SubnauticaPets.Extensions;
+using DaftAppleGames.SubnauticaPets.Pets;
 using DaftAppleGames.SubnauticaPets.Utils;
 using Nautilus.Assets;
 using Nautilus.Assets.Gadgets;
@@ -14,11 +15,11 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
     internal static class PetConsoleFragmentPrefab
     {
         internal static PrefabInfo Info;
-        private const string PrefabAssetName = "PetConsoleDamaged.prefab";
         private const string ClassId = "PetConsoleFragment";
+        private const string PrefabAssetName = "PetConsoleDamaged.prefab";
         private const string CloneClassId = "7eaf11d3-5b65-4325-a249-d69c7cc838b0";
         private const string EncKey = "PetConsole";
-        
+
         /// <summary>
         /// Initialise Pet Console Fragment prefab
         /// </summary>
@@ -28,77 +29,56 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
                 .WithTechType(ClassId, null, null, unlockAtStart: false);
             CustomPrefab consoleFragmentPrefab = new CustomPrefab(Info);
 
-            // Base upgrade console fragment
-            CloneTemplate cloneTemplate = new CloneTemplate(Info, CloneClassId)
+            GameObject damagedConsolePrefab =
+                CustomAssetBundleUtils.GetObjectFromAssetBundle<GameObject>(PrefabAssetName) as GameObject;
 
+            if (!damagedConsolePrefab)
             {
-                ModifyPrefab = obj =>
-                {
-                    if (!obj)
-                    {
-                        LogUtils.LogError(LogArea.Prefabs, $"PetConsoleFragmentPrefab cloned obj is null!");
-                    }
-                    LogUtils.LogDebug(LogArea.Prefabs, $"ConsoleFragmentPrefab cloned. Obj is: {obj.name}");
+                LogUtils.LogError(LogArea.Prefabs, "PetConsole: Could not find prefab asset!");
+                return;
+            }
 
-                    obj.SetActive(false);
+            damagedConsolePrefab.SetActive(false);
 
-                    GameObject damagedConsoleGameObject =
-                        CustomAssetBundleUtils.GetPrefabInstanceFromAssetBundle(PrefabAssetName, false);
-                    
-                    GameObject newModelGameObject = damagedConsoleGameObject.FindChild("newmodel");
+            // Configure
+            MaterialUtils.ApplySNShaders(damagedConsolePrefab);
+            PrefabUtils.AddBasicComponents(damagedConsolePrefab, ClassId, Info.TechType,
+                LargeWorldEntity.CellLevel.Medium);
+            PrefabUtils.AddResourceTracker(damagedConsolePrefab, TechType.Fragment);
+            PetPrefabConfigUtils.ConfigureSkyApplier(damagedConsolePrefab);
+            PetPrefabConfigUtils.UpdatePickupable(damagedConsolePrefab, false);
+            PetPrefabConfigUtils.SetRigidBodyKinematic(damagedConsolePrefab, true);
+            damagedConsolePrefab.AddComponent<PetFabricatorFragment>();
 
-                    if (!newModelGameObject)
-                    {
-                        LogUtils.LogError(LogArea.Prefabs, $"PetConsoleFragmentPrefab: Unable to find 'newmodel' in prefab: {PrefabAssetName}!");
-                        return;
-                    }
-
-                    // Find old model and replace
-                    GameObject oldModelGameObject = obj.FindChild("model");
-
-                    if (!oldModelGameObject)
-                    {
-                        LogUtils.LogError(LogArea.Prefabs, $"PetConsoleFragmentPrefab: Couldn't find old model! All children:");
-                        return;
-                    }
-
-                    LogUtils.LogDebug(LogArea.Prefabs, "Found old model!");
-
-                    newModelGameObject.transform.SetParent(oldModelGameObject.transform.parent);
-                    newModelGameObject.transform.localPosition = new Vector3(0, 0, 0);
-                    newModelGameObject.transform.localRotation = new Quaternion(0, 0, 0, 0);
-
-                    oldModelGameObject.SetActive(false);
-
-                    // Configure
-                    MaterialUtils.ApplySNShaders(newModelGameObject);
-                    PrefabUtils.AddBasicComponents(obj, ClassId, Info.TechType, LargeWorldEntity.CellLevel.Medium);
-                    PrefabUtils.AddResourceTracker(obj, TechType.Fragment);
-                    PetPrefabConfigUtils.ConfigureSkyApplier(obj);
-                    PetPrefabConfigUtils.UpdatePickupable(obj, false);
-                    PetPrefabConfigUtils.SetRigidBodyKinematic(obj, true);
-                    obj.AddComponent<PetConsoleFragment>();
-                }
-            };
-
-            LogUtils.LogDebug(LogArea.Prefabs, "PetConsoleFragmentPrefab: SetGameObject...");
-            consoleFragmentPrefab.SetGameObject(cloneTemplate);
+            consoleFragmentPrefab.SetGameObject(damagedConsolePrefab);
 
             LogUtils.LogDebug(LogArea.Prefabs, "PetConsoleFragmentPrefab: SetSpawns...");
 
             SpawnLocation[] spawnLocations =
             {
-                new SpawnLocation(new Vector3(46.47f, -382.91f, -922.39f), new Vector3(0.04f, -0.03f, 0.17f)), // warp 46.47 -382.91 -922.39 (goto margbase)
-                new SpawnLocation(new Vector3(-260.88f, 40.13f, -773.85f), new Vector3(-0.02f, 0.00f, -0.07f)), // warp -260.88 40.13 -773.85 (goto deltabase)
-                new SpawnLocation(new Vector3(-94.00f, 9.00f, 302.18f), new Vector3(0.03f, -0.46f, -0.01f)), // warp -94.00 9.00 302.18 (goto outpostzero)
-                new SpawnLocation(new Vector3(12.66f, -92.07f, -784.40f), new Vector3(-0.10f, -0.07f, 0.16f)), // warp 12.66 -92.07 -784.40 (goto crashedship1)
-                new SpawnLocation(new Vector3(115.28f, -36.56f, -2.23f), new Vector3(0.01f, -0.02f, 0.07f)), // warp 115.28 -36.56 -2.23 (goto kelptechsite1)
-                new SpawnLocation(new Vector3(-137.69f, -58.83f, -175.80f), new Vector3(-0.10f, 0.03f, -0.06f)), // warp -137.69 -58.83 -175.80 (goto twistytechsite1)
-                new SpawnLocation(new Vector3(-378.69f, -175.21f, -318.37f), new Vector3(-0.10f, 0.02f, 0.16f)), // warp -378.69 -175.21 -318.37 (goto twistytechsite3)
-                new SpawnLocation(new Vector3(240.52f, -100.88f, -612.13f), new Vector3(0.00f, 0.91f, 0.00f)), // warp 240.52 -100.88 -612.13 (goto purpleventsalvage)
-                new SpawnLocation(new Vector3(-282.83f, -16.89f, -14.45f), new Vector3(0.03f, 0.99f, 0.07f)), // warp -282.83 -16.89 -14.45
-                new SpawnLocation(new Vector3(-538.61f, -207.98f, -501.29f), new Vector3(-0.01f, 0.67f, 0.00f)), // warp -538.61 -207.98 -501.29 (goto sanctuary)
-                };
+                new SpawnLocation(new Vector3(98.44f, -384.53f, -930.38f),
+                    new Vector3(55.80f, 80.04f, 101.99f)), // warp 97.62 -383.40 -929.72
+                new SpawnLocation(new Vector3(94.51f, -392.88f, -918.59f),
+                    new Vector3(77.87f, 278.71f, 198.68f)), // warp 95.17 -388.81 -919.84
+                new SpawnLocation(new Vector3(-247.83f, 40.48f, -780.01f),
+                    new Vector3(79.41f, 296.13f, 67.11f)), // warp -245.70 41.95 -779.69
+                new SpawnLocation(new Vector3(-93.28f, 9.55f, 305.32f),
+                    new Vector3(53.20f, 303.42f, 88.92f)), // warp -90.27 10.57 305.48
+                new SpawnLocation(new Vector3(56.41f, -75.96f, -793.46f),
+                    new Vector3(85.17f, 52.20f, 130.39f)), // warp 53.79 -72.21 -795.16
+                new SpawnLocation(new Vector3(110.34f, -36.65f, -3.97f),
+                    new Vector3(286.28f, 27.70f, 90.40f)), // warp 110.30 -31.89 -2.63
+                new SpawnLocation(new Vector3(-140.43f, -59.09f, -178.51f),
+                    new Vector3(281.86f, 158.04f, 52.98f)), // warp -142.73 -56.46 -179.24
+                new SpawnLocation(new Vector3(-368.36f, -173.40f, -317.65f),
+                    new Vector3(270.00f, 284.05f, 0.00f)), // warp -365.50 -171.18 -319.87
+                new SpawnLocation(new Vector3(240.94f, -100.89f, -611.45f),
+                    new Vector3(270.00f, 166.68f, 0.00f)), // warp 243.49 -99.22 -613.92
+                new SpawnLocation(new Vector3(-287.65f, -17.62f, -11.42f),
+                    new Vector3(76.07f, 169.37f, 348.79f)), // warp -289.41 -12.63 -15.73
+                new SpawnLocation(new Vector3(-539.43f, -204.23f, -492.26f),
+                    new Vector3(284.61f, 172.16f, 198.84f)), // warp -541.18 -202.38 -495.66
+            };
 
             consoleFragmentPrefab.SetSpawns(spawnLocations);
             LogUtils.LogDebug(LogArea.Prefabs, "PetConsoleFragmentPrefab: CreateFragment...");

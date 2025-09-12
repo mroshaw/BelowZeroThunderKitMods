@@ -1,4 +1,5 @@
-﻿using DaftAppleGames.SubnauticaPets.Pets;
+﻿using DaftAppleGames.SubnauticaPets.Extensions;
+using DaftAppleGames.SubnauticaPets.Pets;
 using DaftAppleGames.SubnauticaPets.Utils;
 using Nautilus.Assets;
 using Nautilus.Assets.Gadgets;
@@ -15,52 +16,51 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
     {
         internal static PrefabInfo Info;
         private const string ClassId = "PetFabricatorFragment";
-        private const string CloneClassId = "8029a9ce-ab75-46d0-a8ab-63138f6f83e4";
+        private const string PrefabAssetName = "PetFabricatorDamaged.prefab";
+        // private const string CloneClassId = "8029a9ce-ab75-46d0-a8ab-63138f6f83e4";
         private const string EncKey = "PetFabricator";
-        
+
         internal static void Register()
         {
             Info = PrefabInfo
                 .WithTechType("PetFabricatorFragment", null, null, unlockAtStart: false);
             CustomPrefab fabricatorFragmentPrefab = new CustomPrefab(Info);
 
-            // Submarine workbench (damaged)
-            CloneTemplate cloneTemplate = new CloneTemplate(Info, CloneClassId)
+            GameObject damagedFabPrefab =
+                CustomAssetBundleUtils.GetObjectFromAssetBundle<GameObject>(PrefabAssetName) as GameObject;
 
+            if (!damagedFabPrefab)
             {
-                ModifyPrefab = obj =>
-                {
-                    if (!obj)
-                    {
-                        LogUtils.LogError(LogArea.Prefabs, $"FabricatorFragmentPrefab cloned obj is null!");
-                    }
-                    LogUtils.LogDebug(LogArea.Prefabs, $"FabricatorFragmentPrefab cloned. Obj is: {obj.name}");
-                    obj.SetActive(false);
-                    // Add components
-                    PrefabUtils.AddBasicComponents(obj, ClassId, Info.TechType, LargeWorldEntity.CellLevel.Medium);
-                    PrefabUtils.AddResourceTracker(obj, TechType.Fragment);
-                    PetPrefabConfigUtils.ConfigureSkyApplier(obj);
-                    PetPrefabConfigUtils.UpdatePickupable(obj, false);
-                    PetPrefabConfigUtils.SetRigidBodyKinematic(obj, true);
-                    PetPrefabConfigUtils.ResizeCollider(obj, new Vector3(0.0f, 0.61f, 0.24f), new Vector3(1.02f, 1.2f, 0.52f));
-                    obj.AddComponent<PetFabricatorFragment>();
-                }
-            };
+                LogUtils.LogError(LogArea.Prefabs, "PetFabricator: Could not find prefab asset!");
+                return;
+            }
+
+            damagedFabPrefab.SetActive(false);
+
+            // Add components
+            PrefabUtils.AddBasicComponents(damagedFabPrefab, ClassId, Info.TechType, LargeWorldEntity.CellLevel.Medium);
+            PrefabUtils.AddResourceTracker(damagedFabPrefab, TechType.Fragment);
+            PetPrefabConfigUtils.ConfigureSkyApplier(damagedFabPrefab);
+            PetPrefabConfigUtils.UpdatePickupable(damagedFabPrefab, false);
+            PetPrefabConfigUtils.SetRigidBodyKinematic(damagedFabPrefab, true);
+            damagedFabPrefab.AddComponent<PetFabricatorFragment>();
+
             LogUtils.LogDebug(LogArea.Prefabs, "PetFabricatorFragment: SetGameObject...");
-            fabricatorFragmentPrefab.SetGameObject(cloneTemplate);
+            fabricatorFragmentPrefab.SetGameObject(damagedFabPrefab);
             SpawnLocation[] spawnLocations =
             {
-                new SpawnLocation(new Vector3(-388.22f, -149.85f, -837.85f), new Vector3(0.02f, -0.01f, 0.01f)), // warp -388.22 -149.85 -837.85 (goto miningsite)
-                new SpawnLocation(new Vector3(548.66f, -210.13f, -1093.88f), new Vector3(-0.06f, 0.03f, 0.08f)), // warp 548.66 -210.13 -1093.88 (goto outpostomega)
-                new SpawnLocation(new Vector3(267.22f, -233.91f, -1227.16f), new Vector3(-0.11f, -0.14f, -0.06f)), // warp 267.22 -233.91 -1227.16 goto crashedship2)
-                new SpawnLocation(new Vector3(-2.70f, -81.76f, -834.83f), new Vector3(-0.09f, 0.06f, -0.10f)), // warp -2.70 -81.76 -834.83 (goto shipwrecksalvage) 
-                new SpawnLocation(new Vector3(520.79f, -833.54f, -686.17f), new Vector3(0.00f, 0.56f, 0.82f)), // warp 520.79 -833.54 -686.17 (goto crystalcastlecache)
-                new SpawnLocation(new Vector3(-1027.07f, 6.04f, -385.73f), new Vector3(0.24f, 0.40f, -0.44f)), // warp -1027.07 6.04 -385.73 (goto glacialbasinlandbeacon)
-                new SpawnLocation(new Vector3(-317.56f, -196.14f, -332.46f), new Vector3(0.78f, 0.04f, 0.38f)), // warp -317.56 -196.14 -332.46 (goto twistybridgesvalleyfloor)
-                new SpawnLocation(new Vector3(-254.23f, -129.07f, -239.95f), new Vector3(0.00f, 0.94f, 0.01f)), // warp -254.23 -129.07 -239.95 (goto twistytechsite2)
-                new SpawnLocation(new Vector3(-1004.19f, -46.03f, -318.50f), new Vector3(-0.34f, 0.61f, 0.52f)), // warp -1004.19 -46.03 -318.50 (goto glacialbasindock)
-                new SpawnLocation(new Vector3(49.46f, -75.72f, -790.23f), new Vector3(-0.02f, 0.74f, 0.66f)), // warp 49.46 -75.72 -790.23 (goto crashedship1)
-                };
+                new SpawnLocation(new Vector3(54.17f, -381.63f, -893.97f), new Vector3(301.21f, 39.03f, 154.60f)), // warp 52.56 -379.21 -893.41
+                new SpawnLocation(new Vector3(545.30f, -210.05f, -1093.87f), new Vector3(278.35f, 39.87f, 149.11f)), // warp 547.11 -206.15 -1092.51
+                new SpawnLocation(new Vector3(267.75f, -233.41f, -1225.20f), new Vector3(346.60f, 330.40f, 179.27f)), // warp 268.03 -231.77 -1226.99
+                new SpawnLocation(new Vector3(116.66f, -101.49f, -838.96f), new Vector3(359.60f, 302.26f, 184.42f)), // warp 118.61 -98.51 -839.25
+                new SpawnLocation(new Vector3(514.53f, -833.15f, -691.35f), new Vector3(359.55f, 246.30f, 179.84f)), // warp 514.48 -831.69 -693.87
+                new SpawnLocation(new Vector3(-1029.30f, 5.70f, -384.70f), new Vector3(279.82f, 58.46f, 243.36f)), // warp -1032.35 7.57 -383.36
+                new SpawnLocation(new Vector3(-317.42f, -195.69f, -330.86f), new Vector3(326.91f, 334.81f, 175.76f)), // warp -318.58 -194.50 -331.79
+                new SpawnLocation(new Vector3(-251.25f, -128.73f, -239.23f), new Vector3(321.87f, 25.74f, 181.46f)), // warp -252.56 -126.35 -238.21
+                new SpawnLocation(new Vector3(-257.13f, -128.71f, -245.16f), new Vector3(272.22f, 329.60f, 136.21f)), // warp -255.338 -127.287 -245.725
+                new SpawnLocation(new Vector3(-1000.18f, -46.95f, -316.54f), new Vector3(13.67f, 103.79f, 184.40f)), // warp -1001.00 -43.32 -319.54
+                new SpawnLocation(new Vector3(48.86f, -75.44f, -787.47f), new Vector3(282.88f, 129.13f, 66.03f)), // warp 47.44 -73.60 -789.15
+            };
 
             LogUtils.LogDebug(LogArea.Prefabs, "PetFabricatorFragment: SetSpawns...");
             fabricatorFragmentPrefab.SetSpawns(spawnLocations);

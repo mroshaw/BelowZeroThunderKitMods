@@ -11,13 +11,13 @@ You can scan for Pet DNA via a Scanner Room. Upgrade the range and don't forget 
 If you're really stuck, you can use console commands to spawn DNA in your inventory:
 
 ```
-item 5 PengwingAdultPetDna
-item 5 PenglingBabyPetDna
-item 5 SnowstalkerBabyPetDna
-item 5 TrivalveBluePetDna
-item 5 TrivalveYellowPetDna
-item 5 PinnacaridPetDna
-item 5 CatPetDna
+item PengwingAdultPetDna 5
+item PenglingBabyPetDna 5
+item SnowstalkerBabyPetDna 5
+item TrivalveBluePetDna 5
+item TrivalveYellowPetDna 5
+item PinnacaridPetDna 5
+item CatPetDna 5
 ```
 
 ## Base Part Fragments
@@ -27,31 +27,33 @@ If you're struggling to find Pet Console or Pet Fabricator fragments, you can us
 ### Console Fragments
 
 ```
-warp 46.47 -382.91 -922.39
-warp -260.88 40.13 -773.85
-warp -94.00 9.00 302.18
-warp 12.66 -92.07 -784.40
-warp 115.28 -36.56 -2.23
-warp -137.69 -58.83 -175.80
-warp -378.69 -175.21 -318.37
-warp 240.52 -100.88 -612.13
-warp -282.83 -16.89 -14.45
-warp -538.61 -207.98 -501.29
+warp 97.62 -383.40 -929.72
+warp 95.17 -388.81 -919.84
+warp -245.70 41.95 -779.69
+warp -90.27 10.57 305.48
+warp 53.79 -72.21 -795.16
+warp 110.30 -31.89 -2.63
+warp -142.73 -56.46 -179.24
+warp -365.50 -171.18 -319.87
+warp 243.49 -99.22 -613.92
+warp -289.41 -12.63 -15.73
+warp -541.18 -202.38 -495.66
 ```
 
 ### Fabricator Fragments
 
 ```
-warp -388.22 -149.85 -837.85
-warp 548.66 -210.13 -1093.88
-warp 267.22 -233.91 -1227.16
-warp -2.70 -81.76 -834.83
-warp 520.79 -833.54 -686.17
-warp -1027.07 6.04 -385.73
-warp -317.56 -196.14 -332.46
-warp -254.23 -129.07 -239.95
-warp -1004.19 -46.03 -318.50
-warp 49.46 -75.72 -790.23
+warp 52.56 -379.21 -893.41
+warp 547.11 -206.15 -1092.51
+warp 268.03 -231.77 -1226.99
+warp 118.61 -98.51 -839.25
+warp 514.48 -831.69 -693.87
+warp -1032.35 7.57 -383.36
+warp -318.58 -194.50 -331.79
+warp -252.56 -126.35 -238.21
+warp -255.338 -127.287 -245.725
+warp -1001.00 -43.32 -319.54
+warp 47.44 -73.60 -789.15
 ```
 
 ## Credits / Attribution
