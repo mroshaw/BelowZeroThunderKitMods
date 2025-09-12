@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using DaftAppleGames.SubnauticaPets.Extensions;
 using DaftAppleGames.SubnauticaPets.Utils;
 using TMPro;
 using UnityEngine;
@@ -96,8 +95,11 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             StartCoroutine(UpdatePetListAsync());
             SetEmitters();
             
+            // Set initial screen state
+            _hasPower = _powerConsumer.IsPowered();
+            
             // Clean up, as the UWE serializer has a habit of adding stuff back in when loading a save
-            gameObject.transform.parent.gameObject.DestroyComponentsInChildren<PictureFrame>();
+            Invoke(nameof(CleanUp), 5.0f);
         }
 
         /// <summary>
@@ -112,9 +114,6 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             killConfirmButton.onClick.AddListener(KillConfirmButtonHandler);
             killAllConfirmButton.onClick.AddListener(KillAllConfirmButtonHandler);
             petNameTextInput.onValueChanged.AddListener(RenameTextChangedHandler);
-
-            // Listen for changes to the Pet List
-            SubnauticaPetsPlugin.PetSaver.PetListUpdatedEvent.AddListener(PetListUpdatedHandler);
         }
 
         // Remove listeners
@@ -153,6 +152,12 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
                 _hasPower = true;
                 ConstructedOrPowerStateChanged();
             }
+        }
+
+        private void CleanUp()
+        {
+            // Listen for changes to the Pet List
+            SubnauticaPetsPlugin.PetSaver.PetListUpdatedEvent.AddListener(PetListUpdatedHandler);
         }
         
         /// <summary>
