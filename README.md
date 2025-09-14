@@ -1,4 +1,4 @@
-# BelowZeroThunderKitMods
+# Subnautica: Below Zero Thunder Kit Mods
 ## Introduction
 
 This repository contains all of my Subnautica: Below Zero [ThunderKit](https://github.com/PassivePicasso/ThunderKit) Mods in a single Unity 2019.4.36f1 project. It includes the mods themselves, and high level ThunderKit settings and extensions, as well as Unity helpers utilities.
