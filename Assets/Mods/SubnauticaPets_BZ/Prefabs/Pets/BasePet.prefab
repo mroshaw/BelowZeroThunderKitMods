@@ -101,6 +101,7 @@ GameObject:
   - component: {fileID: 4683715473745279827}
   - component: {fileID: 6471995898590915098}
   - component: {fileID: 3873267659578556042}
+  - component: {fileID: 347397406611732758}
   m_Layer: 0
   m_Name: BasePet
   m_TagString: Untagged
@@ -177,3 +178,26 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0.3, z: -0.06}
+--- !u!114 &347397406611732758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4683715473745279828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 815910612, guid: 06dd3d5416bf43ea368cc39ff96e6d5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  handleGravity: 1
+  aboveWaterGravity: 9.81
+  underwaterGravity: 1
+  handleDrag: 1
+  aboveWaterDrag: 0.1
+  underwaterDrag: 1
+  handleWind: 0
+  windScalar: 1
+  aboveWaterOverride: 0
+  useRigidbody: {fileID: 6471995898590915098}
+  moveWithPlatform: 0
