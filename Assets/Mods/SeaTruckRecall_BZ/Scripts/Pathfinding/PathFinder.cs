@@ -105,7 +105,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
 
             if (!_navGrid.IsGridReady)
             {
-                Log.LogError("Waypoint Generation failed. NavGrid is not ready.");
+                LogError("Waypoint Generation failed. NavGrid is not ready.");
                 waypointsCompleteAction?.Invoke(GenerateStatus.Failed, null);
             }
 
@@ -113,7 +113,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             if (!_navGrid.IsPathingReady)
             {
 
-                Log.LogError("Waypoint Generation failed. NavGrid failed to find a path.");
+                LogError("Waypoint Generation failed. NavGrid failed to find a path.");
                 waypointsCompleteAction?.Invoke(GenerateStatus.Failed, null);
             }
             SetWaypointsFromPath(_navGrid.NavPath);

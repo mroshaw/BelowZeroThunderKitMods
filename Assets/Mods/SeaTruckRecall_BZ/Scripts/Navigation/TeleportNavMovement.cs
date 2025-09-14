@@ -20,7 +20,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
         /// </summary>
         protected override void MoveUpdate(Vector3 targetPosition)
         {
-            Log.LogDebug($"MoveUpdate: Moving to {targetPosition}");
+            LogDebug($"MoveUpdate: Moving to {targetPosition}");
             transform.position = targetPosition;
         }
 
@@ -29,9 +29,9 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
         /// </summary>
         protected override void RotateUpdate(Vector3 targetPosition)
         {
-            // Log.LogDebug($"RotateUpdate: Rotating from {transform.rotation}. Source position: {transform.position}, looking at: {targetTransform.position}");
+            // LogDebug($"RotateUpdate: Rotating from {transform.rotation}. Source position: {transform.position}, looking at: {targetTransform.position}");
             transform.LookAt(targetPosition);
-            // Log.LogDebug($"RotateUpdate: New rotation is: {transform.rotation}");
+            // LogDebug($"RotateUpdate: New rotation is: {transform.rotation}");
         }
 
         /// <summary>
@@ -40,9 +40,9 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
         protected override void NavComplete()
         {
             // Force docking
-            Log.LogInfo("Teleport Movement: Nudging...");
+            LogDebug("Teleport Movement: Nudging...");
             Nudge(10.0f);
-            Log.LogInfo("Teleport Movement: Nudged.");
+            LogDebug("Teleport Movement: Nudged.");
         }
     }
 }

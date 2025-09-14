@@ -31,17 +31,17 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
 
         protected virtual void StartNavigation(Vector3 targetPosition, bool rotateBeforeMoving = true)
         {
-            Log.LogDebug("Nav Movement Start");
+            LogDebug("Nav Movement Start");
             _currentTarget = targetPosition;
             _isFacingTarget = false;
             _rotateBeforeMoving = rotateBeforeMoving;
             _isMoving = true;
-            Log.LogDebug($"StartNavigation: Moving to {targetPosition}");
+            LogDebug($"StartNavigation: Moving to {targetPosition}");
         }
 
         protected virtual void StopNavigation()
         {
-            Log.LogDebug("Nav Movement Stop");
+            LogDebug("Nav Movement Stop");
             _isMoving = false;
         }
 
@@ -141,7 +141,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
 
             if (_isFacingTarget && IsMoveComplete())
             {
-                Log.LogDebug($"NavMovement: MoveComplete");
+                LogDebug($"NavMovement: MoveComplete");
                 _isMoving = false;
                 NavMoveComplete();
             }
@@ -154,7 +154,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
         /// </summary>
         public virtual void RotationCompleted()
         {
-            Log.LogDebug($"Rotation Completed.");
+            LogDebug($"Rotation Completed.");
         }
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             {
                 // Make sure rotation is fully complete
                 transform.rotation = targetRotation;
-                Log.LogDebug($"Rotation complete");
+                LogDebug($"Rotation complete");
                 return true;
             }
             // Log.LogDebug($"Checking Rotation: Rotate Angle is: {rotateAngle}, Tolerance is: {RotateThreshold}");
@@ -187,7 +187,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             bool moveComplete = distanceToCurrentTarget < MoveTolerance;
             if (moveComplete)
             {
-                Log.LogDebug($"Move complete");
+                LogDebug($"Move complete");
                 return true;
             }
             return false;

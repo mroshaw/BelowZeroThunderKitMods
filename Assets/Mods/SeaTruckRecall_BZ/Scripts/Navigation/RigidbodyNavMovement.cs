@@ -126,7 +126,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
         /// </summary>
         public void RestoreRigidBodies()
         {
-            Log.LogDebug($"RestoreChildRigidBodies {_numChildRigidBodies}child RigidBodies");
+            LogDebug($"RestoreChildRigidBodies {_numChildRigidBodies}child RigidBodies");
             foreach (RigidBodyBackup backup in _rigidBodyBackups)
             {
                 backup.Restore();
@@ -140,7 +140,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
         /// </summary>
         public void ConfigureRigidBodies()
         {
-            Log.LogDebug($"ZeroChildRigidBodies: {_numChildRigidBodies} child RigidBodies");
+            LogDebug($"ZeroChildRigidBodies: {_numChildRigidBodies} child RigidBodies");
             foreach (RigidBodyBackup backup in _rigidBodyBackups)
             {
                 backup.Zero();
@@ -166,7 +166,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             {
                 if (!_rigidBody)
                 {
-                    Log.LogDebug("Backup RigidBody is null!");
+                    LogDebug("Backup RigidBody is null!");
                     return;
                 }
                 _rigidBody.drag = 0;
@@ -178,7 +178,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             {
                 if (!_rigidBody)
                 {
-                    Log.LogDebug("Backup RigidBody is null!");
+                    LogDebug("Backup RigidBody is null!");
                     return;
                 }
                 _rigidBody.mass = _mass;

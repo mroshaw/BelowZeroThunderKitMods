@@ -23,17 +23,17 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Patches
             SeaTruckDockRecaller newDockRecaller = __instance.gameObject.EnsureComponent<SeaTruckDockRecaller>();
             AllSeaTruckDockRecallers.AddInstance(newDockRecaller);
 
-            Log.LogDebug("Finding terminal...");
+            LogDebug("Finding terminal...");
             MoonpoolExpansionTerminal terminal = __instance.GetComponentInChildren<MoonpoolExpansionTerminal>();
             if (terminal)
             {
-                Log.LogDebug("Found terminal...");
+                LogDebug("Found terminal...");
                 terminal.gameObject.AddComponent<SeaTruckDockRecallerUi>();
-                Log.LogDebug("Added GUI component!");
+                LogDebug("Added GUI component!");
             }
             else
             {
-                Log.LogError("No terminal found on MoonpoolExpansion!");
+                LogDebug("No terminal found on MoonpoolExpansion!");
             }
         }
 
@@ -66,13 +66,13 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Patches
                 return true;
             }
 
-            Log.LogDebug($"IsAllowedToDock: dockable!=null is {dockable != null}");
-            Log.LogDebug($"IsAllowedToDock: dockable.truckSgement!=null is {dockable.truckSegment != null}");
-            Log.LogDebug($"IsAllowedToDock: exitingSeaTruck==null is {__instance.exitingTruck == null}");
-            Log.LogDebug($"IsAllowedToDock: !DockingBlockersInTheWay is {!__instance.DockingBlockersInTheWay()}");
-            Log.LogDebug($"IsAllowedToDock: isLoading is {__instance.isLoading}");
-            Log.LogDebug($"IsAllowedToDock: IsPowered is {__instance.IsPowered()}");
-            Log.LogDebug($"IsAllowedToDock: CheckIfSeatruckModulePresent is {__instance.CheckIfSeatruckModulePresent(__instance.tailDockingPosition.position)}");
+            LogDebug($"IsAllowedToDock: dockable!=null is {dockable != null}");
+            LogDebug($"IsAllowedToDock: dockable.truckSgement!=null is {dockable.truckSegment != null}");
+            LogDebug($"IsAllowedToDock: exitingSeaTruck==null is {__instance.exitingTruck == null}");
+            LogDebug($"IsAllowedToDock: !DockingBlockersInTheWay is {!__instance.DockingBlockersInTheWay()}");
+            LogDebug($"IsAllowedToDock: isLoading is {__instance.isLoading}");
+            LogDebug($"IsAllowedToDock: IsPowered is {__instance.IsPowered()}");
+            LogDebug($"IsAllowedToDock: CheckIfSeatruckModulePresent is {__instance.CheckIfSeatruckModulePresent(__instance.tailDockingPosition.position)}");
 
             __result = dockable.truckSegment != null &&
                        dockable != null &&
@@ -80,7 +80,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Patches
                        !__instance.DockingBlockersInTheWay() &&
                        (__instance.isLoading || __instance.IsPowered()) &&
                        (__instance.isLoading || __instance.CheckIfSeatruckModulePresent(__instance.tailDockingPosition.position));
-            Log.LogDebug($"IsAllowedToDock is: {__result}");
+            LogDebug($"IsAllowedToDock is: {__result}");
             return false;
         }
 
@@ -96,7 +96,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Patches
             {
                 return;
             }
-            Log.LogDebug("Recall Dock docking noted as complete.");
+            LogDebug("Recall Dock docking noted as complete.");
             dockRecaller.CurrentSeaTruckDocked();
         }
 
@@ -112,7 +112,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Patches
             {
                 return;
             }
-            Log.LogDebug("Recall Dock Undocking noted as complete.");
+            LogDebug("Recall Dock Undocking noted as complete.");
             dockRecaller.ReleaseCurrentlyDocked();
         }
     }

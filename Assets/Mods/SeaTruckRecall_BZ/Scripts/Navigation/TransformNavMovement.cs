@@ -36,7 +36,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             if (dirToTarget.sqrMagnitude < Mathf.Epsilon) // Check the positions aren't the same
             {
                 // If they are, set the rotation without Lerp
-                Log.LogDebug("Target Position is same as Source Transform. Setting rotation manually.");
+                LogDebug("Target Position is same as Source Transform. Setting rotation manually.");
                 transform.LookAt(targetPosition);
                 return;
             }
@@ -51,7 +51,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
         /// </summary>
         protected override void NavStarted()
         {
-            Log.LogDebug($"Setting SeaTruck Rigidbody to IsKinematic: {gameObject.name}");
+            LogDebug($"Setting SeaTruck Rigidbody to IsKinematic: {gameObject.name}");
             UWE.Utils.SetIsKinematicAndUpdateInterpolation(gameObject, true, false);
         }
 
@@ -61,14 +61,14 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
         /// </summary>
         protected override void NavComplete()
         {
-            Log.LogDebug("Resetting SeaTruck Rigidbodies");
+            LogDebug("Resetting SeaTruck Rigidbodies");
 
             // Reset rigidbodies
             UWE.Utils.SetIsKinematicAndUpdateInterpolation(gameObject, false, true);
             // Force docking
-            Log.LogInfo("Teleport Movement: Nudging...");
+            LogDebug("Teleport Movement: Nudging...");
             Nudge(10.0f);
-            Log.LogInfo("Teleport Movement: Nudged.");
+            LogDebug("Teleport Movement: Nudged.");
         }
     }
 }

@@ -92,14 +92,14 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
         {
             if (IsBusy)
             {
-                Log.LogWarning("NavGrid is busy!");
+                LogDebug("NavGrid is busy!");
                 pathCompleteAction?.Invoke(GenerateStatus.Generating);
                 yield break;
             }
 
             if (_gridStatus != GenerateStatus.Success)
             {
-                Log.LogWarning("NavGrid grid is not ready for pathing!");
+                LogDebug("NavGrid grid is not ready for pathing!");
                 pathCompleteAction?.Invoke(GenerateStatus.Failed);
                 yield break;
             }
@@ -113,7 +113,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             }
             else
             {
-                Log.LogError("Pathing failed!");
+                LogError("Pathing failed!");
                 SetPathingStatus(GenerateStatus.Failed);
             }
 
@@ -149,7 +149,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
         {
             if (IsBusy)
             {
-                Log.LogWarning("NavGrid is busy!");
+                LogDebug("NavGrid is busy!");
                 gridCompleteAction?.Invoke(GenerateStatus.Generating);
                 yield break;
             }
@@ -162,13 +162,13 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             Transform gridDebugContainer = debug ? ResetGridDebugContainer(debugContainer) : null;
 
             float genTime = Time.time;
-            Log.LogDebug($"Started Grid Generation: {genTime}");
-            Log.LogDebug($"Ocean Level is: {Ocean.GetOceanLevel()}");
+            LogDebug($"Started Grid Generation: {genTime}");
+            LogDebug($"Ocean Level is: {Ocean.GetOceanLevel()}");
             SetGridStatus(GenerateStatus.Generating);
 
             if (sourcePosition == targetPosition)
             {
-                Log.LogError("NavGrid: sourcePosition and targetPosition are the same!");
+                LogError("NavGrid: sourcePosition and targetPosition are the same!");
                 SetGridStatus(GenerateStatus.Failed);
                 gridCompleteAction?.Invoke(GenerateStatus.Failed);
                 yield break;
@@ -178,9 +178,9 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             float distance = Vector3.Distance(sourcePosition, targetPosition);
             int numCellsForward = Mathf.CeilToInt(distance / cellSize);
 
-            Log.LogDebug($"Num Extends: {numCellExtends}");
-            Log.LogDebug($"Cell Size: {cellSize}");
-            Log.LogDebug($"NavGrid dimensions: x:{numCellsForward}, y:{numCellExtends * 2}, z:{numCellExtends * 2}. Total cells: {numCellsForward * (numCellExtends * 2)}");
+            LogDebug($"Num Extends: {numCellExtends}");
+            LogDebug($"Cell Size: {cellSize}");
+            LogDebug($"NavGrid dimensions: x:{numCellsForward}, y:{numCellExtends * 2}, z:{numCellExtends * 2}. Total cells: {numCellsForward * (numCellExtends * 2)}");
 
             _navGrid = new NavCell[numCellsForward, (numCellExtends * 2) + 1, (numCellExtends * 2) + 1];
 
@@ -235,8 +235,8 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
                     yield return null;
                 }
             }
-            Log.LogDebug($"Finished Grid Generation: {Time.time}. Time taken: {Time.time - genTime}");
-            Log.LogDebug($"Cells created: {totalCells}, Blocked cells: {totalBlockedCells}, Clear cells: {totalClearCells}");
+            LogDebug($"Finished Grid Generation: {Time.time}. Time taken: {Time.time - genTime}");
+            LogDebug($"Cells created: {totalCells}, Blocked cells: {totalBlockedCells}, Clear cells: {totalClearCells}");
             SetGridStatus(GenerateStatus.Success);
             gridCompleteAction?.Invoke(GenerateStatus.Success);
         }
@@ -245,11 +245,11 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
         {
             for (int curColliderIndex = 0; curColliderIndex < numColliders; curColliderIndex++)
             {
-                Log.LogDebug($"Found collider: {allColliders[curColliderIndex].name} on layer named: {LayerMask.LayerToName(allColliders[curColliderIndex].gameObject.layer)}");
+                LogDebug($"Found collider: {allColliders[curColliderIndex].name} on layer named: {LayerMask.LayerToName(allColliders[curColliderIndex].gameObject.layer)}");
                 if (allColliders[curColliderIndex].gameObject.transform.parent && allColliders[curColliderIndex].gameObject.transform.parent.GetComponentInChildren<Creature>())
                 {
                     // We want to ignore these
-                    Log.LogDebug("NavGrid: found Creature collider, ignoring...");
+                    LogDebug("NavGrid: found Creature collider, ignoring...");
                     continue;
                 }
 
@@ -265,14 +265,14 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
 
             if (IsBusy)
             {
-                Log.LogWarning("NavGrid is busy!");
+                LogDebug("NavGrid is busy!");
                 pathCompleteAction?.Invoke(GenerateStatus.Generating);
                 yield break;
             }
 
             if (_gridStatus != GenerateStatus.Success)
             {
-                Log.LogWarning("NavGrid grid is not ready for pathing!");
+                LogDebug("NavGrid grid is not ready for pathing!");
                 pathCompleteAction?.Invoke(GenerateStatus.Failed);
                 yield break;
             }
@@ -280,7 +280,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             Transform pathDebugContainer = debug ? GetGridDebugContainer(debugContainer) : null;
 
             float genTime = Time.time;
-            Log.LogDebug($"Started Path Generation: {genTime}");
+            LogDebug($"Started Path Generation: {genTime}");
             SetPathingStatus(GenerateStatus.Generating);
 
             _navPath = new NavPath();
@@ -313,7 +313,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
 
                     SetPathingStatus(GenerateStatus.Success);
                     pathCompleteAction?.Invoke(GenerateStatus.Success);
-                    Log.LogDebug($"Finished Path Generation: {Time.time}. Time taken: {Time.time - genTime}.  Number of path cells: {_navPath.Count}");
+                    LogDebug($"Finished Path Generation: {Time.time}. Time taken: {Time.time - genTime}.  Number of path cells: {_navPath.Count}");
                     yield break;
                 }
 
@@ -342,7 +342,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             }
 
             // No path found
-            Log.LogDebug($"Finished Path Generation: {Time.time}. Time taken: {Time.time - genTime}. No path found.");
+            LogDebug($"Finished Path Generation: {Time.time}. Time taken: {Time.time - genTime}. No path found.");
             SetPathingStatus(GenerateStatus.Failed);
             pathCompleteAction?.Invoke(GenerateStatus.Failed);
         }
@@ -394,7 +394,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
                 return closest;
             }
 
-            Log.LogError("Couldn't find closest walkable cell!");
+            LogError("Couldn't find closest walkable cell!");
             return _navGrid[0, 0, 0]; // Fallback to first cell if no walkable found
         }
 

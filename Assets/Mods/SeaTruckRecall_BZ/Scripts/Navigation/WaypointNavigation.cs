@@ -93,7 +93,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
                 return;
             }
 
-            Log.LogDebug($"Setting new Waypoint: {newWaypoint}");
+            LogDebug($"Setting new Waypoint: {newWaypoint}");
             _currentWaypoint = newWaypoint;
             OnWaypointChanged?.Invoke(newWaypoint);
         }
@@ -157,7 +157,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             Reset();
             NavStarted();
             SetNavState(NavState.Moving);
-            Log.LogDebug("Starting Waypoint Navigation...");
+            LogDebug("Starting Waypoint Navigation...");
             NextWaypoint();
         }
 
@@ -167,7 +167,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             Reset();
             NavStarted();
             SetNavState(NavState.Moving);
-            Log.LogDebug("Starting Waypoint Navigation...");
+            LogDebug("Starting Waypoint Navigation...");
             NextWaypoint();
         }
 
@@ -239,7 +239,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
 
             if (Physics.SphereCast(source.position, radius, direction, out RaycastHit hit, distance))
             {
-                Log.LogInfo($"Found this Collider from current position to this Waypoint {targetWaypoint.Name}: {hit.collider.gameObject.name}");
+                LogDebug($"Found this Collider from current position to this Waypoint {targetWaypoint.Name}: {hit.collider.gameObject.name}");
                 return true;
             }
             return false;

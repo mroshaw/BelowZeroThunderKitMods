@@ -16,7 +16,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Utils
         public static void CloneText(GameObject existingTextGo, string objName, string defaultText, float positionY, float fontSize,
             out GameObject newTextGo, out TextMeshProUGUI newText)
         {
-            Log.LogDebug($"UiUtils CloneText: Creating {objName} Text...");
+            LogDebug($"UiUtils CloneText: Creating {objName} Text...");
             newTextGo = Object.Instantiate(existingTextGo, existingTextGo.transform.parent, true);
             newTextGo.name = objName;
             newTextGo.transform.localPosition = new Vector3(0, positionY, 0);
@@ -25,7 +25,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Utils
             newText = newTextGo.GetComponent<TextMeshProUGUI>();
             newText.text = defaultText;
             newText.fontSizeMax = fontSize;
-            Log.LogDebug($"UiUtils CloneText: Created {objName} Text...");
+            LogDebug($"UiUtils CloneText: Created {objName} Text...");
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Utils
             float fontSize, float scale,
             out GameObject newButtonGo, out Button newButton)
         {
-            Log.LogDebug($"UiUtils CloneButton: Creating {objName} button...");
+            LogDebug($"UiUtils CloneButton: Creating {objName} button...");
             newButtonGo = Object.Instantiate(existingButtonGo, parent, true);
             newButtonGo.name = objName;
             newButton = newButtonGo.GetComponent<Button>();
@@ -45,7 +45,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Utils
             TextMeshProUGUI buttonLabel = newButtonGo.GetComponentInChildren<TextMeshProUGUI>();
             buttonLabel.text = labelText;
             buttonLabel.fontSizeMax = fontSize;
-            Log.LogDebug($"UiUtils CloneButton: Button {objName} created.");
+            LogDebug($"UiUtils CloneButton: Button {objName} created.");
         }
     }
 }

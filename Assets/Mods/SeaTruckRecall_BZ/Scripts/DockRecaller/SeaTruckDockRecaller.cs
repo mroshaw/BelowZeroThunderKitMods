@@ -89,7 +89,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         {
             if (currentSeaTruckAutoPilot == null)
             {
-                Log.LogDebug("ReleaseCurrentlyDocked called but there is no SeaTruck docked.");
+                LogDebug("ReleaseCurrentlyDocked called but there is no SeaTruck docked.");
                 return;
             }
             ReleaseCurrentSeaTruck();
@@ -101,7 +101,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         /// </summary>
         internal void AbortRecall()
         {
-            Log.LogDebug("Aborting Recall...");
+            LogDebug("Aborting Recall...");
             SetDockState(DockRecallState.Aborted);
         }
 
@@ -112,16 +112,16 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         {
             if (IsDockReady())
             {
-                Log.LogDebug("Dock is already occupied or busy!");
+                LogDebug("Dock is already occupied or busy!");
                 return;
             }
 
-            Log.LogDebug("Finding closest Seatruck...");
+            LogDebug("Finding closest Seatruck...");
             SeaTruckAutoPilot closestAutoPilot = AllAutoPilots.GetClosestAutoPilot(transform.position, MaxRange);
             if (closestAutoPilot == null)
             {
                 // Couldn't find a closest Seatruck
-                Log.LogDebug("No Seatrucks found!");
+                LogDebug("No Seatrucks found!");
                 _currentRecallState = DockRecallState.NoneInRange;
                 return;
             }
@@ -152,7 +152,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
                 MoveToBaseText));
 
             // CreateSphere(aboveDockingTubeWaypoint.transform.position, 2.0f, Color.red);
-            Log.LogDebug($"Dock tube above end position: {aboveDockingTubeWaypoint.transform.position}");
+            LogDebug($"Dock tube above end position: {aboveDockingTubeWaypoint.transform.position}");
 
             // Waypoint at the end of the docking tube.
             GameObject endOfDockTubeWaypoint = new GameObject("End of Tube Waypoint")
@@ -168,7 +168,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
                 AlignToDockText));
 
             // CreateSphere(endOfDockTubeWaypoint.transform.position, 1.5f, Color.yellow);
-            Log.LogDebug($"Dock tube end position: {endOfDockTubeWaypoint.transform.position}");
+            LogDebug($"Dock tube end position: {endOfDockTubeWaypoint.transform.position}");
 
             // Waypoint into the docking tube itself
             GameObject dockingWaypoint = new GameObject("Docking Waypoint")
@@ -184,20 +184,20 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
                 MovingToDockText));
 
             // CreateSphere(dockingWaypoint.transform.position, 1.0f, Color.green);
-            Log.LogDebug($"Dock final position: {dockingWaypoint.transform.position}");
+            LogDebug($"Dock final position: {dockingWaypoint.transform.position}");
         }
 
         private void SetDockingAutoPilot(SeaTruckAutoPilot autoPilot)
         {
             if (!autoPilot)
             {
-                Log.LogDebug("Attempt to set current AutoPilot to null!");
+                LogDebug("Attempt to set current AutoPilot to null!");
                 return;
             }
 
             if (currentSeaTruckAutoPilot)
             {
-                Log.LogDebug("AutoPilot is already set!");
+                LogDebug("AutoPilot is already set!");
                 return;
             }
             currentSeaTruckAutoPilot = autoPilot;
@@ -232,6 +232,11 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         /// </summary>
         public bool IsDockReady()
         {
+            // Allow us to test in the Unity Editor
+            if (!_dockingManager)
+            {
+                return false;
+            }
             return _dockingManager.IsOccupied() || currentSeaTruckAutoPilot != null;
         }
 
@@ -245,7 +250,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         /// </summary>
         private void AutoPilotStateChangedHandler(AutoPilotState autoPilotState)
         {
-            Log.LogDebug($"DockRecaller.AutoPilotStateChangedHandler: {autoPilotState}.");
+            LogDebug($"DockRecaller.AutoPilotStateChangedHandler: {autoPilotState}.");
 
             // Autopilot state changes
             switch (autoPilotState)
@@ -275,7 +280,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
                 return;
             }
 
-            Log.LogDebug($"SeaTruckRecaller.SetDockState: state changed from {_currentRecallState} to {newRecallState}.");
+            LogDebug($"SeaTruckRecaller.SetDockState: state changed from {_currentRecallState} to {newRecallState}.");
             _currentRecallState = newRecallState;
             OnDockingStateChanged?.Invoke(newRecallState);
         }
@@ -290,7 +295,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
 
         private IEnumerator ParkSeaTruckAsync()
         {
-            Log.LogDebug("Parking SeaTruck...");
+            LogDebug("Parking SeaTruck...");
 
             currentSeaTruckAutoPilot.BeginParking();
 
@@ -298,7 +303,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
 
             if (currentSeaTruckAutoPilot == null)
             {
-                Log.LogDebug("Parking cancelled - SeaTruck not set");
+                LogDebug("Parking cancelled - SeaTruck not set");
                 yield break;
             }
 
@@ -316,7 +321,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
 
                 if (dockTime > ParkingTimeout)
                 {
-                    Log.LogDebug("Parking timed out!");
+                    LogDebug("Parking timed out!");
                     SetDockState(DockRecallState.Stuck);
                     yield break;
                 }
@@ -324,7 +329,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
                 yield return null;
             }
             currentSeaTruckAutoPilot.DockingComplete();
-            Log.LogDebug("Docked state set: Parking Complete!");
+            LogDebug("Docked state set: Parking Complete!");
         }
 
         private void CreateSphere(Vector3 spherePosition, float radius, Color color)

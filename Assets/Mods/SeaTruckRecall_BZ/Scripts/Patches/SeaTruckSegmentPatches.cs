@@ -25,7 +25,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Patches
                 return;
             }
             // Add the new AutoPilot component
-            Log.LogInfo("Adding SeaTruckAutopilot components...");
+            LogDebug("Adding SeaTruckAutopilot components...");
 
             // If Instant Movement is selected, add the component
             if (ConfigFile.RecallMoveMethod == RecallMoveMethod.Instant)
@@ -60,7 +60,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Patches
             SeaTruckAutoPilot newAutoPilot = __instance.gameObject.EnsureComponent<SeaTruckAutoPilot>();
             AllAutoPilots.AddInstance(newAutoPilot);
 
-            Log.LogInfo($"Added SeaTruckAutopilot components to {__instance.gameObject.name}!");
+            LogDebug($"Added SeaTruckAutopilot components to {__instance.gameObject.name}!");
         }
 
 

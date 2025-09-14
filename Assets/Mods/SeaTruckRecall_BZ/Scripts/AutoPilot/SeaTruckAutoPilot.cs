@@ -118,7 +118,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
             // If we get stuck, change status and notify listeners
             if (IsStuckCheck())
             {
-                Log.LogDebug("AutoPilot is stuck! Aborting!");
+                LogDebug("AutoPilot is stuck! Aborting!");
                 AbortNavigation();
             }
         }
@@ -234,7 +234,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
             if (_currentAutoPilotState != AutoPilotState.Ready)
             {
                 // Already being recalled or is already docked
-                Log.LogDebug($"AutoPilot BeginNavigation: autopilot is not ready. State is: {_currentAutoPilotState}");
+                LogDebug($"AutoPilot BeginNavigation: autopilot is not ready. State is: {_currentAutoPilotState}");
                 return false;
             }
 
@@ -250,7 +250,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
             _waypointNav.SetWayPoints(waypoints);
 
             // Start navigation
-            Log.LogDebug("AutoPilot engaged!");
+            LogDebug("AutoPilot engaged!");
             _waypointNav.StartWaypointNavigation();
 
             return true;
@@ -297,7 +297,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
         /// </summary>
         private void NavStateChangedHandler(NavState navState)
         {
-            Log.LogDebug($"AutoPilot.NavStateChangeHandler: state changed from {_currentNavState} to {navState}");
+            LogDebug($"AutoPilot.NavStateChangeHandler: state changed from {_currentNavState} to {navState}");
             _currentNavState = navState;
 
             // Handle the various SeaTruck states

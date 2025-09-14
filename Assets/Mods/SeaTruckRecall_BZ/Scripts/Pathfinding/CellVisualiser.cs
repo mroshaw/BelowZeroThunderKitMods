@@ -50,7 +50,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
                     _visualiserSphere = CreateSphere(2.0f, Color.black);
                     break;
                 default:
-                    Log.LogDebug("CellVisualiser: Unknown CellType");
+                    LogDebug("CellVisualiser: Unknown CellType");
                     break;
             }
         }

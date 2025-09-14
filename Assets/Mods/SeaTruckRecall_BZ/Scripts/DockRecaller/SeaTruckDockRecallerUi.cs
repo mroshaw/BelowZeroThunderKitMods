@@ -103,7 +103,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         /// </summary>
         private void CreateUi()
         {
-            Log.LogDebug("SeaTruckDockRecallerUi: Creating UI...");
+            LogDebug("SeaTruckDockRecallerUi: Creating UI...");
 
             // Get the InfoPanel so we can parent things nice
             TextMeshProUGUI infoPanel = _expansionTerminal.infoPanel;
@@ -128,12 +128,12 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
             UiUtils.CloneButton(existingButton, _inactiveScreenGo.transform, "AbortButton", AbortButtonDisplayText,
                 250.0f, 20.0f, 3, out _abortRecallButtonGo, out _abortRecallButton);
 
-            Log.LogDebug("SeaTruckDockRecallerUi: Setting up button handlers...");
+            LogDebug("SeaTruckDockRecallerUi: Setting up button handlers...");
             _recallButton.onClick.AddListener(RecallButtonHandler);
             _recallButtonGo.SetActive(true);
             _abortRecallButton.onClick.AddListener(AbortButtonHandler);
             _abortRecallButtonGo.SetActive(false);
-            Log.LogDebug("SeaTruckDockRecallerUi: Button handler setup complete!");
+            LogDebug("SeaTruckDockRecallerUi: Button handler setup complete!");
         }
 
 
@@ -160,16 +160,16 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         /// </summary>
         private void RecallButtonHandler()
         {
-            Log.LogDebug("SeaTruckDockRecallerUi: Recall button clicked!");
+            LogDebug("SeaTruckDockRecallerUi: Recall button clicked!");
             if (_seatruckRecaller.IsDockReady())
             {
-                Log.LogDebug("SeaTruckDockRecallerUi: Recalling closest SeaTruck");
+                LogDebug("SeaTruckDockRecallerUi: Recalling closest SeaTruck");
                 RecallInProgressUi();
                 _seatruckRecaller.RecallClosestSeatruck();
             }
             else
             {
-                Log.LogDebug("SeaTruckDockRecallerUi: Recaller is busy!");
+                LogDebug("SeaTruckDockRecallerUi: Recaller is busy!");
             }
         }
 
@@ -178,14 +178,14 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         /// </summary>
         private void AbortButtonHandler()
         {
-            Log.LogDebug("SeaTruckDockRecallerUi: Abort button clicked!");
+            LogDebug("SeaTruckDockRecallerUi: Abort button clicked!");
             _seatruckRecaller.AbortRecall();
         }
 
         private void DockStateChangedHandler(DockRecallState dockRecallState)
         {
             // Update the UI
-            Log.LogDebug($"SeaTruckDockRecallerUi: Updating UI with DockRecallState: {dockRecallState.ToString()}");
+            LogDebug($"SeaTruckDockRecallerUi: Updating UI with DockRecallState: {dockRecallState.ToString()}");
             _dockingStatusText.text = $"{RecallDisplayText}{_dockRecallDisplayStateTextDict[dockRecallState]}";
 
             // Enable or disable UI components
@@ -205,7 +205,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
 
         private void AutoPilotStateChangedHandler(AutoPilotState autoPilotState)
         {
-            Log.LogDebug($"SeaTruckDockRecallerUi: Updating UI with AutoPilotState: {autoPilotState.ToString()}");
+            LogDebug($"SeaTruckDockRecallerUi: Updating UI with AutoPilotState: {autoPilotState.ToString()}");
             _autoPilotStatusText.text = $"{AutoPilotDisplayText}{_autoPilotStateDisplayTextDict[autoPilotState]}";
         }
 
@@ -213,11 +213,11 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         {
             if (waypoint == null)
             {
-                Log.LogDebug($"SeaTruckDockRecallerUi: Updating UI with NONE Waypoint");
+                LogDebug($"SeaTruckDockRecallerUi: Updating UI with NONE Waypoint");
                 _waypointText.text = $"{WayPointDisplayText}NONE";
                 return;
             }
-            Log.LogDebug($"SeaTruckDockRecallerUi: Updating UI with Waypoint: {waypoint.Name}");
+            LogDebug($"SeaTruckDockRecallerUi: Updating UI with Waypoint: {waypoint.Name}");
             _waypointText.text = $"{WayPointDisplayText}{waypoint.Name}";
         }
     }
