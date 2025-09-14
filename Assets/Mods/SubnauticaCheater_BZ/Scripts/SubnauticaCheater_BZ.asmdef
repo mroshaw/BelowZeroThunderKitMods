@@ -1,0 +1,19 @@
+{
+    "name": "SubnauticaCheater_BZ",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "0Harmony.dll",
+        "Assembly-CSharp_publicized.dll",
+        "Assembly-CSharp-firstpass_publicized.dll",
+        "BepInEx.dll",
+        "Nautilus.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

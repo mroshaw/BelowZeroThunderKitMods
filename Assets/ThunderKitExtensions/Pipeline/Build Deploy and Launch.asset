@@ -17,7 +17,7 @@ MonoBehaviour:
   - {fileID: 114559832304535298}
   - {fileID: 114679819151059082}
   QuickAccess: 1
-  manifest: {fileID: 11400000, guid: 1046126c490d7384799f2de26323218c, type: 2}
+  manifest: {fileID: 0}
 --- !u!114 &114316524637315588
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -62,4 +62,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Active: 1
   OverrideManifest: 1
-  targetpipeline: {fileID: 11400000, guid: 11765d6419e1ad9458a8df2e56d2c691, type: 2}
+  targetpipeline: {fileID: 11400000, guid: bee3c9e850793854fab0abad63dcfaab, type: 2}

@@ -12,6 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2efd008a408bd8449ad573ac2d5003ce, type: 3}
   m_Name: ManifestName
   m_EditorClassIdentifier: 
+--- !u!114 &-1174219983842025320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cebc722807299b54bb8733330087d5e3, type: 3}
+  m_Name: Constant
+  m_EditorClassIdentifier: 
+  Value: Mods
 --- !u!114 &-979976275798157096
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -39,6 +52,7 @@ MonoBehaviour:
   Data:
   - {fileID: -979976275798157096}
   - {fileID: 7031001716288127148}
+  - {fileID: -1174219983842025320}
   - {fileID: -6325497856240983305}
 --- !u!114 &7031001716288127148
 MonoBehaviour:

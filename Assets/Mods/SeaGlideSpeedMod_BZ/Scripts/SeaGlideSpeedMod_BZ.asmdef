@@ -1,0 +1,19 @@
+{
+    "name": "SeaGlideSpeedMod_BZ",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "0Harmony.dll",
+        "BepInEx.dll",
+        "Assembly-CSharp_publicized.dll",
+        "Assembly-CSharp-firstpass_publicized.dll",
+        "Nautilus.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

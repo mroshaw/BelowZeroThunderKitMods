@@ -18,7 +18,14 @@ namespace ThunderKit.Core.Pipelines.Jobs
             var path = Path.Resolve(pipeline, this);
             if (!Directory.Exists(path))
             {
-                throw new DirectoryNotFoundException(path);
+                if (IsFatal)
+                {
+                    throw new DirectoryNotFoundException(path);
+                }
+                else
+                {
+                    return Task.CompletedTask;
+                }
             }
 
             try

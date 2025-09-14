@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Zip
   m_EditorClassIdentifier: 
   Active: 1
-  PerManifest: 1
+  PerManifest: 0
   ListType: 0
   Manifests: []
   ArchiveType: 1
@@ -33,5 +33,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Data:
   - {fileID: -4243233005907335863}
-  QuickAccess: 0
-  manifest: {fileID: 11400000, guid: 1046126c490d7384799f2de26323218c, type: 2}
+  QuickAccess: 1
+  manifest: {fileID: 0}

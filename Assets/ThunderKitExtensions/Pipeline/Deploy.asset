@@ -13,8 +13,27 @@ MonoBehaviour:
   m_Name: ExecutePipeline
   m_EditorClassIdentifier: 
   Active: 1
-  OverrideManifest: 0
+  OverrideManifest: 1
   targetpipeline: {fileID: 11400000, guid: a26a710d612a2c14d92361131311514d, type: 2}
+--- !u!114 &-2236899121766069271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87d65cc226c348d45aa1c6dddf3600a6, type: 3}
+  m_Name: Delete
+  m_EditorClassIdentifier: 
+  Active: 1
+  PerManifest: 0
+  ListType: 0
+  Manifests: []
+  Recursive: 0
+  IsFatal: 0
+  Path: <BepInExGamePlugins>/plugins/<ManifestName>
 --- !u!114 &-1363876913999848018
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -43,10 +62,11 @@ MonoBehaviour:
   m_Name: Deploy
   m_EditorClassIdentifier: 
   Data:
+  - {fileID: -2236899121766069271}
   - {fileID: 2246702635225239771}
   - {fileID: -2486728045325611241}
-  QuickAccess: 0
-  manifest: {fileID: 11400000, guid: 1046126c490d7384799f2de26323218c, type: 2}
+  QuickAccess: 1
+  manifest: {fileID: 0}
 --- !u!114 &2246702635225239771
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -60,7 +80,7 @@ MonoBehaviour:
   m_Name: Copy
   m_EditorClassIdentifier: 
   Active: 1
-  PerManifest: 1
+  PerManifest: 0
   ListType: 0
   Manifests: []
   ReplaceDirectory: 1
