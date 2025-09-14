@@ -15,7 +15,7 @@ You can find non-ThunderKit Subnautica mods in my [Subnautica Mods](https://gith
 - [Sea Glide Speed Mod BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/SeaGlideSpeedMod_BZ) - adds a configurable modifier to alter the speed of the Sea Slide.
 - [Booster Tank Speed Mod BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/BoosterTankSpeedModifier_BZ) - adds a configurable modifier to alter the speed of the Suit Booster Tank.
 - [Sea Truck Fish Scoop BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/SeaTruckFishScoop_BZ) - adds a Fish Scoop to the Sea Truck, causing fish to be sucked into aquariums, rather than being squished.
-- [Subnautica Cheater BZ](https://github.com/mroshaw/SubnauticaThunderKitMods/tree/main/Assets/Mods/SubnauticaCheater_SN) - adds cheats for infinite oxygen and health, mainly for use in debugging and testing other mods.
+- [Subnautica Cheater BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/SubnauticaCheater_BZ) - adds cheats for infinite oxygen and health, mainly for use in debugging and testing other mods.
 
 ## Make your own mods
 
