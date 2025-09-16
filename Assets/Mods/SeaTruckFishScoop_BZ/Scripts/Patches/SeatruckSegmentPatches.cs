@@ -1,7 +1,6 @@
-﻿using DaftAppleGames.SeaTruckFishScoopMod_BZ.MonoBehaviours;
-using HarmonyLib;
+﻿using HarmonyLib;
 
-namespace DaftAppleGames.SeaTruckFishScoopMod_BZ.Patches
+namespace DaftAppleGames.SeaTruckFishScoop_BZ
 {
     /// <summary>
     /// Patches for the SeaTruck Fish Scoop Mod
@@ -14,7 +13,6 @@ namespace DaftAppleGames.SeaTruckFishScoopMod_BZ.Patches
         /// <summary>
         /// Add a FishScoop to every spawned SeaTruck
         /// </summary>
-        /// <param name="__instance"></param>
         [HarmonyPatch(nameof(SeaTruckSegment.Start))]
         [HarmonyPostfix]
         public static void Start_Postfix(SeaTruckSegment __instance)
@@ -22,8 +20,7 @@ namespace DaftAppleGames.SeaTruckFishScoopMod_BZ.Patches
             if (__instance.isMainCab)
             {
                 SeaTruckFishScoopPluginBz.Log.LogDebug("Adding SeaTruckFishScoop components...");
-                __instance.gameObject.AddComponent<SeaTruckFishScoop>();
-                __instance.gameObject.AddComponent<ModInputManager>();
+                __instance.gameObject.AddComponent<FishScoop>();
                 SeaTruckFishScoopPluginBz.Log.LogDebug("SeaTruckFishScoop components added.");
             }
         }

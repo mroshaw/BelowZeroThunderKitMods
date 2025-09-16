@@ -31,6 +31,7 @@ MonoBehaviour:
   Data:
   - {fileID: 1669160000753936738}
   - {fileID: -7429185305120216054}
+  - {fileID: 1985807167473828797}
   identity: {fileID: 1669160000753936738}
   QuickAccess: 1
 --- !u!114 &1669160000753936738
@@ -49,5 +50,24 @@ MonoBehaviour:
   Author: Daft Apple Games
   Name: SeaTruckFishScoop_BZ
   Description: Adds a Fish Scoop to the Sea Truck
-  Version: 1.0.0
+  Version: 3.0.0
   Dependencies: []
+--- !u!114 &1985807167473828797
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17d1008b78cb6e846889b7778282fbef, type: 3}
+  m_Name: AssetBundleDefinitions
+  m_EditorClassIdentifier: 
+  StagingPaths:
+  - <ManifestPluginStaging>/Assets
+  assetBundles:
+  - assetBundleName: seatruckfishscoopassetbundle
+    assets:
+    - {fileID: 2800000, guid: f24012e4859495140a2618ed340ef8c9, type: 3}
+    - {fileID: 8300000, guid: 8b0077bbfc50d7a40a45a2b45bbed7ec, type: 3}

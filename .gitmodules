@@ -1,0 +1,3 @@
+[submodule "Assets/ThirdPartyAssets/Nautilus"]
+	path = Assets/ThirdPartyAssets/Nautilus
+	url = https://github.com/SubnauticaModding/Nautilus.git

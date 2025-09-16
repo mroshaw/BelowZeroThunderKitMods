@@ -89,3 +89,6 @@ crashlytics-build.properties
 /[Aa]ssets/ThirdPartyAssets/
 /[Aa]ssets/SubnauticaRefAssets.meta
 /[Aa]ssets/SubnauticaRefAssets
+
+# Always ignore screenshots, videos etc
+**/ModMedia/

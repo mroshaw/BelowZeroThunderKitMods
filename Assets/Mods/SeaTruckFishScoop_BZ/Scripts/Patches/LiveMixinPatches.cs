@@ -1,8 +1,8 @@
-﻿using DaftAppleGames.SeaTruckFishScoopMod_BZ.MonoBehaviours;
-using HarmonyLib;
+﻿using HarmonyLib;
 using UnityEngine;
+using static DaftAppleGames.SeaTruckFishScoop_BZ.SeaTruckFishScoopPluginBz;
 
-namespace DaftAppleGames.SeaTruckFishScoopMod_BZ.Patches
+namespace DaftAppleGames.SeaTruckFishScoop_BZ
 {
     /// <summary>
     /// Patches for the SeaTruck Fish Scoop Mod
@@ -27,7 +27,7 @@ namespace DaftAppleGames.SeaTruckFishScoopMod_BZ.Patches
 
             // Get the root context of the damage taker
             GameObject taker = __instance.gameObject;
-            SeaTruckFishScoopPluginBz.Log.LogDebug($"Damage: {dealer.name} did damage to: {taker.name}");
+            // Log.LogDebug($"Damage: {dealer.name} did damage to: {taker.name}");
             GameObject rootTaker = UWE.Utils.GetEntityRoot(__instance.gameObject);
             if (rootTaker == null)
             {
@@ -40,32 +40,32 @@ namespace DaftAppleGames.SeaTruckFishScoopMod_BZ.Patches
             {
                 rootDealer = dealer;
             }
-            SeaTruckFishScoopPluginBz.Log.LogDebug($"Dealer root: {rootDealer.name}. Taker root: {rootTaker.name}");
+            // Log.LogDebug($"Dealer root: {rootDealer.name}. Taker root: {rootTaker.name}");
 
             // Let's see if whatever dealt the damage was a SeaTruck main cab
             SeaTruckSegment seaTruckSegment = rootDealer.GetComponent<SeaTruckSegment>();
             if (seaTruckSegment == null)
             {
-                SeaTruckFishScoopPluginBz.Log.LogDebug("SeaTruckSegment is null. No Scoop.");
+                // Log.LogDebug("SeaTruckSegment is null. No Scoop.");
                 return true;
             }
             if (!seaTruckSegment.isMainCab)
             {
-                SeaTruckFishScoopPluginBz.Log.LogDebug("SeaTruckSegment is not Main Cab. No Scoop.");
+                // Log.LogDebug("SeaTruckSegment is not Main Cab. No Scoop.");
                 return true;
             }
 
             // Invoke the might of the scoop
-            SeaTruckFishScoop fishScoop = dealer.gameObject.GetComponent<SeaTruckFishScoop>();
+            FishScoop fishScoop = dealer.gameObject.GetComponent<FishScoop>();
             if (fishScoop != null)
             {
-                SeaTruckFishScoopPluginBz.Log.LogDebug("Calling Scoop...");
+                Log.LogDebug("Calling Scoop...");
                 bool scoopSuccess = fishScoop.Scoop(rootTaker);
                 return !scoopSuccess;
             }
 
-            SeaTruckFishScoopPluginBz.Log.LogDebug("No FishScoop found. No Scoop.");
-            return false;
+            // Allow the method to run
+            return true;
         }
     }
 }

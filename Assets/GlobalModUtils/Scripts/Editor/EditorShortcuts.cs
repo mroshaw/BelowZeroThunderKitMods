@@ -25,43 +25,19 @@ namespace DaftAppleGames.Editor
         private static readonly string SnGameAssemblyPath = Path.Combine(SnGamePath, "Subnautica_Data\\Managed\\Assembly-CSharp.dll");
         private static readonly string BzGameAssemblyPath = Path.Combine(BzGamePath, "SubnauticaZero_Data\\Managed\\Assembly-CSharp.dll");
         
-        [MenuItem("Tools/DnSpy/Run DnSpy (SN)")]
-        private static void RunDnsSpySn()
-        {
-            LaunchProcess("dnSpy.exe", DnSpyPath, SnGameAssemblyPath);
-        }
-
-        [MenuItem("Tools/DnSpy/Run DnSpy (BZ)")]
+        [MenuItem("Tools/Run DnSpy (BZ)")]
         private static void RunDnSpyBz()
         {
             LaunchProcess("dnSpy.exe", DnSpyPath, BzGameAssemblyPath);
         }
 
-        [MenuItem("Tools/Explorer/Open Subnautica Folder")]
-        private static void OpenSnFolder()
-        {
-            OpenExplorer(SnBepInExPath);
-        }
-        
-        [MenuItem("Tools/Explorer/Open Below Zero Folder")]
+        [MenuItem("Tools/Open BZ Game Folder")]
         private static void OpenBzFolder()
         {
             OpenExplorer(BzBepInExPath);
         }
         
-        [MenuItem("Tools/Explorer/Open Old Pets Mod Folder")]
-        private static void OpenOldPetsFolder()
-        {
-            OpenExplorer(OldPetsModPath);
-        }
-
-        [MenuItem("Tools/Logs/Open SN Player Log")]
-        private static void OpenSnLog()
-        {
-            OpenLog(SnLogPath);
-        }
-
-        [MenuItem("Tools/Logs/Open BZ Player Log")]
+        [MenuItem("Tools/Open BZ Player Log")]
         private static void OpenBzLog()
         {
             OpenLog(BzLogPath);            
