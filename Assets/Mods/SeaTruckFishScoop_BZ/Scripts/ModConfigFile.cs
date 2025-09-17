@@ -9,10 +9,17 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
     [Menu("Sea Truck Fish Scoop")]
     internal class ModConfigFile : ConfigFile
     {
-        [Toggle("Scoop While Static")]
+        [Toggle("Scoop While Static", Tooltip="If checked, the scoop will only work while the Sea Truck is moving.")]
         public bool ScoopWhileStatic = false;
 
-        [Toggle("Scoop While Piloting")]
-        public bool ScoopWhilePiloting = true;
+        [Toggle("Only Scoop While Piloting", Tooltip="If checked, scooping will only take place when piloting the Sea Truck. If unchecked, the scoop will continue to work even if you exist the vehicle.")]
+        public bool OnlyScoopWhilePiloting = true;
+        
+        [Toggle("Release Failed Scoop Fish", Tooltip="If checked, fish that can't be scooped (for example, if aquariums are full) will be released rather than hit.")]
+        public bool ReleaseFailedScoopFish = true;
+
+        [Toggle("Show Alerts", Tooltip="If checked, messages will be displayed in the top left of the screen whenever a scoop related action takes place. Uncheck this to suppress those.")]
+        public bool ShowScoopAlerts = true;
+
     }
 }

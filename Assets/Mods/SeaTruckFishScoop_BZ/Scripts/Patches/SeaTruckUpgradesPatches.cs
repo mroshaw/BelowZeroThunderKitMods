@@ -8,6 +8,10 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
     /// </summary>
     public static class SeaTruckUpgradesPatches
     {
+        /// <summary>
+        /// Captures the slot "Key Down" - use this to either toggle the scoop (single press)
+        /// on purge (hold down)
+        /// </summary>
         [HarmonyPatch] public static class SlotKeyDown_Prefix
         {
             static System.Reflection.MethodBase TargetMethod()
@@ -29,6 +33,9 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             }
         }
 
+        /// <summary>
+        /// Used to determine if the press was a single one or a "hold"
+        /// </summary>
         [HarmonyPatch] public static class SlotKeyUp_Prefix
         {
             static System.Reflection.MethodBase TargetMethod()
@@ -49,6 +56,9 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             }
         }
         
+        /// <summary>
+        /// Used to determine how long the key was held down for
+        /// </summary>
         [HarmonyPatch] public static class SlotKeyHeld_Prefix
         {
             static System.Reflection.MethodBase TargetMethod()
@@ -68,5 +78,32 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
                 return true;
             }
         }
+        
+        /// <summary>
+        /// As SeaTruckUpgrades has no "toggled" state of it's own, we must patch in our
+        /// FishScoop state to return it's toggled state
+        /// </summary>
+        [HarmonyPatch] public static class IsToggled_Prefix
+        {
+            static System.Reflection.MethodBase TargetMethod()
+            {
+                return AccessTools.Method(typeof(SeaTruckUpgrades), "IQuickSlots.IsToggled");
+            }
+            
+            static bool Prefix(SeaTruckUpgrades __instance, int slotID, ref bool __result)
+            {
+                TechType techType = __instance.modules.GetTechTypeInSlot(SeaTruckUpgrades.slotIDs[slotID]);
+
+                if (techType == FishScoopModulePrefab.PrefabInfo.TechType)
+                {
+                    FishScoop fishScoop = __instance.GetComponent<FishScoop>();
+                    __result = fishScoop.IsOn;
+                    return false;
+                }
+
+                return true;
+            }
+        }
+        
     }
 }

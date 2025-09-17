@@ -8,21 +8,17 @@ namespace DaftAppleGames.Editor
     public static class EditorShortcuts
     {
 
+        // Generic paths
         private static readonly string DnSpyPath = "D:\\Dev\\dnSpy-net-win64";
-        private static readonly string SnGamePath = "E:\\Games\\Steam\\steamapps\\common\\Subnautica";
-        private static readonly string BzGamePath = "E:\\Games\\Steam\\steamapps\\common\\SubnauticaZero";
-        private static readonly string SnBepInExPath = Path.Combine(SnGamePath, "BepInEx");
-        private static readonly string BzBepInExPath = Path.Combine(BzGamePath, "BepInEx");
-
         private static readonly string TextPadPath = "C:\\Program Files\\TextPad";
-        
         private static readonly string LogBasePath = Path.Combine($"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData)}Low", "Unknown Worlds");
-        private static readonly string SnLogPath = Path.Combine(LogBasePath, "Subnautica\\Player.log");
+        private static readonly string UnityLogBasePath = Path.Combine($"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData)}", "Unity");
+        private static readonly string UnityEditorLogPath = Path.Combine(UnityLogBasePath, "Editor\\Editor.log");
+        
+        // Mod specific paths
+        private static readonly string BzGamePath = "E:\\Games\\Steam\\steamapps\\common\\SubnauticaZero";
+        private static readonly string BzBepInExPath = Path.Combine(BzGamePath, "BepInEx");
         private static readonly string BzLogPath = Path.Combine(LogBasePath, "Subnautica Below Zero\\Player.log");
-        
-        private static readonly string OldPetsModPath = "E:\\Dev\\DAG\\Subnautica Mods\\SubnauticaPets";
-        
-        private static readonly string SnGameAssemblyPath = Path.Combine(SnGamePath, "Subnautica_Data\\Managed\\Assembly-CSharp.dll");
         private static readonly string BzGameAssemblyPath = Path.Combine(BzGamePath, "SubnauticaZero_Data\\Managed\\Assembly-CSharp.dll");
         
         [MenuItem("Tools/Run DnSpy (BZ)")]
@@ -43,6 +39,13 @@ namespace DaftAppleGames.Editor
             OpenLog(BzLogPath);            
         }
 
+        [MenuItem("Tools/Open Unity Editor Log")]
+        private static void OpenUnityEditorLog()
+        {
+            OpenLog(UnityEditorLogPath);            
+        }
+
+        
         private static void OpenLog(string logPath)
         {
             LaunchProcess("textpad.exe", TextPadPath, logPath, true);

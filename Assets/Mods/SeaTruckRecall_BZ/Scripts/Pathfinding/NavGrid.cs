@@ -28,13 +28,10 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
     {
         // Internal NavGrid 3D array
         private NavCell[,,] _navGrid;
-        private NavPath _navPath;
 
         private GenerateStatus _gridStatus = GenerateStatus.Idle;
         private GenerateStatus _pathStatus = GenerateStatus.Idle;
-
-        internal NavPath NavPath => _navPath;
-
+        
         private bool IsBusy => _gridStatus == GenerateStatus.Generating || _pathStatus == GenerateStatus.Generating;
         internal bool IsPathingReady => _gridStatus == GenerateStatus.Success && _pathStatus == GenerateStatus.Success;
         internal bool HasPathingFailed => _gridStatus == GenerateStatus.Failed || _pathStatus == GenerateStatus.Failed;
@@ -59,7 +56,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
         {
         }
 
-        internal class PathingStatusChangedEvent : UnityEvent<GenerateStatus>
+        internal class PathingStatusChangedEvent : UnityEvent<GenerateStatus, NavPath>
         {
         }
 
@@ -73,53 +70,19 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             OnGridStatusChanged.Invoke(newStatus);
         }
 
-        private void SetPathingStatus(GenerateStatus newStatus)
+        private void SetPathingStatus(GenerateStatus newStatus, NavPath navPath = null)
         {
             if (_pathStatus == newStatus)
             {
                 return;
             }
             _pathStatus = newStatus;
-            OnPathingStatusChanged.Invoke(newStatus);
+            OnPathingStatusChanged.Invoke(newStatus, navPath);
         }
 
         // Only used in debugging. Keeps a list of cells so we can tweak the visualisers
         private Dictionary<NavCell, CellVisualiser> _debugCellVisualisers = new Dictionary<NavCell, CellVisualiser>();
-
-        internal IEnumerator GenerateNavGridAndPathAsync(Vector3 sourcePosition, Vector3 targetPosition, float cellSize, int numCellExtends, LayerMask colliderLayerMask,
-            Action<GenerateStatus> gridCompleteAction = null, Action<GenerateStatus> pathCompleteAction = null,
-            bool debug = false, Transform debugContainer = null)
-        {
-            if (IsBusy)
-            {
-                LogDebug("NavGrid is busy!");
-                pathCompleteAction?.Invoke(GenerateStatus.Generating);
-                yield break;
-            }
-
-            if (_gridStatus != GenerateStatus.Success)
-            {
-                LogDebug("NavGrid grid is not ready for pathing!");
-                pathCompleteAction?.Invoke(GenerateStatus.Failed);
-                yield break;
-            }
-
-            yield return GenerateNavGridAsync(sourcePosition, targetPosition, cellSize, numCellExtends, colliderLayerMask, gridCompleteAction,
-                debug, debugContainer);
-
-            if (_gridStatus == GenerateStatus.Success)
-            {
-                yield return GeneratePathAsync(sourcePosition, targetPosition, pathCompleteAction, debug, debugContainer);
-            }
-            else
-            {
-                LogError("Pathing failed!");
-                SetPathingStatus(GenerateStatus.Failed);
-            }
-
-            SetPathingStatus(GenerateStatus.Success);
-        }
-
+        
         private Transform GetGridDebugContainer(Transform parentContainer)
         {
             Transform container = parentContainer.Find("DEBUG");
@@ -143,7 +106,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             return newContainer.transform;
         }
 
-        internal IEnumerator GenerateNavGridAsync(Vector3 sourcePosition, Vector3 targetPosition, float cellSize, int numCellExtends, LayerMask colliderLayerMask,
+        internal IEnumerator GenerateNavGridAsync(Vector3 sourcePosition, float cellSize, int numCellExtends, float distanceBetweenCells, LayerMask colliderLayerMask,
             Action<GenerateStatus> gridCompleteAction = null,
            bool debug = false,  Transform debugContainer = null)
         {
@@ -165,29 +128,19 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             LogDebug($"Started Grid Generation: {genTime}");
             LogDebug($"Ocean Level is: {Ocean.GetOceanLevel()}");
             SetGridStatus(GenerateStatus.Generating);
-
-            if (sourcePosition == targetPosition)
-            {
-                LogError("NavGrid: sourcePosition and targetPosition are the same!");
-                SetGridStatus(GenerateStatus.Failed);
-                gridCompleteAction?.Invoke(GenerateStatus.Failed);
-                yield break;
-            }
-
-            Vector3 direction = (targetPosition - sourcePosition).normalized;
-            float distance = Vector3.Distance(sourcePosition, targetPosition);
-            int numCellsForward = Mathf.CeilToInt(distance / cellSize);
+            
+            Vector3 direction = (sourcePosition).normalized;
 
             LogDebug($"Num Extends: {numCellExtends}");
             LogDebug($"Cell Size: {cellSize}");
-            LogDebug($"NavGrid dimensions: x:{numCellsForward}, y:{numCellExtends * 2}, z:{numCellExtends * 2}. Total cells: {numCellsForward * (numCellExtends * 2)}");
+            LogDebug($"NavGrid dimensions: x:{numCellExtends * 2}, y:{numCellExtends * 2}, z:{numCellExtends * 2}. Total cells: {Math.Pow(numCellExtends,3)}");
 
-            _navGrid = new NavCell[numCellsForward, (numCellExtends * 2) + 1, (numCellExtends * 2) + 1];
+            _navGrid = new NavCell[(numCellExtends * 2) + 1, (numCellExtends * 2) + 1, (numCellExtends * 2) + 1];
 
             Vector3 right = Vector3.Cross(direction, Vector3.up).normalized;
             Vector3 up = Vector3.Cross(right, direction).normalized;
 
-            for (int x = 0; x < numCellsForward; x++)
+            for (int x = -numCellExtends; x < numCellExtends; x++)
             {
                 for (int y = -numCellExtends; y <= numCellExtends; y++)
                 {
@@ -195,21 +148,18 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
                     {
                         Vector3 cellPosition = sourcePosition + (direction * (x * cellSize)) + (up * (y * cellSize)) + (right * (z * cellSize));
 
-
-                        // bool hasCollider = Physics.CheckBox(cellPosition, Vector3.one * (cellSize * 0.5f), Quaternion.identity, ~ignoreLayerMask);
-                        // Check for colliders inside grid box
-                        // RaycastHit[] hits = Physics.BoxCastAll(cellPosition, Vector3.one * (cellSize * 0.5f), Vector3.zero, Quaternion.identity, 0f, ~ignoreLayerMask, QueryTriggerInteraction.Ignore);
                         int numColliderHits = Physics.OverlapBoxNonAlloc(cellPosition, Vector3.one * (cellSize * 0.5f), _colliderHitCache, Quaternion.identity, colliderLayerMask, QueryTriggerInteraction.Ignore);
 
                         // If the cell is above sea level, mark as "invalid"
                         bool hasCollider = cellPosition.y > Ocean.GetOceanLevel() - 2.0f || HasValidColliders(numColliderHits, _colliderHitCache);
 
+                        int cellXIndex = x + numCellExtends;
                         int cellYIndex = y + numCellExtends;
                         int cellZIndex = z + numCellExtends;
 
-                        string cellName = $"(X:{x}, Y:{cellYIndex}, Z:{cellZIndex}";
+                        string cellName = $"(X:{cellXIndex}, Y:{cellYIndex}, Z:{cellZIndex}";
 
-                        _navGrid[x, cellYIndex, cellZIndex] = new NavCell { Position = cellPosition, HasColliders = hasCollider, Name = cellName };
+                        _navGrid[cellXIndex, cellYIndex, cellZIndex] = new NavCell { Position = cellPosition, HasColliders = hasCollider, Name = cellName };
 
                         totalCells++;
 
@@ -227,8 +177,8 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
                             GameObject newCellVis = new GameObject($"Cell Visualiser: {cellName}");
                             newCellVis.transform.SetParent(gridDebugContainer, true);
                             CellVisualiser cellVis = newCellVis.AddComponent<CellVisualiser>();
-                            cellVis.CreateOrUpdate(_navGrid[x, cellYIndex, cellZIndex], CellType.NavCell, gridDebugContainer);
-                            _debugCellVisualisers.Add(_navGrid[x, cellYIndex, cellZIndex], cellVis);
+                            cellVis.CreateOrUpdate(_navGrid[cellXIndex, cellYIndex, cellZIndex], CellType.NavCell, gridDebugContainer);
+                            _debugCellVisualisers.Add(_navGrid[cellXIndex, cellYIndex, cellZIndex], cellVis);
                         }
                     }
 
@@ -259,21 +209,21 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
         }
 
         internal IEnumerator GeneratePathAsync(Vector3 startPos, Vector3 endPos,
-            Action<GenerateStatus> pathCompleteAction = null,
+            Action<GenerateStatus, NavPath> pathCompleteAction = null,
             bool debug = false, Transform debugContainer = null)
         {
 
             if (IsBusy)
             {
                 LogDebug("NavGrid is busy!");
-                pathCompleteAction?.Invoke(GenerateStatus.Generating);
+                pathCompleteAction?.Invoke(GenerateStatus.Failed, null);
                 yield break;
             }
 
             if (_gridStatus != GenerateStatus.Success)
             {
                 LogDebug("NavGrid grid is not ready for pathing!");
-                pathCompleteAction?.Invoke(GenerateStatus.Failed);
+                pathCompleteAction?.Invoke(GenerateStatus.Failed, null);
                 yield break;
             }
 
@@ -283,7 +233,6 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             LogDebug($"Started Path Generation: {genTime}");
             SetPathingStatus(GenerateStatus.Generating);
 
-            _navPath = new NavPath();
             HashSet<NavCell> openSet = new HashSet<NavCell>();
             HashSet<NavCell> closedSet = new HashSet<NavCell>();
             Dictionary<NavCell, NavCell> cameFrom = new Dictionary<NavCell, NavCell>();
@@ -304,16 +253,16 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
                 if (current.Position == targetCell.Position)
                 {
                     // Reached our destination, so pathing is complete
-                    _navPath = ReconstructPath(cameFrom, current);
+                    NavPath navPath = ReconstructPath(cameFrom, current);
 
                     if (debug)
                     {
-                        UpdatePathVisualisers(pathDebugContainer);
+                        UpdatePathVisualisers(pathDebugContainer, navPath);
                     }
 
                     SetPathingStatus(GenerateStatus.Success);
-                    pathCompleteAction?.Invoke(GenerateStatus.Success);
-                    LogDebug($"Finished Path Generation: {Time.time}. Time taken: {Time.time - genTime}.  Number of path cells: {_navPath.Count}");
+                    pathCompleteAction?.Invoke(GenerateStatus.Success, navPath);
+                    LogDebug($"Finished Path Generation: {Time.time}. Time taken: {Time.time - genTime}.  Number of path cells: {navPath.Count}");
                     yield break;
                 }
 
@@ -344,25 +293,25 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             // No path found
             LogDebug($"Finished Path Generation: {Time.time}. Time taken: {Time.time - genTime}. No path found.");
             SetPathingStatus(GenerateStatus.Failed);
-            pathCompleteAction?.Invoke(GenerateStatus.Failed);
+            pathCompleteAction?.Invoke(GenerateStatus.Failed, null);
         }
 
-        private void UpdatePathVisualisers(Transform pathDebugContainer)
+        private void UpdatePathVisualisers(Transform pathDebugContainer, NavPath navPath)
         {
-            for (int curCell = 0; curCell < _navPath.Count; curCell++)
+            for (int curCell = 0; curCell < navPath.Count; curCell++)
             {
                 // Start
                 if (curCell == 0)
                 {
-                    _debugCellVisualisers[_navPath[curCell]].CreateOrUpdate(_navPath[curCell], CellType.Start, null);
+                    _debugCellVisualisers[navPath[curCell]].CreateOrUpdate(navPath[curCell], CellType.Start, null);
                 }
-                else if (curCell == _navPath.Count - 1)
+                else if (curCell == navPath.Count - 1)
                 {
-                    _debugCellVisualisers[_navPath[curCell]].CreateOrUpdate(_navPath[curCell], CellType.End, null);
+                    _debugCellVisualisers[navPath[curCell]].CreateOrUpdate(navPath[curCell], CellType.End, null);
                 }
                 else
                 {
-                    _debugCellVisualisers[_navPath[curCell]].CreateOrUpdate(_navPath[curCell], CellType.Route, null);
+                    _debugCellVisualisers[navPath[curCell]].CreateOrUpdate(navPath[curCell], CellType.Route, null);
                 }
             }
         }

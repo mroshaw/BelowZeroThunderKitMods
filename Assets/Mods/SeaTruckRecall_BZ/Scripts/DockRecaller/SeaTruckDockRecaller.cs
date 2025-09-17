@@ -37,13 +37,20 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         private const string MoveToBaseText = "MOVING TO BASE";
         private const string AlignToDockText = "ALIGNING TO DOCK";
         private const string MovingToDockText = "MOVING TO DOCK";
-
+        
         [SerializeField] private SeaTruckAutoPilot currentSeaTruckAutoPilot;
         // Transform within the dock, that the recall will pull the SeaTruck into it's final docking place
         // If not docked within the timeout, abandon
+        [SerializeField] private bool createGridOnStart = true;
         [SerializeField] private Vector3 parkingDockConnection;
         [SerializeField] private List<Waypoint> dockingWaypoints;
 
+        /// <summary>
+        /// Subscribe to these events to be notified of the status of various async processes
+        /// </summary>
+
+        [SerializeField] internal NavGrid.PathingStatusChangedEvent OnPathingStatusChanged = new NavGrid.PathingStatusChangedEvent();
+ 
         // Public properties
         public float MaxRange { get; set; } = 500.0f;
 
@@ -64,6 +71,23 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
 
         internal UnityEvent OnDocked = new UnityEvent();
 
+        private GridBuilder _gridBuilder;
+
+        private void OnEnable()
+        {
+            if (!_gridBuilder)
+            {
+                _gridBuilder = GetComponent<GridBuilder>();
+            }
+            
+            _gridBuilder.OnGridStatusChanged.AddListener(GridStatusChangedHandler);
+        }
+
+        private void OnDisable()
+        {
+            _gridBuilder.OnGridStatusChanged.RemoveListener(GridStatusChangedHandler);
+        }
+        
         private void Start()
         {
             // Init useful local components
@@ -77,8 +101,23 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
 
             // Set up the docking waypoints
             CreateWaypoints();
+
+            if (createGridOnStart)
+            {
+                GenerateNavGrid();
+            }
         }
 
+        public void GenerateNavGrid()
+        {
+            _gridBuilder.RefreshNavGrid();
+        }
+        
+        private void GridStatusChangedHandler(GenerateStatus gridStatus)
+        {
+            
+        }
+        
         public void CurrentSeaTruckDocked()
         {
             SetDockState(DockRecallState.Docked);
@@ -128,7 +167,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
 
             // Recall the SeaTruck
             SetDockingAutoPilot(closestAutoPilot);
-            closestAutoPilot.StartNavigation(dockingWaypoints);
+            closestAutoPilot.StartNavigation(dockingWaypoints, _gridBuilder.NavGrid);
         }
 
         /// <summary>

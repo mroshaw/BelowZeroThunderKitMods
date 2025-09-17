@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using static DaftAppleGames.SeaTruckFishScoop_BZ.SeaTruckFishScoopPluginBz;
 
 namespace DaftAppleGames.SeaTruckFishScoop_BZ
 {
@@ -19,9 +20,30 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         {
             if (__instance.isMainCab)
             {
-                SeaTruckFishScoopPluginBz.Log.LogDebug("Adding SeaTruckFishScoop components...");
+                Log.LogDebug("Adding SeaTruckFishScoop components...");
                 __instance.gameObject.AddComponent<FishScoop>();
-                SeaTruckFishScoopPluginBz.Log.LogDebug("SeaTruckFishScoop components added.");
+                Log.LogDebug("SeaTruckFishScoop components added.");
+            }
+        }
+        
+        /// <summary>
+        /// Update FishScoop state when detaching an aquarium
+        /// </summary>
+        [HarmonyPatch(nameof(SeaTruckSegment.Detach))]
+        [HarmonyPostfix]
+        public static void Detach_Postfix(SeaTruckSegment __instance)
+        {
+            // Only interested in Aquariums
+            if (!__instance.GetComponent<SeaTruckAquarium>())
+            {
+                return;
+            }
+
+            FishScoop fishScoop = __instance.motor.GetComponent<FishScoop>();
+            if (fishScoop)
+            {
+                Log.LogDebug("Aquarium has been detached. Reevaluating fish scoop state...");
+                fishScoop.EvaluateScoopState();
             }
         }
     }

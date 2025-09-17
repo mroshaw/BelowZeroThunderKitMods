@@ -24,7 +24,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
         private WaypointNavigation _navSystem;
         private SeaTruckAutoPilot _autoPilot;
         private PathFinder _pathFinder;
-
+        
         private void OnEnable()
         {
             if (!_pathFinder)
@@ -39,8 +39,6 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
 
             seaTruckDockRecaller.OnDockingStateChanged.AddListener(DockingStateChangedHandler);
             _pathFinder.OnWaypointStatusChanged.AddListener(WaypointStatusChangedHandler);
-            _pathFinder.OnGridStatusChanged.AddListener(GridStatusChangedHandler);
-            _pathFinder.OnPathingStatusChanged.AddListener(PathingStatusChangedHandler);
             _autoPilot.OnAutopilotStateChanged.AddListener(AutoPilotStateChangedHandler);
         }
 
@@ -57,8 +55,6 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             }
 
             _pathFinder.OnWaypointStatusChanged.RemoveListener(WaypointStatusChangedHandler);
-            _pathFinder.OnGridStatusChanged.RemoveListener(GridStatusChangedHandler);
-            _pathFinder.OnPathingStatusChanged.RemoveListener(PathingStatusChangedHandler);
             _autoPilot.OnAutopilotStateChanged.AddListener(AutoPilotStateChangedHandler);
             seaTruckDockRecaller.OnDockingStateChanged.RemoveListener(DockingStateChangedHandler);
 
@@ -69,12 +65,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             _autoPilot = seaTruck.GetComponent<SeaTruckAutoPilot>();
             AllAutoPilots.GetAllActiveAutoPilots();
         }
-
-        public void GenerateGridPathAndNavigate()
-        {
-            _pathFinder.GenerateWaypoints(WaypointsReady);
-        }
-
+        
         public void StartNav()
         {
             // _navSystem.StartWaypointNavigation(_waypoints);
@@ -84,12 +75,12 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
 
         public void RefreshGrid()
         {
-            _pathFinder.RefreshNavGrid();
+            seaTruckDockRecaller.GenerateNavGrid();
         }
 
         public void RefreshPath()
         {
-            _pathFinder.GenerateWaypoints(SetWaypoints);
+            // _pathFinder.SetPath();
         }
 
         private void SetWaypoints(GenerateStatus waypointStatus, List<Waypoint> waypoints)

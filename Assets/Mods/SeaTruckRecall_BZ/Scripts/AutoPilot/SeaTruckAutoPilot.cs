@@ -123,7 +123,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
             }
         }
 
-        public bool StartNavigation(List<Waypoint> waypoints)
+        public bool StartNavigation(List<Waypoint> waypoints, NavGrid navGrid)
         {
             // Generate a path from the SeaTruck to the first point in the Recaller waypoints
             Vector3 targetPosition = waypoints[0].Position;
@@ -132,7 +132,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
 
             // Creates a grid of cells 10.0 units square, 5 squares to the left, right, top and bottom from the SeaTruck to the target.
             SetAutopilotState(AutoPilotState.CalculatingRoute);
-            _pathFinder.GenerateWaypoints(transform.position, targetPosition, pathCellSize, pathCellExtends, _collisionLayerMask, null, null, WaypointsCompleteHandler, true, _debugContainer);
+            _pathFinder.SetPath(navGrid, transform.position, targetPosition);
 
             return true;
         }

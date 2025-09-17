@@ -42,12 +42,12 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
                 .WithFabricatorType(CraftTree.Type.Workbench);
             
             prefab.SetVehicleUpgradeModule(EquipmentType.SeaTruckModule, QuickSlotType.Toggleable)
-                .WithEnergyCost(EnergyCost);
+                .WithEnergyCost(EnergyCost)
                 // Currently, BZ doesn't seem to actually implement Toggleable, so this is handled manually
                 // in SeaTruckUpgradesPatches and in the FishScoop component
                 // .WithOnModuleToggled(ScoopToggled)
-                // .WithOnModuleAdded(ScoopAdded)
-                // .WithOnModuleRemoved(ScoopRemoved);
+                .WithOnModuleAdded(ScoopAdded)
+                .WithOnModuleRemoved(ScoopRemoved);
             
             prefab.Register();
         }
@@ -58,14 +58,16 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         private static void ScoopAdded(SeaTruckUpgrades upgrade, SeaTruckMotor seaTruck, int slotId)
         {
             Log.LogDebug($"Fish Scoop upgrade added in slot {slotId} on {seaTruck}.");
+            seaTruck.GetComponent<FishScoop>()?.Equip(slotId);
         }
         
         /// <summary>
-        /// Use for debugging
+        /// Turn off the scoop if the upgrade is removed
         /// </summary>
         private static void ScoopRemoved(SeaTruckUpgrades upgrade, SeaTruckMotor seaTruck, int slotId)
         {
             Log.LogDebug($"Fish Scoop upgrade removed from slot {slotId} on {seaTruck}.");
+            seaTruck.GetComponent<FishScoop>()?.Unequip(slotId);
         }
         
         /// <summary>

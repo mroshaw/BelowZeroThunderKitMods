@@ -60,7 +60,10 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             if (fishScoop != null)
             {
                 Log.LogDebug("Calling Scoop...");
+                // Set caught fish to maximum health
+                __instance.ResetHealth();
                 bool scoopSuccess = fishScoop.Scoop(rootTaker);
+                
                 return !scoopSuccess;
             }
 

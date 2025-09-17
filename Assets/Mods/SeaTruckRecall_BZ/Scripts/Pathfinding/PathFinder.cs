@@ -1,59 +1,36 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using static DaftAppleGames.SeatruckRecall_BZ.SeaTruckDockRecallPlugin;
 
 namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
 {
     internal class PathFinder : MonoBehaviour
     {
+        [SerializeField] private bool debugPath;
+        [SerializeField] private Transform debugContainer;
         [SerializeField] private Transform targetTransformOverride;
-        [SerializeField] private float navGridCellSizeOverride = 10f;
-        [SerializeField] private int navGridCellExtendsOverride = 5;
-        [SerializeField] private LayerMask navGridOverrideIgnoreLayerMask;
-        [SerializeField] private bool navGridDebugOverride = true;
-        [SerializeField] private Transform navGridDebugContainerOverride;
 
-        private NavGrid _navGrid;
+        internal WaypointsStatusChangedEvent OnWaypointStatusChanged = new WaypointsStatusChangedEvent();
+        
+        // private NavGrid _navGrid;
+        
         private GenerateStatus _waypointStatus;
         private List<Waypoint> Waypoints { get; set; }
-
-        /// <summary>
-        /// Subscribe to these events to be notified of the status of various async processes
-        /// </summary>
-        internal NavGrid.GridStatusChangedEvent OnGridStatusChanged = new NavGrid.GridStatusChangedEvent();
-        internal NavGrid.PathingStatusChangedEvent OnPathingStatusChanged = new NavGrid.PathingStatusChangedEvent();
-        internal WaypointsStatusChangedEvent OnWaypointStatusChanged = new WaypointsStatusChangedEvent();
-
+        
         internal class WaypointsStatusChangedEvent : UnityEvent<GenerateStatus>
         {
         }
-
-        private void OnEnable()
-        {
-            if (_navGrid == null)
-            {
-                _navGrid = new NavGrid();
-            }
-            _navGrid.OnPathingStatusChanged.AddListener(PathingStatusChangedHandler);
-            _navGrid.OnGridStatusChanged.AddListener(GridStatusChangedHandler);
-            _navGrid.OnPathingStatusChanged.AddListener(PathingStatusChangedHandler);
-        }
-
-        private void OnDisable()
-        {
-            _navGrid.OnPathingStatusChanged.RemoveListener(PathingStatusChangedHandler);
-            _navGrid.OnGridStatusChanged.RemoveListener(GridStatusChangedHandler);
-            _navGrid.OnPathingStatusChanged.RemoveListener(PathingStatusChangedHandler);
-        }
-
+        
         private void Start()
         {
             SetWaypointsStatus(GenerateStatus.Idle);
         }
 
+        private void PathingStatusChangedHandler(GenerateStatus pathStatus)
+        {
+        }
+        
         private void SetWaypointsStatus(GenerateStatus newStatus)
         {
             if (_waypointStatus == newStatus)
@@ -64,98 +41,22 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             OnWaypointStatusChanged.Invoke(newStatus);
         }
 
-        private void GridStatusChangedHandler(GenerateStatus status)
+        internal void SetPath(NavGrid navGrid, Vector3 startPosition, Vector3 targetPosition)
         {
-            OnGridStatusChanged.Invoke(status);
+            StartCoroutine(SetPathAsync(navGrid, startPosition, targetPosition, debugPath));
+        }
+        
+        private  IEnumerator SetPathAsync(NavGrid navGrid, Vector3 startPosition, Vector3 targetPosition, bool debug = true)
+        {
+            yield return navGrid.GeneratePathAsync(startPosition, targetPosition, GeneratePathCompleteHandler, debug,
+                debugContainer);
         }
 
-        private void PathingStatusChangedHandler(GenerateStatus status)
+        private void GeneratePathCompleteHandler(GenerateStatus pathStatus, NavPath navPath)
         {
-            OnPathingStatusChanged?.Invoke(status);
-            if (status == GenerateStatus.Success)
-            {
-                SetWaypointsFromPath(_navGrid.NavPath);
-                SetWaypointsStatus(GenerateStatus.Success);
-            }
-            if(status == GenerateStatus.Failed)
-            {
-                SetWaypointsStatus(GenerateStatus.Failed);
-            }
+            SetWaypointsFromPath(navPath, debugPath);
         }
-
-        internal void GenerateWaypoints(Vector3 sourcePosition, Vector3 targetPosition, float cellSize, int cellExtends, LayerMask ignoreLayerMask,
-            Action<GenerateStatus> gridCompleteAction = null, Action<GenerateStatus> pathCompleteAction = null, Action<GenerateStatus, List<Waypoint>> waypointsCompleteAction = null,
-            bool debug = false, Transform debugContainer = null)
-        {
-            StartCoroutine(GenerateWaypointsAsync(sourcePosition, targetPosition, cellSize, cellExtends, ignoreLayerMask, gridCompleteAction, pathCompleteAction, waypointsCompleteAction,
-                debug, debugContainer));
-        }
-
-        private IEnumerator GenerateWaypointsAsync(Vector3 sourcePosition, Vector3 targetPosition, float cellSize, int cellExtends, LayerMask ignoreLayerMask,
-            Action<GenerateStatus> gridCompleteAction = null, Action<GenerateStatus> pathCompleteAction = null, Action<GenerateStatus, List<Waypoint>> waypointsCompleteAction = null,
-            bool debug = false, Transform debugContainer = null)
-        {
-            SetWaypointsStatus(GenerateStatus.Generating);
-
-            if (!_navGrid.IsGridReady)
-            {
-                yield return _navGrid.GenerateNavGridAsync(sourcePosition, targetPosition, cellSize, cellExtends, ignoreLayerMask, gridCompleteAction,
-                    debug, debugContainer);
-            }
-
-            if (!_navGrid.IsGridReady)
-            {
-                LogError("Waypoint Generation failed. NavGrid is not ready.");
-                waypointsCompleteAction?.Invoke(GenerateStatus.Failed, null);
-            }
-
-            yield return _navGrid.GeneratePathAsync(sourcePosition, targetPosition, pathCompleteAction, debug, debugContainer);
-            if (!_navGrid.IsPathingReady)
-            {
-
-                LogError("Waypoint Generation failed. NavGrid failed to find a path.");
-                waypointsCompleteAction?.Invoke(GenerateStatus.Failed, null);
-            }
-            SetWaypointsFromPath(_navGrid.NavPath);
-            waypointsCompleteAction?.Invoke(GenerateStatus.Success, Waypoints);
-        }
-
-        internal void RefreshNavGrid()
-        {
-            RefreshNavGrid(transform.position, targetTransformOverride.position, navGridCellSizeOverride, navGridCellExtendsOverride,navGridOverrideIgnoreLayerMask,
-                navGridDebugOverride, navGridDebugContainerOverride);
-        }
-
-        private void RefreshNavGrid(Vector3 sourcePosition, Vector3 targetPosition, float cellSize, int cellExtends, LayerMask ignoreLayerMask,
-            bool debug = false, Transform debugContainer = null)
-        {
-            StartCoroutine(_navGrid.GenerateNavGridAsync(sourcePosition, targetPosition, cellSize, cellExtends, ignoreLayerMask, null,
-                debug, debugContainer));
-        }
-
-        internal void RefreshPath()
-        {
-            RefreshPath(transform.position, targetTransformOverride.position,
-                navGridDebugOverride, navGridDebugContainerOverride);
-        }
-
-        private void RefreshPath(Vector3 sourcePosition, Vector3 targetPosition,
-            bool debug = false, Transform debugContainer = null)
-        {
-            StartCoroutine(_navGrid.GeneratePathAsync(sourcePosition, targetPosition, null, debug, debugContainer));
-        }
-
-        /// <summary>
-        /// Overload to use Unity serialized values for testing
-        /// </summary>
-        /// <returns></returns>
-        internal void GenerateWaypoints(Action<GenerateStatus, List<Waypoint>> waypointCompleteAction = null)
-        {
-            GenerateWaypoints(transform.position, targetTransformOverride.position, navGridCellSizeOverride, navGridCellExtendsOverride, navGridOverrideIgnoreLayerMask,
-                null, null, waypointCompleteAction,
-                navGridDebugOverride, navGridDebugContainerOverride);
-        }
-
+        
         /// <summary>
         /// Try to establish a path from source to target, return as a list of Waypoints
         /// </summary>
