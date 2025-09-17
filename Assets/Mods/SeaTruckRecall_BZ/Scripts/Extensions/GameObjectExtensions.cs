@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace DaftAppleGames.SeatruckRecall_BZ.Extensions
 {

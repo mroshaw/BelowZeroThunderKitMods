@@ -23,39 +23,26 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
         private List<Waypoint> _waypoints;
         private WaypointNavigation _navSystem;
         private SeaTruckAutoPilot _autoPilot;
-        private PathFinder _pathFinder;
         
         private void OnEnable()
         {
-            if (!_pathFinder)
-            {
-                _pathFinder = seaTruck.GetComponent<PathFinder>();
-            }
-
             if (!_autoPilot)
             {
                 _autoPilot = seaTruck.GetComponent<SeaTruckAutoPilot>();
             }
 
             seaTruckDockRecaller.OnDockingStateChanged.AddListener(DockingStateChangedHandler);
-            _pathFinder.OnWaypointStatusChanged.AddListener(WaypointStatusChangedHandler);
-            _autoPilot.OnAutopilotStateChanged.AddListener(AutoPilotStateChangedHandler);
+            _autoPilot.OnAutoPilotStateChanged.AddListener(AutoPilotStateChangedHandler);
         }
 
         private void OnDisable()
         {
-            if (!_pathFinder)
-            {
-                _pathFinder = seaTruck.GetComponent<PathFinder>();
-            }
-
             if (!_autoPilot)
             {
                 _autoPilot = seaTruck.GetComponent<SeaTruckAutoPilot>();
             }
 
-            _pathFinder.OnWaypointStatusChanged.RemoveListener(WaypointStatusChangedHandler);
-            _autoPilot.OnAutopilotStateChanged.AddListener(AutoPilotStateChangedHandler);
+            _autoPilot.OnAutoPilotStateChanged.AddListener(AutoPilotStateChangedHandler);
             seaTruckDockRecaller.OnDockingStateChanged.RemoveListener(DockingStateChangedHandler);
 
         }
@@ -70,7 +57,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
         {
             // _navSystem.StartWaypointNavigation(_waypoints);
             // _autoPilot.BeginNavigation(_waypoints);
-            seaTruckDockRecaller.RecallClosestSeatruck();
+            seaTruckDockRecaller.RecallClosestSeaTruck();
         }
 
         public void RefreshGrid()

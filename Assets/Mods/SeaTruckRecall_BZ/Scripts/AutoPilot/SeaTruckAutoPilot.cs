@@ -26,27 +26,29 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
     /// </summary>
     internal class SeaTruckAutoPilot : MonoBehaviour
     {
-
         // Unity Event to publish AutoPilot state changes
         internal class AutopilotStateChangedEvent : UnityEvent<AutoPilotState>
         {
         }
-
-        [SerializeField] private float pathCellSize = 10.0f;
-        [SerializeField] private int pathCellExtends = 5;
+        internal class AutoPilotWaypointChangedEvent : UnityEvent<Waypoint, float>
+        {
+        }
+        
+        [Header("Stuck Check")]
+        [SerializeField] private float stuckCheckTimeThreshold = 10.0f;
+        [SerializeField] private float stuckCheckPositionThreshold = 0.1f;
+        [SerializeField] private float stuckCheckRotationThreshold = 5.0f;
+        
+        [Header("Waypoints")]
         [SerializeField] private List<Waypoint> currentWaypoints;
 
         // Autopilot state
         private AutoPilotState _currentAutoPilotState;
         private NavState _currentNavState;
 
-        // Stuck settings
-
+        private Vector3 _destination;
+        
         // If the autopilot is active and doesn't "move" for this amount of time and distance, it's considered "stuck"
-        private const float StuckCheckTimeThreshold = 10.0f;
-        private const float StuckCheckPositionThreshold = 0.1f;
-        private const float StuckCheckRotationThreshold = 5.0f;
-
         private float _currStuckCheckTimer = 0.0f;
 
         private Vector3 _lastPosition =  Vector3.zero;
@@ -58,15 +60,11 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
         private Waypoint _currentWaypoint;
 
         // Unity Event publishing Status changes
-        internal AutopilotStateChangedEvent OnAutopilotStateChanged = new AutopilotStateChangedEvent();
-        internal WaypointChangedEvent OnAutopilotWaypointChanged = new WaypointChangedEvent();
-
-        private PathFinder _pathFinder;
+        internal AutopilotStateChangedEvent OnAutoPilotStateChanged = new AutopilotStateChangedEvent();
+        internal WaypointChangedEvent OnNavWaypointChanged = new WaypointChangedEvent();
+        internal AutoPilotWaypointChangedEvent OnAutoPilotWaypointChanged = new AutoPilotWaypointChangedEvent();
+        
         private List<Waypoint> _recallWaypoints;
-
-        // Lists the layers to INCLUDE in collision avoidance
-        private LayerMask _collisionLayerMask;
-        private Transform _debugContainer;
 
         protected virtual void OnEnable()
         {
@@ -77,35 +75,29 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
                 _waypointNav.OnNavStateChanged.AddListener(NavStateChangedHandler);
                 _waypointNav.OnWaypointChanged.AddListener(NavWaypointChangedHandler);
             }
+            AllAutoPilots.AddInstance(this);
         }
 
         protected virtual void OnDisable()
         {
-            InitComponentReferences();
+            AllAutoPilots.RemoveInstance(this);
             if (_waypointNav)
             {
                 _waypointNav.OnNavStateChanged.RemoveListener(NavStateChangedHandler);
                 _waypointNav.OnWaypointChanged.RemoveListener(NavWaypointChangedHandler);
             }
+            InitComponentReferences();
         }
 
         private void Awake()
         {
-            if (!_pathFinder)
-            {
-                _pathFinder = GetComponent<PathFinder>();
-            }
             // Include layers for obstacle detection
-            _collisionLayerMask = LayerMask.GetMask("TerrainCollider", "Default");
         }
 
         private void Start()
         {
             // Set default state
             SetAutopilotState(AutoPilotState.Ready);
-
-            GameObject debugGameObject = new GameObject("NAVGRID");
-            _debugContainer = debugGameObject.transform;
         }
 
         private void Update()
@@ -122,21 +114,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
                 AbortNavigation();
             }
         }
-
-        public bool StartNavigation(List<Waypoint> waypoints, NavGrid navGrid)
-        {
-            // Generate a path from the SeaTruck to the first point in the Recaller waypoints
-            Vector3 targetPosition = waypoints[0].Position;
-
-            _recallWaypoints = waypoints;
-
-            // Creates a grid of cells 10.0 units square, 5 squares to the left, right, top and bottom from the SeaTruck to the target.
-            SetAutopilotState(AutoPilotState.CalculatingRoute);
-            _pathFinder.SetPath(navGrid, transform.position, targetPosition);
-
-            return true;
-        }
-
+        
         public void BeginParking()
         {
             SetAutopilotState(AutoPilotState.Parking);
@@ -164,34 +142,12 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
                 _instantNav = GetComponent<InstantNavigation>();
             }
         }
-
-        /// <summary>
-        /// Manages the Pathing responses from the PathFinder MonoBehaviour
-        /// </summary>
-        private void WaypointsCompleteHandler(GenerateStatus status, List<Waypoint> pathWaypoints)
-        {
-            // Confirm we can get the waypoints from the PathFinder
-            if (status == GenerateStatus.Success)
-            {
-                currentWaypoints = pathWaypoints;
-
-                // Append the remaining dock recall waypoints
-                foreach (Waypoint currWayPoint in _recallWaypoints)
-                {
-                    currentWaypoints.Add(currWayPoint);
-                }
-
-                // Begin moving through the waypoints
-                SetAutopilotState(AutoPilotState.Ready);
-                NavigateWaypoints(currentWaypoints);
-            }
-        }
-
+        
         private bool IsStuckCheck()
         {
             _currStuckCheckTimer += Time.deltaTime;
 
-            if (_currStuckCheckTimer < StuckCheckTimeThreshold)
+            if (_currStuckCheckTimer < stuckCheckTimeThreshold)
             {
                 return false;
             }
@@ -207,8 +163,8 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
             }
 
             // Check how far we've travelled and rotated since the last stuck check
-            if (Vector3.Distance(_lastPosition, transform.position) < StuckCheckPositionThreshold &&
-                Quaternion.Angle(_lastRotation, transform.rotation) < StuckCheckRotationThreshold)
+            if (Vector3.Distance(_lastPosition, transform.position) < stuckCheckPositionThreshold &&
+                Quaternion.Angle(_lastRotation, transform.rotation) < stuckCheckRotationThreshold)
             {
                 return true;
             }
@@ -228,7 +184,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
         /// <summary>
         /// Begin navigating to the list of waypoints given
         /// </summary>
-        private bool NavigateWaypoints(List<Waypoint> waypoints)
+        internal bool StartNavigation(Vector3 destination, List<Waypoint> waypoints)
         {
             // Abort, if already being recalled
             if (_currentAutoPilotState != AutoPilotState.Ready)
@@ -237,7 +193,10 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
                 LogDebug($"AutoPilot BeginNavigation: autopilot is not ready. State is: {_currentAutoPilotState}");
                 return false;
             }
-
+            
+            // Used to calculate remaining distance
+            _destination = destination;
+            
             if (_instantNav)
             {
                 SetAutopilotState(AutoPilotState.Moving);
@@ -275,7 +234,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
                 return;
             }
             _currentAutoPilotState = newState;
-            OnAutopilotStateChanged?.Invoke(newState);
+            OnAutoPilotStateChanged?.Invoke(newState);
         }
 
         /// <summary>
@@ -289,7 +248,8 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
             }
 
             _currentWaypoint = newWaypoint;
-            OnAutopilotWaypointChanged?.Invoke(newWaypoint);
+            float distanceToTarget = Vector3.Distance(transform.position, _destination);
+            OnAutoPilotWaypointChanged?.Invoke(newWaypoint, distanceToTarget);
         }
 
         /// <summary>

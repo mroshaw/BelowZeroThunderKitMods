@@ -52,9 +52,6 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Patches
                         __instance.gameObject.EnsureComponent<TeleportNavMovement>();
                         break;
                 }
-
-                __instance.gameObject.EnsureComponent<PathFinder>();
-
             }
 
             SeaTruckAutoPilot newAutoPilot = __instance.gameObject.EnsureComponent<SeaTruckAutoPilot>();

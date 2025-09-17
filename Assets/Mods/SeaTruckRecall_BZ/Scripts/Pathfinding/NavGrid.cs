@@ -106,7 +106,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             return newContainer.transform;
         }
 
-        internal IEnumerator GenerateNavGridAsync(Vector3 sourcePosition, float cellSize, int numCellExtends, float distanceBetweenCells, LayerMask colliderLayerMask,
+        internal IEnumerator GenerateNavGridAsync(Vector3 sourcePosition, int numCellExtends, float range, LayerMask colliderLayerMask,
             Action<GenerateStatus> gridCompleteAction = null,
            bool debug = false,  Transform debugContainer = null)
         {
@@ -131,7 +131,10 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
             
             Vector3 direction = (sourcePosition).normalized;
 
+            float cellSize = range/(numCellExtends * 2);
+            
             LogDebug($"Num Extends: {numCellExtends}");
+            LogDebug($"Range: {range}");
             LogDebug($"Cell Size: {cellSize}");
             LogDebug($"NavGrid dimensions: x:{numCellExtends * 2}, y:{numCellExtends * 2}, z:{numCellExtends * 2}. Total cells: {Math.Pow(numCellExtends,3)}");
 
@@ -151,8 +154,11 @@ namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
                         int numColliderHits = Physics.OverlapBoxNonAlloc(cellPosition, Vector3.one * (cellSize * 0.5f), _colliderHitCache, Quaternion.identity, colliderLayerMask, QueryTriggerInteraction.Ignore);
 
                         // If the cell is above sea level, mark as "invalid"
+#if UNITY_EDITOR
+                        bool hasCollider =  HasValidColliders(numColliderHits, _colliderHitCache);
+#else
                         bool hasCollider = cellPosition.y > Ocean.GetOceanLevel() - 2.0f || HasValidColliders(numColliderHits, _colliderHitCache);
-
+#endif
                         int cellXIndex = x + numCellExtends;
                         int cellYIndex = y + numCellExtends;
                         int cellZIndex = z + numCellExtends;

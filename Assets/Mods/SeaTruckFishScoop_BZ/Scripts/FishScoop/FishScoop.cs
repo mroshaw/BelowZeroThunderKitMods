@@ -1,15 +1,21 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using static DaftAppleGames.SeaTruckFishScoop_BZ.SeaTruckFishScoopPluginBz;
+using Random = UnityEngine.Random;
 
 namespace DaftAppleGames.SeaTruckFishScoop_BZ
 {
+    internal enum PurgeTarget { BioReactor, Water }
+    
     public class FishScoop : MonoBehaviour
     {
         [SerializeField] private Vector3 purgePositionOffset = new Vector3(0.0f, 4.0f, 1.0f);
         [SerializeField] private float purgeVelocity = 2.0f;
         [SerializeField] private float purgeLocationRandomMax = 0.5f;
+        [SerializeField] private float bioreactorPurgeRange = 10.0f;
         [SerializeField] private float slotPressedTimeForPurge = 2.0f;         // Number of seconds the slot activation key must be held to purge the aquariums
         [SerializeField] private float audioVolume = 10.0f;
         
@@ -34,6 +40,9 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         private Vector3 RandomPurgeLocation => PurgeLocation + (Random.Range(Random.Range(0, purgeLocationRandomMax), purgeLocationRandomMax) * _mainMotor.transform.forward) + (Random.Range(0, purgeLocationRandomMax) * _mainMotor.transform.up);
         private Vector3 PurgeVelocity =>  _mainMotor.transform.up * purgeVelocity;
 
+        // Used to detect nearby BioReactors without generating garbage
+        private Collider[] _colliderBuffer = new Collider[50]; // adjust size if needed
+        
         internal bool IsOn => _isOn;
         private bool _isOn;
         
@@ -256,7 +265,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         /// </summary>
         private static void RaiseOnToggle(SeaTruckUpgrades upgrades, int slotID, bool state)
         {
-            var evt = typeof(SeaTruckUpgrades).GetField("onToggle",
+            FieldInfo evt = typeof(SeaTruckUpgrades).GetField("onToggle",
                 BindingFlags.Instance | BindingFlags.NonPublic);
             if (evt == null)
             {
@@ -340,20 +349,40 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             if (!IsAquariumAttached())
             {
                 Log.LogDebug($"Couldn't find any Aquariums!");
-                ShowAlert($"Cannot start scoop, no aquariums attached!");
+                ShowAlert($"Cannot purge, no aquariums attached!");
                 return;
             }
 
             // Checks all done, we can purge the modules
+            int totalFishInWater = 0;
+            int totalFishInBioreactor = 0;
+            
+            // Check if there are bioreactors in range
+            List<BaseBioReactor> bioReactorsInRange = FindNearbyBioReactors();
+            PurgeTarget purgeTarget = bioReactorsInRange.Count > 0 ? PurgeTarget.BioReactor : PurgeTarget.Water;
+            Log.LogDebug($"Attempting to purge to : {purgeTarget}");
+            
+            // Iterate over attached aquariums
             SeaTruckAquarium[] seaTruckAquariums = _mainMotor.GetComponentsInChildren<SeaTruckAquarium>();
             Log.LogDebug($"Found {seaTruckAquariums.Length} aquarium modules");
             _purgeEmitter.Play();
             foreach (SeaTruckAquarium seaTruckAquarium in seaTruckAquariums)
             {
-                PurgeFishFromAquarium(seaTruckAquarium);
+                (int numFishInWater, int numFixInBioReactor) = PurgeFishFromAquarium(seaTruckAquarium, purgeTarget, bioReactorsInRange);
+                totalFishInWater +=  numFishInWater;
+                totalFishInBioreactor +=  numFixInBioReactor;
                 Log.LogDebug($"Purged aquarium: {seaTruckAquarium.name}");
             }
             ShowAlert($"All aquariums purged!");
+            if (totalFishInWater > 0)
+            {
+                ShowAlert($"Released {totalFishInWater} fish.");
+            }
+
+            if (totalFishInBioreactor > 0)
+            {
+                ShowAlert($"Moved {totalFishInBioreactor} fish to Bioreactors in range.");
+            }
         }
 
         /// <summary>
@@ -427,26 +456,62 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         /// <summary>
         /// Removes all fish from the specified Aquarium module
         /// </summary>
-        private void PurgeFishFromAquarium(SeaTruckAquarium seaTruckAquarium)
+        private (int numFishInWater, int numFishInBioReactor) PurgeFishFromAquarium(SeaTruckAquarium seaTruckAquarium, PurgeTarget purgeTarget, List<BaseBioReactor> bioReactors)
         {
             // Get all creatures / aquariumfish
             ItemsContainer container = seaTruckAquarium.storageContainer.container;
 
-            // Release around the SeaTruck
-            Log.LogDebug($"Dropping above MainMotor at: {PurgeLocation}");
+            // Maintain counts
+            int numFishInWater = 0;
+            int numFishInBioReactor = 0;
             
             // Allows us to amend while iterating
             foreach (InventoryItem fishItem in container.ToList())
             {
                 Pickupable fishPickupable = fishItem.item;
 
-                Log.LogDebug($"Dropping {fishItem.item} at: {RandomPurgeLocation}");
-                fishPickupable.Drop(RandomPurgeLocation, PurgeVelocity, false);
+                switch (purgeTarget)
+                {
+                    case PurgeTarget.Water:
+                        fishPickupable.Drop(RandomPurgeLocation, PurgeVelocity, false);
+                        numFishInWater++;
+                        break;
+                    
+                    case PurgeTarget.BioReactor:
+                        Log.LogDebug("Attempting to add to BioReactor...");
+                        // Try to add to one of the in range bioreactors
+                        bool addedToReactor = false;
+                        foreach (BaseBioReactor bioReactor in bioReactors)
+                        {
+                            if (bioReactor._container.HasRoomFor(fishPickupable))
+                            {
+                                Log.LogDebug("Adding to BioReactor...");
+                                InventoryItem item = new InventoryItem(fishPickupable);
+                                bioReactor._container.UnsafeAdd(item);
+                                addedToReactor = true;
+                                numFishInBioReactor++;
+                                Log.LogDebug("Successfully added to BioReactor!");
+                                break;
+                            }
+                        }
+
+                        // If we were unable to add to a bioreactor, drop it in the ocean
+                        if (!addedToReactor)
+                        {
+                            Log.LogDebug("All BioReactors in range are full. Purging to ocean...");
+                            fishPickupable.Drop(RandomPurgeLocation, PurgeVelocity, false);
+                            numFishInWater++;
+                        }
+                        break;
+                }
+                
+
 
                 // Remove from aquarium container
                 container.RemoveItem(fishPickupable, true);
                 Log.LogDebug($"Removed {fishPickupable.name}");
             }
+            return (numFishInWater,  numFishInBioReactor);
         }
         
         /// <summary>
@@ -494,8 +559,35 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             {
                 return;
             }
-
             ErrorMessage.AddMessage(alertMessage);
+        }
+        
+        /// <summary>
+        /// Purges the aquariums to these bio-reactors
+        /// </summary>
+        private void PurgeToBioreactor(List<BaseBioReactor> bioreactors)
+        {
+            
+        }
+
+        /// <summary>
+        /// Finds Bioreactors within range of the Fish Scoop
+        /// </summary>
+        /// <returns></returns>
+        private List<BaseBioReactor> FindNearbyBioReactors()
+        {
+            List<BaseBioReactor> bioReactorsInRange = new List<BaseBioReactor>();
+            BaseBioReactor[] allBioReactors = FindObjectsOfType<BaseBioReactor>();
+
+            foreach (BaseBioReactor bioReactor in allBioReactors)
+            {
+                if(Math.Abs(Vector3.Distance(bioReactor.transform.position, transform.position)) < bioreactorPurgeRange)
+                {
+                    bioReactorsInRange.Add(bioReactor);
+                }
+            }
+            Log.LogDebug($"Found {bioReactorsInRange.Count} nearby bio reactors");
+            return bioReactorsInRange;
         }
     }
 }

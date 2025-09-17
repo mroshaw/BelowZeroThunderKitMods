@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using DaftAppleGames.SeatruckRecall_BZ.Navigation;
-using UnityEngine;
-using UnityEngine.Events;
-using static DaftAppleGames.SeatruckRecall_BZ.SeaTruckDockRecallPlugin;
+﻿using UnityEngine;
 
 namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
 {

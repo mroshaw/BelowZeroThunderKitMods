@@ -12,14 +12,17 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
     // Recaller Status
     internal enum DockRecallState
     {
-        None,
+        Initialising,
         Ready,
-        NoneInRange,
         Recalling,
         Stuck,
         Aborted,
         Parking,
         Docked
+    }
+
+    internal class AutoPilotChangedEvent : UnityEvent<SeaTruckAutoPilot, SeaTruckAutoPilot>
+    {
     }
 
     // Unity Event to publish DockRecallStatus changes
@@ -38,54 +41,46 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         private const string AlignToDockText = "ALIGNING TO DOCK";
         private const string MovingToDockText = "MOVING TO DOCK";
         
-        [SerializeField] private SeaTruckAutoPilot currentSeaTruckAutoPilot;
+        [SerializeField] private SeaTruckAutoPilot currentAutoPilot;
         // Transform within the dock, that the recall will pull the SeaTruck into it's final docking place
         // If not docked within the timeout, abandon
+        [SerializeField] private float maxRange = 500.0f;
         [SerializeField] private bool createGridOnStart = true;
         [SerializeField] private Vector3 parkingDockConnection;
         [SerializeField] private List<Waypoint> dockingWaypoints;
-
-        /// <summary>
-        /// Subscribe to these events to be notified of the status of various async processes
-        /// </summary>
-
-        [SerializeField] internal NavGrid.PathingStatusChangedEvent OnPathingStatusChanged = new NavGrid.PathingStatusChangedEvent();
- 
-        // Public properties
-        public float MaxRange { get; set; } = 500.0f;
 
         // Useful internal components
         private MoonpoolExpansionManager _dockingManager;
 
         // Internal tracking and audit
-        private DockRecallState _currentRecallState = DockRecallState.None;
+        private DockRecallState _currentRecallState = DockRecallState.Initialising;
 
         private const float ParkingTimeout = 5.0f;
         private const float ParkingMoveSpeed = 1.0f;
         private const float ParkingRotateSpeed = 1.0f;
 
         // Event publishing latest recall state and distance
+        internal AutoPilotChangedEvent OnAutoPilotChanged = new  AutoPilotChangedEvent();
         internal DockRecallStateChangedEvent OnDockingStateChanged = new DockRecallStateChangedEvent();
-        internal WaypointChangedEvent OnDockingWaypointChanged = new WaypointChangedEvent();
-        internal SeaTruckAutoPilot.AutopilotStateChangedEvent OnAutoPilotStateChanged = new SeaTruckAutoPilot.AutopilotStateChangedEvent();
 
         internal UnityEvent OnDocked = new UnityEvent();
 
-        private GridBuilder _gridBuilder;
+        private bool _gridReady;
+        
+        private NavGridHelper _navGridHelper;
 
         private void OnEnable()
         {
-            if (!_gridBuilder)
+            if (!_navGridHelper)
             {
-                _gridBuilder = GetComponent<GridBuilder>();
+                _navGridHelper = GetComponent<NavGridHelper>();
             }
-            
-            _gridBuilder.OnGridStatusChanged.AddListener(GridStatusChangedHandler);
+            AllSeaTruckDockRecallers.AddInstance(this);
         }
 
         private void OnDisable()
         {
-            _gridBuilder.OnGridStatusChanged.RemoveListener(GridStatusChangedHandler);
+            AllSeaTruckDockRecallers.RemoveInstance(this);
         }
         
         private void Start()
@@ -108,14 +103,37 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
             }
         }
 
-        public void GenerateNavGrid()
+        /// <summary>
+        /// Sets the SeaTruck linked to this recaller
+        /// </summary>
+        private void SetAutoPilot(SeaTruckAutoPilot newAutoPilot)
         {
-            _gridBuilder.RefreshNavGrid();
+            SeaTruckAutoPilot oldAutoPilot = currentAutoPilot;
+            currentAutoPilot = newAutoPilot;
+            OnAutoPilotChanged?.Invoke(oldAutoPilot, newAutoPilot);
         }
         
-        private void GridStatusChangedHandler(GenerateStatus gridStatus)
+        internal void SetMaxRange(float newRange)
         {
-            
+            maxRange = newRange;
+        }
+        
+        /// <summary>
+        /// Generate the NavGrid centered around this dock
+        /// </summary>
+        public void GenerateNavGrid()
+        {
+            SetDockState(DockRecallState.Initialising);
+            _navGridHelper.RefreshNavGrid(GridReadyHandler);
+        }
+
+        private void GridReadyHandler(GenerateStatus gridStatus)
+        {
+            _gridReady = gridStatus == GenerateStatus.Success;
+            if (_gridReady)
+            {
+                SetDockState(DockRecallState.Ready);
+            }
         }
         
         public void CurrentSeaTruckDocked()
@@ -126,7 +144,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
 
         public void ReleaseCurrentlyDocked()
         {
-            if (currentSeaTruckAutoPilot == null)
+            if (currentAutoPilot == null)
             {
                 LogDebug("ReleaseCurrentlyDocked called but there is no SeaTruck docked.");
                 return;
@@ -147,29 +165,38 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         /// <summary>
         /// Public method to recall the closest Seatruck
         /// </summary>
-        public void RecallClosestSeatruck()
+        public void RecallClosestSeaTruck()
         {
-            if (IsDockReady())
+            if (!IsDockReady())
             {
                 LogDebug("Dock is already occupied or busy!");
                 return;
             }
-
             LogDebug("Finding closest Seatruck...");
-            SeaTruckAutoPilot closestAutoPilot = AllAutoPilots.GetClosestAutoPilot(transform.position, MaxRange);
+            SeaTruckAutoPilot closestAutoPilot = AllAutoPilots.GetClosestAutoPilot(transform.position, maxRange);
             if (closestAutoPilot == null)
             {
                 // Couldn't find a closest Seatruck
                 LogDebug("No Seatrucks found!");
-                _currentRecallState = DockRecallState.NoneInRange;
                 return;
             }
 
             // Recall the SeaTruck
-            SetDockingAutoPilot(closestAutoPilot);
-            closestAutoPilot.StartNavigation(dockingWaypoints, _gridBuilder.NavGrid);
+            SetAutoPilot(closestAutoPilot);
+            
+            // Generate a path for the SeaTruck
+            _navGridHelper.GenerateNavPath(closestAutoPilot.transform.position, dockingWaypoints[dockingWaypoints.Count - 1].Position, PathReadyHandler);
         }
 
+        private void PathReadyHandler(GenerateStatus pathStatus, NavPath navPath)
+        {
+            if (pathStatus == GenerateStatus.Success)
+            {
+                List<Waypoint> waypoints = navPath.GetFinalWaypoints(dockingWaypoints);
+                currentAutoPilot.StartNavigation(transform.position, waypoints);
+            }
+        }
+        
         /// <summary>
         /// Set up the docking waypoints for this dock
         /// </summary>
@@ -225,48 +252,24 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
             // CreateSphere(dockingWaypoint.transform.position, 1.0f, Color.green);
             LogDebug($"Dock final position: {dockingWaypoint.transform.position}");
         }
-
-        private void SetDockingAutoPilot(SeaTruckAutoPilot autoPilot)
-        {
-            if (!autoPilot)
-            {
-                LogDebug("Attempt to set current AutoPilot to null!");
-                return;
-            }
-
-            if (currentSeaTruckAutoPilot)
-            {
-                LogDebug("AutoPilot is already set!");
-                return;
-            }
-            currentSeaTruckAutoPilot = autoPilot;
-            autoPilot.OnAutopilotStateChanged.AddListener(AutoPilotStateChangedHandler);
-            autoPilot.OnAutopilotWaypointChanged.AddListener(AutopilotWaypointChangedHandler);
-        }
-
+        
         private void ReleaseCurrentSeaTruck()
         {
-            currentSeaTruckAutoPilot.ReleaseFromDock();
-            currentSeaTruckAutoPilot.OnAutopilotStateChanged.RemoveListener(AutoPilotStateChangedHandler);
-            currentSeaTruckAutoPilot.OnAutopilotWaypointChanged.RemoveListener(AutopilotWaypointChangedHandler);
-            currentSeaTruckAutoPilot = null;
+            currentAutoPilot.ReleaseFromDock();
+            SetAutoPilot(null);
         }
-
-        private void AutopilotWaypointChangedHandler(Waypoint newWaypoint)
-        {
-            OnDockingWaypointChanged?.Invoke(newWaypoint);
-        }
+        
 
         /// <summary>
         /// Sets the appropriate docked status
         /// </summary>
         private void SetCurrentDockedStatus()
         {
-            SetDockState(IsDockReady() ? DockRecallState.Docked : DockRecallState.Ready);
+            SetDockState(IsDockReady() ? DockRecallState.Ready : DockRecallState.Docked);
         }
 
         /// <summary>
-        /// Returns true if Seatruck is already docked here
+        /// Returns true if recaller is available
         /// otherwise false
         /// </summary>
         public bool IsDockReady()
@@ -274,44 +277,13 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
             // Allow us to test in the Unity Editor
             if (!_dockingManager)
             {
-                return false;
+                return true;
             }
-            return _dockingManager.IsOccupied() || currentSeaTruckAutoPilot != null;
+            return !_dockingManager.IsOccupied() && currentAutoPilot == null;
         }
-
-        private void AutoPilotWaypointChangedHandler(Waypoint waypoint)
-        {
-            OnDockingWaypointChanged.Invoke(waypoint);
-        }
-
-        /// <summary>
-        /// Handle Waypoint change
-        /// </summary>
-        private void AutoPilotStateChangedHandler(AutoPilotState autoPilotState)
-        {
-            LogDebug($"DockRecaller.AutoPilotStateChangedHandler: {autoPilotState}.");
-
-            // Autopilot state changes
-            switch (autoPilotState)
-            {
-                // AutoPilot has arrived. Docking isn't guaranteed, so we'll check that and engage
-                // the tractor beam if required
-                case AutoPilotState.Arrived:
-                    SetDockState(DockRecallState.Parking);
-                    ParkSeaTruck();
-                    break;
-                case AutoPilotState.Moving:
-                    SetDockState(DockRecallState.Recalling);
-                    break;
-                case AutoPilotState.Blocked:
-                case AutoPilotState.Aborted:
-                    SetDockState(DockRecallState.Ready);
-                    break;
-            }
-
-            OnAutoPilotStateChanged.Invoke(autoPilotState);
-        }
-
+        
+        
+        
         private void SetDockState(DockRecallState newRecallState)
         {
             if (newRecallState == _currentRecallState)
@@ -336,27 +308,27 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         {
             LogDebug("Parking SeaTruck...");
 
-            currentSeaTruckAutoPilot.BeginParking();
+            currentAutoPilot.BeginParking();
 
             float dockTime = 0.0f;
 
-            if (currentSeaTruckAutoPilot == null)
+            if (currentAutoPilot == null)
             {
                 LogDebug("Parking cancelled - SeaTruck not set");
                 yield break;
             }
 
-            Vector3 dirToTarget = parkingDockConnection - currentSeaTruckAutoPilot.transform.position;
+            Vector3 dirToTarget = parkingDockConnection - currentAutoPilot.transform.position;
             Quaternion targetRotation = Quaternion.LookRotation(dirToTarget);
 
             while (_currentRecallState != DockRecallState.Docked)
             {
                 // Rotate
-                currentSeaTruckAutoPilot.transform.rotation = Quaternion.Slerp(currentSeaTruckAutoPilot.transform.rotation, targetRotation, Time.deltaTime * ParkingRotateSpeed);
+                currentAutoPilot.transform.rotation = Quaternion.Slerp(currentAutoPilot.transform.rotation, targetRotation, Time.deltaTime * ParkingRotateSpeed);
                 dockTime += Time.deltaTime;
 
                 // Move
-                currentSeaTruckAutoPilot.transform.position = Vector3.Lerp(currentSeaTruckAutoPilot.transform.position, parkingDockConnection, Time.deltaTime * ParkingMoveSpeed);
+                currentAutoPilot.transform.position = Vector3.Lerp(currentAutoPilot.transform.position, parkingDockConnection, Time.deltaTime * ParkingMoveSpeed);
 
                 if (dockTime > ParkingTimeout)
                 {
@@ -367,7 +339,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
 
                 yield return null;
             }
-            currentSeaTruckAutoPilot.DockingComplete();
+            currentAutoPilot.DockingComplete();
             LogDebug("Docked state set: Parking Complete!");
         }
 

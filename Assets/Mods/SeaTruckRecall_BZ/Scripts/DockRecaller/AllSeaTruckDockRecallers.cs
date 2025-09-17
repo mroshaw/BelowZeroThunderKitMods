@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using DaftAppleGames.SeatruckRecall_BZ.AutoPilot;
 using static DaftAppleGames.SeatruckRecall_BZ.SeaTruckDockRecallPlugin;
 
 namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
@@ -19,8 +18,10 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         /// </summary>
         internal static void AddInstance(SeaTruckDockRecaller dockRecaller)
         {
-            dockRecaller.MaxRange = ConfigFile.MaximumRange;
-            LogDebug($"DockRecaller: Registered new instance: {dockRecaller.gameObject.name} with Range: {dockRecaller.MaxRange}");
+#if !UNITY_EDITOR
+            dockRecaller.SetMaxRange(ConfigFile.MaximumRange);
+#endif
+            LogDebug($"DockRecaller: Registered new instance: {dockRecaller.gameObject.name}.");
             AllDockRecallersList.Add(dockRecaller);
         }
 
@@ -41,7 +42,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
             LogDebug($"DockRecaller: Updating range to {recallRange} for {Count} DockRecallers");
             foreach (SeaTruckDockRecaller dockRecaller in AllDockRecallersList)
             {
-                dockRecaller.MaxRange = recallRange;
+                dockRecaller.SetMaxRange(recallRange);
             }
         }
     }
