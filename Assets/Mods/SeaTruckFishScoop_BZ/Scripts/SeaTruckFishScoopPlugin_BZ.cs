@@ -9,9 +9,9 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
     public class SeaTruckFishScoopPluginBz : BaseUnityPlugin
     {
         // Plugin properties
-        private const string MyGuid = "com.mroshaw.seatruckfishscoopmodbz";
+        private const string MyGuid = "com.mroshaw.SeaTruckfishscoopmodbz";
         private const string PluginName = "Sea Truck Fish Scoop Mod BZ";
-        private const string VersionString = "3.0.1";
+        private const string VersionString = "3.2.0";
 
         // Config file / UI initialisation
         internal static ModConfigFile ConfigFile = OptionsPanelHandler.RegisterModOptions<ModConfigFile>();

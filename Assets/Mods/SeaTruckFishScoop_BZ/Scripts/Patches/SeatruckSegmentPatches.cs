@@ -9,7 +9,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
     /// </summary>
     ///
     [HarmonyPatch(typeof(SeaTruckSegment))]
-    public class SeatruckSegmentPatches
+    public class SeaTruckSegmentPatches
     {
         /// <summary>
         /// Add a FishScoop to every spawned SeaTruck

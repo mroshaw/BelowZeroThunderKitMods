@@ -15,7 +15,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         private static bool _isAssetBundleReady = false;
         private static AssetBundle _assetBundle;
 
-        private const string AssetBundleName = "seatruckfishscoopassetbundle";
+        private const string AssetBundleName = "SeaTruckfishscoopassetbundle";
 
         internal static Object[] AllAssets => AssetBundle.LoadAllAssets();
 

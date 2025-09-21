@@ -43,13 +43,13 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             // Log.LogDebug($"Dealer root: {rootDealer.name}. Taker root: {rootTaker.name}");
 
             // Let's see if whatever dealt the damage was a SeaTruck main cab
-            SeaTruckSegment seaTruckSegment = rootDealer.GetComponent<SeaTruckSegment>();
-            if (seaTruckSegment == null)
+            SeaTruckSegment SeaTruckSegment = rootDealer.GetComponent<SeaTruckSegment>();
+            if (SeaTruckSegment == null)
             {
                 // Log.LogDebug("SeaTruckSegment is null. No Scoop.");
                 return true;
             }
-            if (!seaTruckSegment.isMainCab)
+            if (!SeaTruckSegment.isMainCab)
             {
                 // Log.LogDebug("SeaTruckSegment is not Main Cab. No Scoop.");
                 return true;

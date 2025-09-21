@@ -55,27 +55,27 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         /// <summary>
         /// Use for debugging
         /// </summary>
-        private static void ScoopAdded(SeaTruckUpgrades upgrade, SeaTruckMotor seaTruck, int slotId)
+        private static void ScoopAdded(SeaTruckUpgrades upgrade, SeaTruckMotor SeaTruck, int slotId)
         {
-            Log.LogDebug($"Fish Scoop upgrade added in slot {slotId} on {seaTruck}.");
-            seaTruck.GetComponent<FishScoop>()?.Equip(slotId);
+            Log.LogDebug($"Fish Scoop upgrade added in slot {slotId} on {SeaTruck}.");
+            SeaTruck.GetComponent<FishScoop>()?.Equip(slotId);
         }
         
         /// <summary>
         /// Turn off the scoop if the upgrade is removed
         /// </summary>
-        private static void ScoopRemoved(SeaTruckUpgrades upgrade, SeaTruckMotor seaTruck, int slotId)
+        private static void ScoopRemoved(SeaTruckUpgrades upgrade, SeaTruckMotor SeaTruck, int slotId)
         {
-            Log.LogDebug($"Fish Scoop upgrade removed from slot {slotId} on {seaTruck}.");
-            seaTruck.GetComponent<FishScoop>()?.Unequip(slotId);
+            Log.LogDebug($"Fish Scoop upgrade removed from slot {slotId} on {SeaTruck}.");
+            SeaTruck.GetComponent<FishScoop>()?.Unequip(slotId);
         }
         
         /// <summary>
         /// Use for debugging
         /// </summary>
-        private static void ScoopToggled(SeaTruckUpgrades upgrade, SeaTruckMotor seaTruck, int slotId, float charge, bool toggled)
+        private static void ScoopToggled(SeaTruckUpgrades upgrade, SeaTruckMotor SeaTruck, int slotId, float charge, bool toggled)
         {
-            Log.LogDebug($"Fish Scoop toggled to {toggled} on {seaTruck} .");
+            Log.LogDebug($"Fish Scoop toggled to {toggled} on {SeaTruck} .");
         }
 
         /// <summary>

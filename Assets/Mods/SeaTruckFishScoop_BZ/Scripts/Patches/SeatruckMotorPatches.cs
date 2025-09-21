@@ -8,7 +8,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
     /// </summary>
     ///
     [HarmonyPatch(typeof(SeaTruckMotor))]
-    public class SeatruckMotorPatches
+    public class SeaTruckMotorPatches
     {
         /// <summary>
         /// Disable the fishscoop if we stop piloting the Sea Truck
