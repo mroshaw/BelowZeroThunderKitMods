@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 using static DaftAppleGames.SeaTruckRecall_BZ.SeaTruckDockRecallPlugin;
 
@@ -7,7 +8,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
     internal class NavGridHelper : MonoBehaviour
     {
         [Header("Settings")]
-        [SerializeField] private float maxRange = 100.0f;
+        [SerializeField] internal float maxRange = 100.0f;
         [SerializeField] private int navGridCellExtends = 5;
         [SerializeField] private LayerMask navGridIncludeLayerMask;
         
@@ -32,14 +33,23 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
 #endif
 
         internal Transform NavGridDebugContainer => navGridDebugContainer;
-
-
         
         private void Awake()
         {
             _navGrid = new NavGrid();
             _navGrid.OnGridStatusChanged.AddListener(GridStatusChangedHandler);
             _navGrid.OnPathingStatusChanged.AddListener(PathingStatusChangedHandler);
+        }
+        
+        internal IEnumerator RefreshNavGridAsync(Action<GenerateStatus> gridCompleteCallBack)
+        {
+#if !UNITY_EDITOR
+            navGridDebug = SeaTruckDockRecallPlugin.ConfigFile.EnableNavGridDebug;
+            maxRange = SeaTruckDockRecallPlugin.ConfigFile.MaximumRange;
+            navGridCellExtends = SeaTruckDockRecallPlugin.ConfigFile.CellExtents;
+#endif
+            yield return StartCoroutine(_navGrid.GenerateNavGridAsync(transform.position, navGridCellExtends, maxRange, navGridIncludeLayerMask,
+                gridCompleteCallBack, navGridDebug, navGridDebugContainer, visualiserPrefab));
         }
         
         /// <summary>
@@ -49,6 +59,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         {
 #if !UNITY_EDITOR
             navGridDebug = SeaTruckDockRecallPlugin.ConfigFile.EnableNavGridDebug;
+            maxRange = SeaTruckDockRecallPlugin.ConfigFile.MaximumRange;
+            navGridCellExtends = SeaTruckDockRecallPlugin.ConfigFile.CellExtents;
 #endif
             StartCoroutine(_navGrid.GenerateNavGridAsync(transform.position, navGridCellExtends, maxRange, navGridIncludeLayerMask,
                 gridCompleteCallBack, navGridDebug, navGridDebugContainer, visualiserPrefab));

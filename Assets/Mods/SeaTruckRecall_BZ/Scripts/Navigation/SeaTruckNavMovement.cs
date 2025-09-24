@@ -19,7 +19,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         [SerializeField] private float slowDistance = 1.0f;
         [SerializeField] private float slowingAngle = 10f;
 
-        [SerializeField] private float moveDistanceThreshold = 0.15f;
+        [SerializeField] private float moveDistanceThreshold = 0.2f;
         [SerializeField] private float skipWaypointThreshold = 1.0f;
         [SerializeField] private float rotateAngleThreshold = 0.01f;
         

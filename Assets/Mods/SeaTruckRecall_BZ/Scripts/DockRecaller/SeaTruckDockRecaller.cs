@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using DaftAppleGames.SeaTruckRecall_BZ.Navigation;
 
@@ -11,6 +12,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
     // Recaller Status
     internal enum DockRecallState
     {
+        None,
         Initialising,
         FindingPath,
         PathingError,
@@ -29,8 +31,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
     internal class SeaTruckDockRecaller : MonoBehaviour
     {
         [Header("Settings")]
-        [SerializeField] private float maxRange = 500.0f;
         [SerializeField] private bool createGridOnStart = true;
+        [SerializeField] private bool instantNav = false;
         
         [Header("Debug")]
         [SerializeField] private SeaTruckAutoPilot currentAutoPilot;
@@ -40,6 +42,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         [SerializeField] internal AutoPilotChangedEvent onAutoPilotChanged = new AutoPilotChangedEvent();
         [SerializeField]internal DockStateChangedEvent onDockingStateChanged = new DockStateChangedEvent();
         
+        private List<Waypoint> _instantNavWaypoints = new List<Waypoint>();
         private Waypoint _endOfDockRunway;
         private Waypoint _startOfDockRunway;
         private Waypoint _dockEngagement;
@@ -48,7 +51,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         private MoonpoolExpansionManager _dockingManager;
 
         // Internal tracking and audit
-        private DockRecallState _currentRecallState = DockRecallState.Initialising;
+        private DockRecallState _currentRecallState = DockRecallState.None;
         
         private bool _gridReady;
         private NavGridHelper _navGridHelper;
@@ -128,15 +131,16 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             onAutoPilotChanged?.Invoke(oldAutoPilot, newAutoPilot);
         }
         
-        internal void SetMaxRange(float newRange)
+        private IEnumerator GenerateNavGridAsync()
         {
-            maxRange = newRange;
+            SetDockState(DockRecallState.Initialising);
+            yield return _navGridHelper.RefreshNavGridAsync(GridReadyHandler);
         }
         
         /// <summary>
         /// Generate the NavGrid centered around this dock
         /// </summary>
-        private void GenerateNavGrid()
+        internal void GenerateNavGrid()
         {
             SetDockState(DockRecallState.Initialising);
             _navGridHelper.RefreshNavGrid(GridReadyHandler);
@@ -219,7 +223,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 return;
             }
             ModDebugLog.LogDebug("Finding closest SeaTruck...");
-            SeaTruckAutoPilot closestAutoPilot = AllSeaTruckAutoPilots.GetClosestAutoPilot(transform.position, maxRange);
+            SeaTruckAutoPilot closestAutoPilot = AllSeaTruckAutoPilots.GetClosestAutoPilot(transform.position, _navGridHelper.maxRange);
             if (closestAutoPilot == null)
             {
                 // Couldn't find a closest SeaTruck
@@ -230,11 +234,34 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             // Recall the SeaTruck
             SetAutoPilot(closestAutoPilot);
             
+#if UNITY_EDITOR
+            if (instantNav)
+#else
+            if (ConfigFile.RecallMoveMethod == RecallMoveMethod.Instant)
+#endif
+            {
+                InstantNav();
+                return;
+            }
+            
             // Generate a path for the SeaTruck
             SetDockState(DockRecallState.FindingPath);
             _navGridHelper.GenerateNavPath(closestAutoPilot.transform.position, _startOfDockRunway.Position, PathReadyHandler);
         }
 
+        /// <summary>
+        /// Teleports the SeaTruck to the end of the docking tube, then navigates to the dock point
+        /// </summary>
+        private void InstantNav()
+        {
+            if (currentAutoPilot)
+            {
+                currentAutoPilot.transform.position = _startOfDockRunway.Position;
+                currentAutoPilot.transform.LookAt(_endOfDockRunway.Position);
+                currentAutoPilot.StartNavigation(_instantNavWaypoints);
+            }
+        }
+        
         private void PathReadyHandler(GenerateStatus pathStatus, NavPath navPath)
         {
             if (pathStatus == GenerateStatus.Success)
@@ -263,6 +290,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             _startOfDockRunway = CreateDockWaypoint(gameObject.transform.position + (new Vector3(0, 0.1f, 0)) + (-gameObject.transform.right * 45.0f), "Docking Runway Start", Color.red);
             _endOfDockRunway = CreateDockWaypoint(gameObject.transform.position + (new Vector3(0, 0.1f, 0)) + (-gameObject.transform.right * 30.0f), "Docking Runway End", Color.yellow);
             _dockEngagement = CreateDockWaypoint(gameObject.transform.position + (new Vector3(0, 0.8f, 0)) + (-gameObject.transform.right * 10.0f), "Dock Engagement", Color.green);
+            
+            _instantNavWaypoints.Add(_endOfDockRunway);
+            _instantNavWaypoints.Add(_dockEngagement);
         }
         
         /// <summary>

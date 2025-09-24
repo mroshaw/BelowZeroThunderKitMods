@@ -16,7 +16,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         [SerializeField] private Transform alertContainer;
 
         [Header("Settings")] [Tooltip("How long each alert stays visible before fading starts (in seconds).")]
-        [SerializeField] private float displayDuration = 3f;
+        [SerializeField] private float displayDuration = 10f;
 
         [Tooltip("How long it takes for the alert to fade out (in seconds).")]
         [SerializeField] private float fadeDuration = 1f;

@@ -56,12 +56,12 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         
         // Component references
         private SeaTruckNavMovement _seaTruckNavMovement;
-        private InstantNavigation _instantNav;
         private Waypoint _currentWaypoint;
         private Rigidbody _rigidBody;
         private Dockable _dockable;
         
         private List<Waypoint> _recallWaypoints;
+        private List<Waypoint> _instantNavWaypoints;
         private int _currentWaypointIndex;
         private int _totalWaypoints;
 
@@ -94,7 +94,6 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         private void Awake()
         {
             _seaTruckNavMovement = GetComponent<SeaTruckNavMovement>();
-            _instantNav = GetComponent<InstantNavigation>();
             _rigidBody = GetComponent<Rigidbody>();
             _motor = GetComponent<SeaTruckMotor>();
             _dockable = GetComponent<Dockable>();
@@ -246,14 +245,6 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
             
             // Used to calculate remaining distance
             _finalDestination = waypoints[waypoints.Count - 1].Position;
-            
-            if (_instantNav)
-            {
-                SetAutopilotState(AutoPilotState.Moving);
-                _instantNav.MoveToDestination(waypoints);
-                SetAutopilotState(AutoPilotState.Arrived);
-                return true;
-            }
 
             // Start navigation
             ModDebugLog.LogDebug("AutoPilot engaged!");
@@ -261,7 +252,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
 
             return true;
         }
-
+        
         internal void StopNavigation()
         {
             _seaTruckNavMovement.StopNavigation();

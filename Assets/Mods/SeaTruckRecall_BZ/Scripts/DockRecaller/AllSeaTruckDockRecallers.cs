@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 using static DaftAppleGames.SeaTruckRecall_BZ.SeaTruckDockRecallPlugin;
 
 namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
@@ -18,9 +20,6 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         /// </summary>
         internal static void AddInstance(SeaTruckDockRecaller dockRecaller)
         {
-#if !UNITY_EDITOR
-            dockRecaller.SetMaxRange(ConfigFile.MaximumRange);
-#endif
             ModDebugLog.LogDebug($"DockRecaller: Registered new instance: {dockRecaller.gameObject.name}.");
             AllDockRecallersList.Add(dockRecaller);
         }
@@ -37,12 +36,12 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         /// <summary>
         /// Update all Dock settings (Range)
         /// </summary>
-        internal static void UpdateAllDockRange(float recallRange)
+        internal static void RegenerateAllNavGrids()
         {
-            ModDebugLog.LogDebug($"DockRecaller: Updating range to {recallRange} for {Count} DockRecallers");
+            ModDebugLog.LogDebug($"DockRecaller: Regenerating NavGrids for all {AllDockRecallersList.Count} DockRecallers");
             foreach (SeaTruckDockRecaller dockRecaller in AllDockRecallersList)
             {
-                dockRecaller.SetMaxRange(recallRange);
+                dockRecaller.GenerateNavGrid();
             }
         }
     }

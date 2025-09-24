@@ -116,8 +116,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
             _debugCellVisualisers = new Dictionary<NavCell, CellVisualiser>();
             Transform gridDebugContainer = debug ? ResetGridDebugContainer(debugContainer) : null;
 
-            float genTime = Time.time;
-            ModDebugLog.LogDebug($"Started Grid Generation: {genTime}");
+            float genStartTime = Time.fixedTime;
+            ModDebugLog.LogDebug($"Started Grid Generation: {genStartTime}");
             ModDebugLog.LogDebug($"Ocean Level is: {Ocean.GetOceanLevel()}");
             SetGridStatus(GenerateStatus.Generating);
             
@@ -184,7 +184,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
                     yield return null;
                 }
             }
-            ModDebugLog.LogDebug($"Finished Grid Generation: {Time.time}. Time taken: {Time.time - genTime}");
+
+            float genEndTime = Time.fixedTime;
+            ModDebugLog.LogDebug($"Finished Grid Generation: {Time.time}. Time taken: {genEndTime - genStartTime}");
             ModDebugLog.LogDebug($"Cells created: {totalCells}, Blocked cells: {totalBlockedCells}, Clear cells: {totalClearCells}");
             SetGridStatus(GenerateStatus.Success);
             gridCompleteAction?.Invoke(GenerateStatus.Success);
@@ -198,7 +200,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
                 if (allColliders[curColliderIndex].gameObject.transform.parent && allColliders[curColliderIndex].gameObject.transform.parent.GetComponentInChildren<Creature>())
                 {
                     // We want to ignore these
-                    ModDebugLog.LogDebug("NavGrid: found Creature collider, ignoring...");
+                    // ModDebugLog.LogDebug("NavGrid: found Creature collider, ignoring...");
                     continue;
                 }
 
