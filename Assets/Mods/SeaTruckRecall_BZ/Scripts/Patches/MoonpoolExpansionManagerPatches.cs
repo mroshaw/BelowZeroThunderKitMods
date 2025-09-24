@@ -124,8 +124,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Patches
                     gameObject = collider.gameObject;
                 }
 
-                SeaTruckSegment segment = gameObject.GetComponent<SeaTruckSegment>();
-                if (segment.GetComponent<SeaTruckAutoPilot>())
+                SeaTruckAutoPilot autoPilot = gameObject.GetComponent<SeaTruckAutoPilot>();
+                if (autoPilot && autoPilot.IsBusy)
                 {
                     __result = true;
                     return;
@@ -152,6 +152,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Patches
                     autoPilot.BeginDocking();
                 }
             }
+
             return true;
         }
 
@@ -159,7 +160,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Patches
         [HarmonyPrefix]
         internal static bool OnDockingTimelineCompleted_Prefix(MoonpoolExpansionManager __instance)
         {
-            // ModDebugLog.LogDebug($"MoonpoolExpansionManager.OnDockingTimelineCompleted called");
+            ModDebugLog.LogDebug($"MoonpoolExpansionManager.OnDockingTimelineCompleted called");
 
             SeaTruckSegment dockingSeaTruck = __instance.dockedHead;
 
@@ -171,10 +172,11 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Patches
                     autoPilot.DockingComplete();
                 }
             }
+
             return true;
         }
 
-        
+
         /// <summary>
         /// Keep the Recall Dock status updated - when un-docking complete
         /// </summary>
@@ -202,25 +204,25 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Patches
             GameObject editScreenGo = terminal.transform.Find("EditScreen").gameObject;
             GameObject activeScreenGo = editScreenGo.transform.Find("Active").gameObject;
             GameObject inActiveScreenGo = editScreenGo.transform.Find("Inactive").gameObject;
-            
+
             // Clear out the old screen
             foreach (Transform child in inActiveScreenGo.transform)
             {
                 GameObject.Destroy(child.gameObject);
             }
+
             ModDebugLog.LogDebug("Removing old console UI screen... Done!");
 
             ModDebugLog.LogDebug("Getting new UI screen prefab...");
             GameObject consoleUiGo = ModAssetUtils.GetPrefabInstanceFromAssetBundle(RecallConsoleUiAssetName, false);
-
+            SeaTruckDockRecallerUi recallerUi =  consoleUiGo.GetComponent<SeaTruckDockRecallerUi>();
+            
             consoleUiGo.GetComponent<SeaTruckDockRecallerUi>().SetRecaller(dockRecaller);
             ModDebugLog.LogDebug("Assigning new UI screen prefab...");
 
             // Replace the old with the new UI
-            consoleUiGo.gameObject.transform.SetParent(inActiveScreenGo.transform);
-            consoleUiGo.gameObject.transform.localPosition = inActiveScreenGo.transform.localPosition;
-            consoleUiGo.gameObject.transform.localRotation = inActiveScreenGo.transform.localRotation;
-            consoleUiGo.gameObject.transform.localScale = new Vector3(5.0f, 5.0f, 5.0f);
+            consoleUiGo.gameObject.transform.SetParent(editScreenGo.transform);
+            recallerUi.ReparentScreen(inActiveScreenGo.transform);
 
             consoleUiGo.SetActive(true);
 

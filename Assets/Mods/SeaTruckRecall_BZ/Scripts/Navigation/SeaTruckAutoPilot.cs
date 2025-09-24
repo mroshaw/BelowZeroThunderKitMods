@@ -14,7 +14,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         Moving,
         Aborted,
         Arrived,
-        Blocked,
+        Stuck,
         Parking,
         Docking,
         Docked
@@ -43,6 +43,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         [SerializeField] internal StateChangedEvent onStateChanged = new StateChangedEvent();
         [SerializeField] internal WaypointChangedEvent onWaypointChanged = new WaypointChangedEvent();
         
+        // Used by the MoonPoolExpansion patches to detect a docking autopilot
+        internal bool IsBusy => currentAutoPilotState != AutoPilotState.Ready && currentAutoPilotState != AutoPilotState.Initialising;
+        
         private SeaTruckMotor _motor;
         private Vector3 _finalDestination;
         
@@ -59,6 +62,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         private Dockable _dockable;
         
         private List<Waypoint> _recallWaypoints;
+        private int _currentWaypointIndex;
+        private int _totalWaypoints;
 
         /// <summary>
         /// Init component references and subscribe to events
@@ -145,6 +150,18 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
 
         internal void BeginDocking()
         {
+            // If we're coming from Ready state, it means we're already docked (e.g. loading a save game)
+            // ModDebugLog.LogDebug($"BeginDocking called with currentAutoPilotState: {currentAutoPilotState}");
+            if (currentAutoPilotState == AutoPilotState.Docking || currentAutoPilotState == AutoPilotState.Docked)
+            {
+                return;
+            }
+            
+            if (currentAutoPilotState == AutoPilotState.Ready || currentAutoPilotState == AutoPilotState.Initialising)
+            {
+                SetAutopilotState(AutoPilotState.Docked);
+                return;
+            }
             SetAutopilotState(AutoPilotState.Docking);
         }
         
@@ -153,6 +170,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         /// </summary>
         internal void DockingComplete()
         {
+            StopNavigation();
             SetAutopilotState(AutoPilotState.Docked);
         }
 
@@ -161,6 +179,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         /// </summary>
         internal void ReleaseFromDock()
         {
+            ModDebugLog.LogDebug("SeaTruck has been released from the dock");
             SetAutopilotState(AutoPilotState.Ready);
         }
         
@@ -209,7 +228,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         /// <summary>
         /// Begin navigating to the list of waypoints given
         /// </summary>
-        internal bool StartNavigation(Vector3 finalDestination, List<Waypoint> waypoints)
+        internal bool StartNavigation(List<Waypoint> waypoints)
         {
             // Abort, if already being recalled
             if (currentAutoPilotState != AutoPilotState.Ready)
@@ -222,8 +241,11 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
             // Reset dockable time
             _dockable.timeUndocked = 0.0f;
             
+            _totalWaypoints =  waypoints.Count;
+            _currentWaypointIndex = 0;
+            
             // Used to calculate remaining distance
-            _finalDestination = finalDestination;
+            _finalDestination = waypoints[waypoints.Count - 1].Position;
             
             if (_instantNav)
             {
@@ -257,7 +279,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
 
         internal void SetStuck()
         {
-            SetAutopilotState(AutoPilotState.Blocked);
+            SetAutopilotState(AutoPilotState.Stuck);
             SetAutopilotState(AutoPilotState.Ready);
         }
         
@@ -279,8 +301,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
                 return;
             }
             ModDebugLog.LogDebug($"AutoPilotState changed from: {currentAutoPilotState} to {newState}");
+            AutoPilotState oldState = currentAutoPilotState;
             currentAutoPilotState = newState;
-            onStateChanged?.Invoke(newState);
+            onStateChanged?.Invoke(oldState, newState);
         }
 
         /// <summary>
@@ -294,9 +317,10 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
             }
 
             _currentWaypoint = newWaypoint;
+            _currentWaypointIndex++;
             float distanceToTarget = Vector3.Distance(transform.position, _finalDestination);
             ModDebugLog.LogDebug($"AutoPilot NavWaypointChanged: {newWaypoint}");
-            onWaypointChanged?.Invoke(newWaypoint, distanceToTarget);
+            onWaypointChanged?.Invoke(newWaypoint, _currentWaypointIndex, _totalWaypoints, distanceToTarget);
         }
 
         /// <summary>
@@ -316,7 +340,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
                     SetAutopilotState(AutoPilotState.Arrived);
                     break;
                 case NavState.Blocked:
-                    SetAutopilotState(AutoPilotState.Blocked);
+                    SetAutopilotState(AutoPilotState.Stuck);
                     break;
                 default:
                     return;
@@ -325,7 +349,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         
         // Unity Event to publish AutoPilot state changes
         [Serializable]
-        internal class StateChangedEvent : UnityEvent<AutoPilotState>
+        internal class StateChangedEvent : UnityEvent<AutoPilotState, AutoPilotState>
         {
         }
     }

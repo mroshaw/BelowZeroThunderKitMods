@@ -71,18 +71,11 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
                 return;
             }
             
-            // Set the SeaTruck rigidbody to allow physics movement
-            CacheRigidbodies();
-            CacheSeaTruckRigidBodyState();
-            
             if (!currentWaypoint.RotateBeforeMoving || (currentWaypoint.RotateBeforeMoving && isRotationComplete))
             {
                 MoveUpdate();
             }
             CheckMoveComplete();
-            
-            // Restore the SeaTruck rigidbody state
-            RestoreSeaTruckRigidBodyState();
         }
 
         /// <summary>
@@ -94,10 +87,6 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
             {
                 return;
             }
-
-            // Set the SeaTruck rigidbody to allow physics movement
-            CacheRigidbodies();
-            CacheSeaTruckRigidBodyState();
             
             _mainRigidbody.isKinematic = false;
             
@@ -111,10 +100,6 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
             {
                 WaypointReached();
             }
-            
-            // Restore the SeaTruck rigidbody state
-            RestoreSeaTruckRigidBodyState();
-            
         }
         
         /// <summary>
@@ -163,12 +148,15 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
             
             // If the next waypoint is really close, skip it
             // Keep all the code above, as we still want to inform listeners about what's happening
-            float distanceToNextWaypoint = Vector3.Distance(waypoints[currentWaypointIndex].Position,
-                waypoints[currentWaypointIndex - 1].Position);
-            if (distanceToNextWaypoint < skipWaypointThreshold)
+            if (currentWaypointIndex > 0)
             {
-                currentWaypointIndex++;
-                SetNextWaypoint();
+                float distanceToNextWaypoint = Vector3.Distance(waypoints[currentWaypointIndex].Position,
+                    waypoints[currentWaypointIndex - 1].Position);
+                if (distanceToNextWaypoint < skipWaypointThreshold)
+                {
+                    currentWaypointIndex++;
+                    SetNextWaypoint();
+                }
             }
         }
         
@@ -221,8 +209,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         /// </summary>
         private void NavComplete()
         {
-            SetNavState(NavState.Arrived);
             RestoreRigidBodies();
+            RestoreSeaTruckRigidBodyState();
+            SetNavState(NavState.Arrived);
             InitialiseNav();
             onDestinationReached.Invoke(currentWaypoint);
         }
@@ -232,6 +221,10 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         /// </summary>
         private void MoveUpdate()
         {
+            // Set the SeaTruck rigidbody to allow physics movement
+            CacheSeaTruckRigidBodyState();
+            SetSeaTruckRigidBodyForMove();
+            
             Vector3 direction = currentWaypoint.Position - _mainRigidbody.position;
             float distance = direction.magnitude;
             
@@ -243,6 +236,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
             float scaledSpeed = moveSpeed * scaleFactor;
 
             _mainRigidbody.velocity = normalizedDirection * scaledSpeed;
+            
+            // Restore the SeaTruck rigidbody state
+            RestoreSeaTruckRigidBodyState();
         }
 
         /// <summary>
@@ -250,6 +246,10 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         /// </summary>
         private void RotateUpdate()
         {
+            // Set the SeaTruck rigidbody to allow physics movement
+            CacheSeaTruckRigidBodyState();
+            SetSeaTruckRigidBodyForMove();
+            
             // Direction vector from player to target
             Vector3 toTarget = (currentWaypoint.Position - transform.position).normalized;
 
@@ -264,8 +264,10 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
 
             // Apply torque proportional to angle
             _mainRigidbody.AddTorque(rotationAxis.normalized * angle * rotateSpeed);
+            
+            // Restore the SeaTruck rigidbody state
+            RestoreSeaTruckRigidBodyState();
         }
-
         
         /// <summary>
         /// True if we've arrived
@@ -300,9 +302,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         /// </summary>
         private void SetSeaTruckRigidBodyForMove()
         {
+            // _mainRigidbody.interpolation = RigidbodyInterpolation.None;
+            _mainRigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
             _mainRigidbody.isKinematic = false;
-            _mainRigidbody.interpolation = RigidbodyInterpolation.None;
-            _mainRigidbody.collisionDetectionMode = CollisionDetectionMode.Discrete;
         }
         
         /// <summary>
@@ -313,7 +315,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         {
             _mainTruckRigidBodyBackupIsKinematic = _mainRigidbody.isKinematic;
             _mainTruckRigidBodyBackupCollisionDetectionMode = _mainRigidbody.collisionDetectionMode;
-            _mainTruckRigidBodyBackupInterpolation = _mainRigidbody.interpolation;
+            // _mainTruckRigidBodyBackupInterpolation = _mainRigidbody.interpolation;
         }
 
         /// <summary>
@@ -321,9 +323,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         /// </summary>
         private void RestoreSeaTruckRigidBodyState()
         {
-            _mainRigidbody.isKinematic = _mainTruckRigidBodyBackupIsKinematic;
             _mainRigidbody.collisionDetectionMode = _mainTruckRigidBodyBackupCollisionDetectionMode;
-            _mainRigidbody.interpolation = _mainTruckRigidBodyBackupInterpolation;
+            _mainRigidbody.isKinematic = _mainTruckRigidBodyBackupIsKinematic;
+            // _mainRigidbody.interpolation = _mainTruckRigidBodyBackupInterpolation;
         }
         
         /// <summary>
@@ -371,6 +373,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
             {
                 backup.Restore();
             }
+            ModDebugLog.LogDebug($"RestoreRigidBodies: {_numChildRigidBodies} child RigidBodies");
         }
 
         /// <summary>

@@ -13,7 +13,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         private void Start()
         {
             CreateWayPoints();
-            autoPilot.StartNavigation(waypointTransforms[waypointTransforms.Length - 1].position, _navWaypoints);
+            autoPilot.StartNavigation(_navWaypoints);
         }
         
         private void CreateWayPoints()

@@ -9,7 +9,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
     /// Wrapper class for a Waypoint based UnityEvent
     /// </summary>
     [Serializable]
-    internal class WaypointChangedEvent : UnityEvent<Waypoint, float>
+    internal class WaypointChangedEvent : UnityEvent<Waypoint, int, int, float>
     {
     }
 

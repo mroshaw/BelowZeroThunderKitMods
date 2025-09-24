@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using DaftAppleGames.SeaTruckRecall_BZ.Navigation;
 
@@ -13,12 +12,12 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
     internal enum DockRecallState
     {
         Initialising,
+        FindingPath,
         PathingError,
         Ready,
         Recalling,
         Stuck,
         Aborted,
-        Parking,
         Docking,
         Docked
     }
@@ -32,12 +31,6 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         [Header("Settings")]
         [SerializeField] private float maxRange = 500.0f;
         [SerializeField] private bool createGridOnStart = true;
-        [SerializeField] private Vector3 parkingDockConnection;
-
-        [Header("Parking")]
-        [SerializeField] private float parkingTimeout = 20.0f;
-        [SerializeField] private float parkingMoveSpeed = 0.08f;
-        [SerializeField] private float parkingRotateSpeed = 0.3f;
         
         [Header("Debug")]
         [SerializeField] private SeaTruckAutoPilot currentAutoPilot;
@@ -77,6 +70,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         private void Awake()
         {
             _navGridHelper = GetComponent<NavGridHelper>();
+            _dockingManager = GetComponent<MoonpoolExpansionManager>();
+            SetDockedAutoPilot();
         }
         
         private void Start()
@@ -85,11 +80,6 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 #if !UNITY_EDITOR
             _dockingManager = gameObject.transform.parent.GetComponent<MoonpoolExpansionManager>();
 #endif
-            // Set the initial dock status
-            SetCurrentDockedStatus();
-
-            // Set the parking position
-            parkingDockConnection = gameObject.transform.position + (-gameObject.transform.right * 2.0f);
 
             // Set up the docking waypoints
             CreateWaypoints();
@@ -101,20 +91,38 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         }
 
         /// <summary>
+        /// Check to see if something is docked when the component first starts
+        /// </summary>
+        private void SetDockedAutoPilot()
+        {
+            if (_dockingManager && _dockingManager.dockedHead && !currentAutoPilot)
+            {
+                SeaTruckAutoPilot autoPilot = _dockingManager.dockedHead.GetComponent<SeaTruckAutoPilot>();
+                if (autoPilot)
+                {
+                    SetAutoPilot(autoPilot);
+                }
+            }
+        }
+        
+        /// <summary>
         /// Sets the SeaTruck linked to this recaller
         /// </summary>
         private void SetAutoPilot(SeaTruckAutoPilot newAutoPilot)
         {
             SeaTruckAutoPilot oldAutoPilot = currentAutoPilot;
             currentAutoPilot = newAutoPilot;
+            
+            ModDebugLog.LogDebug($"AutoPilot changed from: {oldAutoPilot} to {newAutoPilot}");
+            
             if (oldAutoPilot)
             {
-                newAutoPilot.onStateChanged.RemoveListener(AutoPilotStateChangeHandler);
+                oldAutoPilot.onStateChanged?.RemoveListener(AutoPilotStateChangeHandler);
             }
 
             if (newAutoPilot)
             {
-                newAutoPilot.onStateChanged.AddListener(AutoPilotStateChangeHandler);
+                newAutoPilot.onStateChanged?.AddListener(AutoPilotStateChangeHandler);
             }
             
             onAutoPilotChanged?.Invoke(oldAutoPilot, newAutoPilot);
@@ -143,25 +151,25 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             }
         }
         
-        private void AutoPilotStateChangeHandler(AutoPilotState newState)
+        private void AutoPilotStateChangeHandler(AutoPilotState oldState, AutoPilotState newState)
         {
             switch (newState)
             {
                 case AutoPilotState.Ready:
                     SetDockState(DockRecallState.Ready);
                     break;
-                case AutoPilotState.Aborted:
-                    SetDockState(DockRecallState.Ready);
+                case AutoPilotState.Moving:
+                    SetDockState(DockRecallState.Recalling);
                     break;
-                case AutoPilotState.Blocked:
+                case AutoPilotState.Aborted:
+                    SetDockState(DockRecallState.Aborted);
+                    SetDockState(DockRecallState.Ready);
+                    SetAutoPilot(null);
+                    break;
+                case AutoPilotState.Stuck:
                     SetDockState(DockRecallState.Ready);
                     break;
                 case AutoPilotState.Arrived:
-                    currentAutoPilot.BeginParking();
-                    break;
-                case AutoPilotState.Parking:
-                    SetDockState(DockRecallState.Parking);
-                    // StartCoroutine(ParkSeaTruckAsync());
                     break;
                 case AutoPilotState.Docking:
                     SetDockState(DockRecallState.Docking);
@@ -172,14 +180,22 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             }
         }
         
+        /// <summary>
+        /// Release the currently docked seatruck. Does a check to see if we have a Seatruck in the
+        /// dock that isn't registered (e.g. from a game save load)
+        /// </summary>
         public void ReleaseCurrentlyDocked()
         {
-            if (currentAutoPilot == null)
+            if (_dockingManager.dockedHead && !currentAutoPilot)
             {
-                ModDebugLog.LogDebug("ReleaseCurrentlyDocked called but there is no SeaTruck docked.");
-                return;
+                SetDockedAutoPilot();
             }
-            ReleaseCurrentSeaTruck();
+
+            if (currentAutoPilot)
+            {
+                currentAutoPilot.ReleaseFromDock();
+                SetAutoPilot(null);
+            }
             SetDockState(DockRecallState.Ready);
         }
 
@@ -215,6 +231,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             SetAutoPilot(closestAutoPilot);
             
             // Generate a path for the SeaTruck
+            SetDockState(DockRecallState.FindingPath);
             _navGridHelper.GenerateNavPath(closestAutoPilot.transform.position, _startOfDockRunway.Position, PathReadyHandler);
         }
 
@@ -228,7 +245,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 // waypoints.Add(_startOfDockRunway);
                 waypoints.Add(_endOfDockRunway);
                 waypoints.Add(_dockEngagement);
-                currentAutoPilot.StartNavigation(transform.position, waypoints);
+                currentAutoPilot.StartNavigation(waypoints);
             }
             else
             {
@@ -266,6 +283,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                     }
                 };
                 
+                /*
                 GameObject debugSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 debugSphere.name = waypointName;
                 debugSphere.transform.SetParent(_navGridHelper.NavGridDebugContainer);
@@ -273,25 +291,12 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 debugSphere.transform.rotation = newWaypointGo.transform.rotation;
                 debugSphere.GetComponent<Renderer>().material.color = debugColor;
                 Destroy(debugSphere.GetComponent<Collider>());
+                */
             }
 
             return newWaypoint;
         }
         
-        private void ReleaseCurrentSeaTruck()
-        {
-            currentAutoPilot.ReleaseFromDock();
-            SetAutoPilot(null);
-        }
-        
-        /// <summary>
-        /// Sets the appropriate docked status
-        /// </summary>
-        private void SetCurrentDockedStatus()
-        {
-            SetDockState(IsDockReady() ? DockRecallState.Ready : DockRecallState.Docked);
-        }
-
         /// <summary>
         /// Returns true if recaller is available
         /// otherwise false
@@ -316,51 +321,6 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             ModDebugLog.LogDebug($"SeaTruckRecaller.SetDockState: state changed from {_currentRecallState} to {newRecallState}.");
             _currentRecallState = newRecallState;
             onDockingStateChanged?.Invoke(newRecallState);
-        }
-        private IEnumerator ParkSeaTruckAsync()
-        {
-            ModDebugLog.LogDebug("Parking SeaTruck...");
-            
-            float dockTime = 0.0f;
-
-            currentAutoPilot.transform.LookAt(parkingDockConnection);
-            
-            if (currentAutoPilot == null)
-            {
-                ModDebugLog.LogDebug("Parking cancelled - SeaTruck not set");
-                yield break;
-            }
-
-            Vector3 dirToTarget = parkingDockConnection - currentAutoPilot.transform.position;
-            Quaternion targetRotation = Quaternion.LookRotation(dirToTarget);
-
-            while (_currentRecallState != DockRecallState.Docked && _currentRecallState != DockRecallState.Docking)
-            {
-                // Rotate
-                if (Quaternion.Angle(transform.rotation, targetRotation) >= 1f)
-                {
-                    currentAutoPilot.transform.rotation = Quaternion.Slerp(currentAutoPilot.transform.rotation, targetRotation, Time.deltaTime * parkingRotateSpeed);
-                }
-
-                // Move
-                if (Vector3.Distance(parkingDockConnection, currentAutoPilot.transform.position) >= 0.01f)
-                {
-                    currentAutoPilot.transform.position = Vector3.Lerp(currentAutoPilot.transform.position, parkingDockConnection, Time.deltaTime * parkingMoveSpeed);    
-                }
-
-                dockTime += Time.deltaTime;
-                
-                if (dockTime > parkingTimeout)
-                {
-                    ModDebugLog.LogDebug("Parking timed out!");
-                    currentAutoPilot.transform.position = parkingDockConnection;
-                    _dockingManager.JostleSeatruck(currentAutoPilot.GetComponent<SeaTruckSegment>());
-                    yield break;
-                }
-
-                yield return null;
-            }
-            ModDebugLog.LogDebug("Parking is complete!");
         }
         
         // Unity Events to publish DockRecallStatus changes

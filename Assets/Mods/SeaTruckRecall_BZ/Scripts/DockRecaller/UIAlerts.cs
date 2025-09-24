@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using static DaftAppleGames.SeaTruckRecall_BZ.SeaTruckDockRecallPlugin;
 
 namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 {
@@ -23,15 +24,37 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         private readonly List<AlertInstance> _activeAlerts = new List<AlertInstance>();
 
         private ScrollRect _scrollRect;
-
+        private bool _canShowAlerts;
+        
         private void Awake()
         {
             _scrollRect = alertContainer.GetComponentInParent<ScrollRect>();
+        }
+
+        private void OnEnable()
+        {
+            _canShowAlerts = true;
+        }
+        
+        /// <summary>
+        /// Clean up the UI if disabled
+        /// </summary>
+        private void OnDisable()
+        {
+            _canShowAlerts = false;
+            ModDebugLog.LogDebug("UIAlerts disabled - cleaning up.");
+            CleanUp();
         }
         
         // Public method to add a new alert
         internal void AddAlert(string newAlert)
         {
+            // Ignore new alerts if the UI has been disabled
+            if (!_canShowAlerts)
+            {
+                return;
+            }
+            
             if (alertPrefab == null || alertContainer == null)
             {
                 Debug.LogWarning("UIAlerts: Missing prefab or container.");
@@ -98,6 +121,23 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             Canvas.ForceUpdateCanvases();
             
             _scrollRect.verticalNormalizedPosition = 0f;
+        }
+
+        /// <summary>
+        /// Clears up all alerts and resets the component
+        /// </summary>
+        private void CleanUp()
+        {
+            StopAllCoroutines();
+            ModDebugLog.LogDebug($"UIAlerts is cleaning up {_activeAlerts.Count} alerts...");
+            foreach (AlertInstance alert in _activeAlerts)
+            {
+                ModDebugLog.LogDebug($"Destroying alert object...");
+                Destroy(alert.AlertGameObjectInstance);
+            }
+            
+            ModDebugLog.LogDebug($"Clear alert list...");
+            _activeAlerts.Clear();
         }
         
         private class AlertInstance
