@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Perceiver
+  - DenyBuilding
   layers:
   - Default
   - TransparentFX
@@ -14,30 +15,30 @@ TagManager:
   - UI
   - 
   - 
-  - Terrain
+  - Viewmodel
+  - OnlyVehicle
+  - BuildPreview
+  - BuiltEntities
+  - HardPoints
+  - Useable
+  - IgnoreDepthWorldUI
+  - SpyPengin
+  - IgnoreHoverbike
+  - Vehicle
+  - FrontEnd
   - Player
-  - Target
-  - Obstacles
   - 
+  - Trigger
+  - NotUseable
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - RenderForAllCameras
+  - ControlRoomMinimap
+  - AllowPlayerAndVehicle
+  - IntroSpace
+  - BaseClipProxy
+  - Sky
+  - TerrainCollider
+  - DebugOverlays
   m_SortingLayers:
   - name: Default
     uniqueID: 0
