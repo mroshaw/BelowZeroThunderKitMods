@@ -1,18 +1,18 @@
 ﻿using System.Collections.Generic;
-using static DaftAppleGames.SeatruckRecall_BZ.SeaTruckDockRecallPlugin;
+using static DaftAppleGames.SeaTruckRecall_BZ.SeaTruckDockRecallPlugin;
 using UnityEngine;
 
-namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
+namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
 {
     /// <summary>
     /// Simple static class to track a list of active AutoPilots
     /// </summary>
-    internal static class AllAutoPilots
+    internal static class AllSeaTruckAutoPilots
     {
         private static readonly List<SeaTruckAutoPilot> AllAutoPilotsList;
         private static int Count => AllAutoPilotsList.Count;
 
-        static AllAutoPilots()
+        static AllSeaTruckAutoPilots()
         {
             AllAutoPilotsList = new List<SeaTruckAutoPilot>();
         }
@@ -22,8 +22,12 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
         /// </summary>
         internal static void AddInstance(SeaTruckAutoPilot autoPilot)
         {
+            if (AllAutoPilotsList.Contains(autoPilot))
+            {
+                return;
+            }
             AllAutoPilotsList.Add(autoPilot);
-            LogDebug($"AutoPilot: Registered new instance: {autoPilot.gameObject.name} with MoveMethod: {ConfigFile.RecallMoveMethod.ToString()}");
+            ModDebugLog.LogDebug($"AutoPilot: Registered new instance: {autoPilot.gameObject.name}");
         }
 
         /// <summary>
@@ -31,10 +35,19 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
         /// </summary>
         internal static void RemoveInstance(SeaTruckAutoPilot autoPilot)
         {
+            if (!AllAutoPilotsList.Contains(autoPilot))
+            {
+                return;
+            }
+            
             AllAutoPilotsList.Remove(autoPilot);
-            LogDebug($"DockRecaller: Removed instance: {autoPilot.gameObject.name}");
+            ModDebugLog.LogDebug($"DockRecaller: Removed instance: {autoPilot.gameObject.name}");
         }
 
+        /// <summary>
+        /// Be be used to get an initial list of active SeaTrucks. Try not to use, as FindObjectsOfType is pretty
+        /// inefficient
+        /// </summary>
         public static void GetAllActiveAutoPilots()
         {
             AllAutoPilotsList.Clear();
@@ -44,20 +57,23 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
             }
         }
 
+        /// <summary>
+        /// Given an origin, determine the closest SeaTruck with a "Ready" state autopilot
+        /// </summary>
         internal static SeaTruckAutoPilot GetClosestAutoPilot(Vector3 sourcePosition, float maxDistance)
         {
             float closestDistance = Mathf.Infinity;
             SeaTruckAutoPilot closestSeaTruck = null;
 
-            LogDebug($"Looking for closest SeaTruckAutoPilot out of {Count} registered SeaTrucks...");
+            ModDebugLog.LogDebug($"Looking for closest SeaTruckAutoPilot out of {Count} registered SeaTrucks...");
 
             if (Count == 0)
             {
-                LogDebug("No Seatrucks registered.");
+                ModDebugLog.LogDebug("No SeaTrucks registered.");
                 return null;
             }
 
-            // Loop through each seatruck, find out which is closest
+            // Loop through each SeaTruck, find out which is closest
             foreach (SeaTruckAutoPilot autoPilot in AllAutoPilotsList)
             {
 #if !UNITY_EDITOR
@@ -65,17 +81,17 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
                 SeaTruckSegment segment = autoPilot.GetComponent<SeaTruckSegment>();
                 if (segment.isDocked || segment.IsDocking() || !autoPilot.IsAvailable())
                 {
-                    LogDebug($"Seatruck {autoPilot.gameObject.name} is already docking or docked. Skipping...");
+                    ModDebugLog.LogDebug($"SeaTruck {autoPilot.gameObject.name} is already docking or docked. Skipping...");
                     continue;
                 }
 #endif
-                LogDebug($"Checking distance to: {autoPilot.gameObject.name}...");
+                ModDebugLog.LogDebug($"Checking distance to: {autoPilot.gameObject.name}...");
                 float currDistance = Vector3.Distance(sourcePosition, autoPilot.gameObject.transform.position);
                 {
-                    LogDebug($"Distance is: {currDistance}, closest so far is: {closestDistance}");
+                    ModDebugLog.LogDebug($"Distance is: {currDistance}, closest so far is: {closestDistance}");
                     if ((closestDistance == 0 || currDistance < closestDistance) && currDistance <= maxDistance)
                     {
-                        LogDebug("New closest Seatruck found!");
+                        ModDebugLog.LogDebug("New closest SeaTruck found!");
                         closestDistance = currDistance;
                         closestSeaTruck = autoPilot;
                     }
@@ -83,7 +99,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.AutoPilot
             }
 
             // Check to see if we've found anything in range
-            LogDebug(closestSeaTruck == null ? $"No SeaTrucks found within range!" : $"Closest Seatruck found: {closestSeaTruck.gameObject.name} at {closestDistance}");
+            ModDebugLog.LogDebug(closestSeaTruck == null ? $"No SeaTrucks found within range!" : $"Closest SeaTruck found: {closestSeaTruck.gameObject.name} at {closestDistance}");
 
             return closestSeaTruck;
         }

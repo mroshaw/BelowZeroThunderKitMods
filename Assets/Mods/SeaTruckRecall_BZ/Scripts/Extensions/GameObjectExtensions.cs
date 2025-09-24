@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace DaftAppleGames.SeatruckRecall_BZ.Extensions
+namespace DaftAppleGames.SeaTruckRecall_BZ.Extensions
 {
     public static class GameObjectExtensions
     {

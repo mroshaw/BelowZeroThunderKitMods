@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
+namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
 {
     /// <summary>
     /// Instant navigation to the destination position and rotation

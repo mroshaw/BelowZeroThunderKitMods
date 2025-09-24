@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace DaftAppleGames.SeatruckRecall_BZ.Navigation
+namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
 {
     /// <summary>
     /// Represents a "Cell" in the 3 dimensional nav grid

@@ -1,84 +1,99 @@
 ﻿using System.Collections.Generic;
-using DaftAppleGames.SeatruckRecall_BZ.AutoPilot;
-using DaftAppleGames.SeatruckRecall_BZ.Navigation;
+using DaftAppleGames.SeaTruckRecall_BZ.Navigation;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static DaftAppleGames.SeatruckRecall_BZ.SeaTruckDockRecallPlugin;
+using static DaftAppleGames.SeaTruckRecall_BZ.SeaTruckDockRecallPlugin;
 
-namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
+namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 {
     /// <summary>
     /// MonoBehaviour class implementing the UI elements of the
-    /// Seatruck Recall component
+    /// SeaTruck Recall component
     /// </summary>
     internal class SeaTruckDockRecallerUi : MonoBehaviour
     {
-        private readonly Dictionary<DockRecallState, string> _dockRecallDisplayStateTextDict = new Dictionary<DockRecallState, string>()
-        {
-            { DockRecallState.Initialising, "INITIALISING..." },
-            { DockRecallState.Ready, "READY" },
-            { DockRecallState.Aborted, "ABORTED" },
-            { DockRecallState.Recalling , "IN PROGRESS..." },
-            { DockRecallState.Docked,"DOCKED" },
-            { DockRecallState.Parking, "PARKING"}
-        };
-
         // Autopilot state text
         private const string AutoPilotDisplayText = "AUTOPILOT: ";
         private readonly Dictionary<AutoPilotState, string> _autoPilotStateDisplayTextDict = new Dictionary<AutoPilotState, string>()
         {
             { AutoPilotState.Ready, "READY" },
-            { AutoPilotState.CalculatingRoute, "CALCULATING ROUTE" },
             { AutoPilotState.Moving, "MOVING" },
-            { AutoPilotState.Arrived , "READY" },
+            { AutoPilotState.Arrived , "ARRIVED" },
             { AutoPilotState.Blocked, "ROUTE BLOCKED!" },
-            { AutoPilotState.Aborted , "READY" },
+            { AutoPilotState.Parking, "PARKING" },
+            { AutoPilotState.Docking , "DOCKING"},
+            { AutoPilotState.Docked , "DOCKED" },
+            { AutoPilotState.Aborted , "ABORTED!" },
         };
+        
+        [Header("Settings")]
+        [SerializeField] private SeaTruckDockRecaller _seaTruckRecaller;
         
         // UI properties
         [SerializeField] private GameObject activeScreenGo;
         [SerializeField] private GameObject inactiveScreenGo;
 
-        // New text controls for state updates
-        [SerializeField] private TextMeshProUGUI dockingStatusText;
-        [SerializeField] private TextMeshProUGUI autoPilotStatusText;
-        [SerializeField] private TextMeshProUGUI statusText;
+        // Text controls for state updates
+        [SerializeField] private TMP_Text dockingStatusText;
+        [SerializeField] private TMP_Text autoPilotStatusText;
         [SerializeField] private Button recallButton;
         [SerializeField] private Button abortRecallButton;
 
-        private SeaTruckDockRecaller _seatruckRecaller;
+        // Used for notifications on the console UI
+        private UIAlerts _uiAlerts;
         
         private void OnEnable()
         {
-            if (!_seatruckRecaller)
+            if (!_seaTruckRecaller)
             {
-                _seatruckRecaller = GetComponentInParent<SeaTruckDockRecaller>();
+                _seaTruckRecaller = GetComponentInParent<SeaTruckDockRecaller>();
             } 
 
             // Recaller events
-            _seatruckRecaller.OnDockingStateChanged.AddListener(DockStateChangedHandler);
-            _seatruckRecaller.OnAutoPilotChanged.AddListener(AutoPilotChangedHandler);
+            _seaTruckRecaller?.onAutoPilotChanged?.AddListener(AutoPilotChangedHandler);
+            _seaTruckRecaller?.onDockingStateChanged.AddListener(RecallerStateChangedHandler);
             
             // UI events
-            recallButton.onClick.AddListener(RecallButtonHandler);
-            abortRecallButton.onClick.AddListener(AbortButtonHandler);
+            recallButton?.onClick.AddListener(RecallButtonHandler);
+            abortRecallButton?.onClick.AddListener(AbortButtonHandler);
         }
 
         private void OnDisable()
         {
             // Recaller events
-            _seatruckRecaller.OnDockingStateChanged.RemoveListener(DockStateChangedHandler);
+            _seaTruckRecaller?.onAutoPilotChanged?.RemoveListener(AutoPilotChangedHandler);
+            _seaTruckRecaller?.onDockingStateChanged.RemoveListener(RecallerStateChangedHandler);
             
             // UI events
-            recallButton.onClick.RemoveListener(RecallButtonHandler);
-            abortRecallButton.onClick.RemoveListener(AbortButtonHandler);
+            recallButton?.onClick.RemoveListener(RecallButtonHandler);
+            abortRecallButton?.onClick.RemoveListener(AbortButtonHandler);
+        }
+
+        private void Awake()
+        {
+            _uiAlerts = GetComponentInChildren<UIAlerts>(true);
+            dockingStatusText.text = "INITIALISING...";
+            _uiAlerts.AddAlert("INITIALISING NAV GRID...");
+        }
+
+        private void Start()
+        {
+            SetButtonsToReady(false);
         }
 
         /// <summary>
+        /// Called by patch code to set the recaller
+        /// </summary>
+        internal void SetRecaller(SeaTruckDockRecaller newRecaller)
+        {
+            _seaTruckRecaller =  newRecaller;
+        }
+        
+        /// <summary>
         /// Enable the Recall UI
         /// </summary>
-        private void RecallReadyUi(bool interactable)
+        private void SetButtonsToReady(bool interactable)
         {
             recallButton.gameObject.SetActive(true);
             recallButton.interactable = interactable;
@@ -88,7 +103,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         /// <summary>
         /// Disable the Recall UI
         /// </summary>
-        private void RecallInProgressUi()
+        private void SetButtonsToRecalling()
         {
             recallButton.gameObject.SetActive(false);
             abortRecallButton.gameObject.SetActive(true);
@@ -99,16 +114,17 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         /// </summary>
         private void RecallButtonHandler()
         {
-            LogDebug("SeaTruckDockRecallerUi: Recall button clicked!");
-            if (_seatruckRecaller.IsDockReady())
+            ModDebugLog.LogDebug("SeaTruckDockRecallerUi: Recall button clicked!");
+            if (_seaTruckRecaller.IsDockReady())
             {
-                LogDebug("SeaTruckDockRecallerUi: Recalling closest SeaTruck");
-                // RecallInProgressUi();
-                _seatruckRecaller.RecallClosestSeaTruck();
+                ModDebugLog.LogDebug("SeaTruckDockRecallerUi: Recalling closest SeaTruck");
+                SetButtonsToRecalling();
+                _seaTruckRecaller.RecallClosestSeaTruck();
             }
             else
             {
-                LogDebug("SeaTruckDockRecallerUi: Recaller is busy!");
+                _uiAlerts.AddAlert("DOCK IS BUSY!");
+                ModDebugLog.LogDebug("SeaTruckDockRecallerUi: Recaller is busy!");
             }
         }
 
@@ -117,61 +133,92 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         /// </summary>
         private void AbortButtonHandler()
         {
-            LogDebug("SeaTruckDockRecallerUi: Abort button clicked!");
-            _seatruckRecaller.AbortRecall();
+            ModDebugLog.LogDebug("SeaTruckDockRecallerUi: Abort button clicked!");
+            _seaTruckRecaller.AbortRecall();
         }
 
-        private void DockStateChangedHandler(DockRecallState dockRecallState)
+        /// <summary>
+        /// Handle changes to the state of the attached Recaller
+        /// </summary>
+        private void RecallerStateChangedHandler(DockRecallState state)
         {
-            // Update the UI
-            LogDebug($"SeaTruckDockRecallerUi: Updating UI with DockRecallState: {dockRecallState.ToString()}");
-            dockingStatusText.text = $"{_dockRecallDisplayStateTextDict[dockRecallState]}";
-
-            // Enable or disable UI components
-            switch (dockRecallState)
+            switch (state)
             {
                 case DockRecallState.Ready:
+                    dockingStatusText.text = "READY";
+                    _uiAlerts.AddAlert("DOCK READY!");
+                    SetButtonsToReady(true);
+                    break;
+                
+                case DockRecallState.PathingError:
+                    dockingStatusText.text = "READY";
+                    _uiAlerts.AddAlert("PATHING ERROR! ABORTING!");
+                    SetButtonsToReady(true);
+                    break;
+                
+                case DockRecallState.Recalling:
+                    dockingStatusText.text = "RECALLING";
+                    _uiAlerts.AddAlert("RECALLING SEATRUCK!");
+                    SetButtonsToRecalling();
+                    break;
+                
                 case DockRecallState.Aborted:
-                    RecallReadyUi(true);
+                    dockingStatusText.text = "READY";
+                    _uiAlerts.AddAlert("NAVIGATION ABORTED!");
+                    SetButtonsToReady(true);
                     break;
-                case DockRecallState.Initialising:
-                    RecallReadyUi(false);
+                
+                case DockRecallState.Parking:
+                    dockingStatusText.text = "PARKING";
+                    _uiAlerts.AddAlert("PARKING SEATRUCK!");
                     break;
-                default:
-                    RecallInProgressUi();
+                
+                case DockRecallState.Docking:
+                    dockingStatusText.text = "DOCKING";
+                    _uiAlerts.AddAlert("SEATRUCK IS DOCKING!");
+                    break;
+                case DockRecallState.Docked:
+                    dockingStatusText.text = "DOCKED";
+                    _uiAlerts.AddAlert("SEATRUCK DOCKED!");
+                    SetButtonsToReady(false);
                     break;
             }
         }
 
+        /// <summary>
+        /// Subscribe / unsubscribe to AutoPilot events when the autopilot changes
+        /// </summary>
         private void AutoPilotChangedHandler(SeaTruckAutoPilot oldAutoPilot, SeaTruckAutoPilot newAutoPilot)
         {
             if (oldAutoPilot)
             {
-                oldAutoPilot.OnAutoPilotStateChanged.RemoveListener(AutoPilotStateChangedHandler);
-                oldAutoPilot.OnAutoPilotWaypointChanged.RemoveListener(AutoPilotWaypointChangedHandler);
+                oldAutoPilot.onStateChanged.RemoveListener(AutoPilotStateChangedHandler);
+                oldAutoPilot.onWaypointChanged.RemoveListener(AutoPilotWaypointChangedHandler);
             }
 
             if (newAutoPilot)
             {
-                newAutoPilot.OnAutoPilotStateChanged.AddListener(AutoPilotStateChangedHandler);
-                newAutoPilot.OnAutoPilotWaypointChanged.AddListener(AutoPilotWaypointChangedHandler);
+                newAutoPilot.onStateChanged.AddListener(AutoPilotStateChangedHandler);
+                newAutoPilot.onWaypointChanged.AddListener(AutoPilotWaypointChangedHandler);
             }
         }
         
+        /// <summary>
+        /// Show details of AutoPilot state on console UI
+        /// </summary>
         private void AutoPilotStateChangedHandler(AutoPilotState autoPilotState)
         {
-            LogDebug($"SeaTruckDockRecallerUi: Updating UI with AutoPilotState: {autoPilotState.ToString()}");
+            // LogDebug($"SeaTruckDockRecallerUi: Updating UI with AutoPilotState: {autoPilotState.ToString()}");
             autoPilotStatusText.text = $"{AutoPilotDisplayText}{_autoPilotStateDisplayTextDict[autoPilotState]}";
         }
 
+        /// <summary>
+        /// Display details of waypoints as they change
+        /// </summary>
         private void AutoPilotWaypointChangedHandler(Waypoint newWaypoint, float distanceToTarget)
         {
-            SetStatusText($"DISTANCE TO TARGET: {distanceToTarget:F}");
+            _uiAlerts.AddAlert($"MOVING TO WAYPOINT: {newWaypoint}");
+            _uiAlerts.AddAlert($"DISTANCE TO TARGET: {distanceToTarget:F}");
         }
-        
-        private void SetStatusText(string text)
-        {
-            statusText.text = text;
-        }
-    }
+}
 }

@@ -15,8 +15,28 @@ MonoBehaviour:
   Data:
   - {fileID: 7569945700012801874}
   - {fileID: 5489749723997726442}
+  - {fileID: 4985034652811520183}
   identity: {fileID: 7569945700012801874}
   QuickAccess: 1
+--- !u!114 &4985034652811520183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17d1008b78cb6e846889b7778282fbef, type: 3}
+  m_Name: AssetBundleDefinitions
+  m_EditorClassIdentifier: 
+  StagingPaths:
+  - <ManifestPluginStaging>/Assets
+  assetBundles:
+  - assetBundleName: seatruckrecallbzassetbundle
+    assets:
+    - {fileID: 824046755542336116, guid: d30660bd1ab749446ad92859954ba7f1, type: 3}
+    - {fileID: 6418034312203088039, guid: 123aa9f4a1528564baaa06789d599110, type: 3}
 --- !u!114 &5489749723997726442
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32,7 +52,8 @@ MonoBehaviour:
   StagingPaths:
   - <ManifestPluginStaging>
   definitions:
-  - {fileID: 5897886265953266890, guid: 5b060dc02db1b6948995f247e01f9b74, type: 3}
+  - {fileID: 5897886265953266890, guid: f80da6a1f35cddb46b379ab967f5ad7f, type: 3}
+  - {fileID: 5897886265953266890, guid: a8101a7f788ddab4d835833e6de817ac, type: 3}
 --- !u!114 &7569945700012801874
 MonoBehaviour:
   m_ObjectHideFlags: 0

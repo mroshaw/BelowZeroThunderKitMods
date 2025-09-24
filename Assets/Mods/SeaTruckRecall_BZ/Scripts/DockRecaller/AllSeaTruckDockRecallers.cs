@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using static DaftAppleGames.SeatruckRecall_BZ.SeaTruckDockRecallPlugin;
+using static DaftAppleGames.SeaTruckRecall_BZ.SeaTruckDockRecallPlugin;
 
-namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
+namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 {
     public static class AllSeaTruckDockRecallers
     {
@@ -21,7 +21,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
 #if !UNITY_EDITOR
             dockRecaller.SetMaxRange(ConfigFile.MaximumRange);
 #endif
-            LogDebug($"DockRecaller: Registered new instance: {dockRecaller.gameObject.name}.");
+            ModDebugLog.LogDebug($"DockRecaller: Registered new instance: {dockRecaller.gameObject.name}.");
             AllDockRecallersList.Add(dockRecaller);
         }
 
@@ -31,7 +31,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         internal static void RemoveInstance(SeaTruckDockRecaller dockRecaller)
         {
             AllDockRecallersList.Remove(dockRecaller);
-            LogDebug($"DockRecaller: Removed instance: {dockRecaller.gameObject.name}");
+            ModDebugLog.LogDebug($"DockRecaller: Removed instance: {dockRecaller.gameObject.name}");
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace DaftAppleGames.SeatruckRecall_BZ.DockRecaller
         /// </summary>
         internal static void UpdateAllDockRange(float recallRange)
         {
-            LogDebug($"DockRecaller: Updating range to {recallRange} for {Count} DockRecallers");
+            ModDebugLog.LogDebug($"DockRecaller: Updating range to {recallRange} for {Count} DockRecallers");
             foreach (SeaTruckDockRecaller dockRecaller in AllDockRecallersList)
             {
                 dockRecaller.SetMaxRange(recallRange);
