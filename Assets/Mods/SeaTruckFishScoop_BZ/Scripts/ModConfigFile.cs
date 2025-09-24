@@ -1,4 +1,6 @@
-﻿using Nautilus.Json;
+﻿using DaftAppleGames.ModUtils;
+using Nautilus.Json;
+using Nautilus.Options;
 using Nautilus.Options.Attributes;
 
 namespace DaftAppleGames.SeaTruckFishScoop_BZ
@@ -23,6 +25,16 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         
         [Toggle("Show Alerts", Tooltip="If checked, messages will be displayed in the top left of the screen whenever a scoop related action takes place. Uncheck this to suppress those.")]
         public bool ShowScoopAlerts = true;
+        
+        [Toggle("Detailed Logging", Tooltip="Only check this if you have a problem and need to see the debug output of the mod in the Player.log file"), OnChange(nameof(DetailedLoggingChangedHandler))]
+        public bool DetailedLogging = false;
 
+        /// <summary>
+        /// Set the Detailed Logging on the Mod Logger
+        /// </summary>
+        private void DetailedLoggingChangedHandler(ToggleChangedEventArgs newArgs)
+        {
+            SeaTruckFishScoopPluginBz.ModDebugLog.SetDetailedLoggingState(newArgs.Value);
+        }
     }
 }

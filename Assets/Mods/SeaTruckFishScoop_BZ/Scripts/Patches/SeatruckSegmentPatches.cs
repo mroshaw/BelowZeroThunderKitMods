@@ -20,9 +20,9 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         {
             if (__instance.isMainCab)
             {
-                Log.LogDebug("Adding SeaTruckFishScoop components...");
+                ModDebugLog.LogDebug("Adding SeaTruckFishScoop components...");
                 __instance.gameObject.AddComponent<FishScoop>();
-                Log.LogDebug("SeaTruckFishScoop components added.");
+                ModDebugLog.LogDebug("SeaTruckFishScoop components added.");
             }
         }
         
@@ -42,7 +42,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             FishScoop fishScoop = __instance.motor.GetComponent<FishScoop>();
             if (fishScoop)
             {
-                Log.LogDebug("Aquarium has been detached. Reevaluating fish scoop state...");
+                ModDebugLog.LogDebug("Aquarium has been detached. Reevaluating fish scoop state...");
                 fishScoop.EvaluateScoopState();
             }
         }

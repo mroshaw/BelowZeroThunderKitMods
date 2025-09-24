@@ -27,7 +27,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
 
             // Get the root context of the damage taker
             GameObject taker = __instance.gameObject;
-            // Log.LogDebug($"Damage: {dealer.name} did damage to: {taker.name}");
+            // ModLog.LogDebug($"Damage: {dealer.name} did damage to: {taker.name}");
             GameObject rootTaker = UWE.Utils.GetEntityRoot(__instance.gameObject);
             if (rootTaker == null)
             {
@@ -40,18 +40,18 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             {
                 rootDealer = dealer;
             }
-            // Log.LogDebug($"Dealer root: {rootDealer.name}. Taker root: {rootTaker.name}");
+            // ModLog.LogDebug($"Dealer root: {rootDealer.name}. Taker root: {rootTaker.name}");
 
             // Let's see if whatever dealt the damage was a SeaTruck main cab
             SeaTruckSegment SeaTruckSegment = rootDealer.GetComponent<SeaTruckSegment>();
             if (SeaTruckSegment == null)
             {
-                // Log.LogDebug("SeaTruckSegment is null. No Scoop.");
+                // ModLog.LogDebug("SeaTruckSegment is null. No Scoop.");
                 return true;
             }
             if (!SeaTruckSegment.isMainCab)
             {
-                // Log.LogDebug("SeaTruckSegment is not Main Cab. No Scoop.");
+                // ModLog.LogDebug("SeaTruckSegment is not Main Cab. No Scoop.");
                 return true;
             }
 
@@ -59,7 +59,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             FishScoop fishScoop = dealer.gameObject.GetComponent<FishScoop>();
             if (fishScoop != null)
             {
-                Log.LogDebug("Calling Scoop...");
+                ModDebugLog.LogDebug("Calling Scoop...");
                 // Set caught fish to maximum health
                 __instance.ResetHealth();
                 bool scoopSuccess = fishScoop.Scoop(rootTaker);

@@ -1,5 +1,6 @@
-﻿using BepInEx;
-using BepInEx.Logging;
+﻿using System.Reflection;
+using BepInEx;
+using DaftAppleGames.ModUtils;
 using HarmonyLib;
 using Nautilus.Handlers;
 
@@ -13,22 +14,29 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         private const string PluginName = "Sea Truck Fish Scoop Mod BZ";
         private const string VersionString = "3.2.0";
 
+        private const string AssetBundleName = "seatruckfishscoopassetbundle";
+        
         // Config file / UI initialisation
         internal static ModConfigFile ConfigFile = OptionsPanelHandler.RegisterModOptions<ModConfigFile>();
         private static readonly Harmony Harmony = new Harmony(MyGuid);
-        public static ManualLogSource Log;
 
+        // Setup helpers
+        internal static ModLog ModDebugLog;
+        internal static ModAssetBundleUtils ModAssetUtils;
+        
         private void Awake()
         {
-            Log = Logger;
-                        
+            // Setup logging and asset bundle
+            ModDebugLog =  new ModLog(Logger, ConfigFile.DetailedLogging);
+            ModAssetUtils = new ModAssetBundleUtils(AssetBundleName, Assembly.GetExecutingAssembly(),true, ModDebugLog);
+
             // Setup the new module prefab. 
             FishScoopModulePrefab.Init();
             // Patch in our MOD
-            Logger.LogInfo(PluginName + " " + VersionString + " " + "loading...");
+            ModDebugLog.LogInfo(PluginName + " " + VersionString + " " + "loading...");
             // Patch in the SeaTruckUpgrades
             Harmony.PatchAll();
-            Logger.LogInfo(PluginName + " " + VersionString + " " + "loaded.");
+            ModDebugLog.LogInfo(PluginName + " " + VersionString + " " + "loaded.");
         }
     }
 }

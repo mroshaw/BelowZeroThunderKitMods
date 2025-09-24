@@ -19,7 +19,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         private const string IconAssetName = "FishScoopIcon.png";
         internal static void Init()
         {
-            Log.LogDebug("Initialising FishScoop Upgrade Module...");
+            ModDebugLog.LogDebug("Initialising FishScoop Upgrade Module...");
             PrefabInfo = PrefabInfo.WithTechType("SeaTruckFishScoopUpgrade", "SeaTruck Fish Scoop", "Scoop fish directly into attached aquariums. Great for stocking up on bio-fuel!", unlockAtStart: true)
                 .WithIcon(GetIconSprite());
             CustomPrefab prefab = new CustomPrefab(PrefabInfo);
@@ -27,7 +27,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             CloneTemplate clone = new CloneTemplate(PrefabInfo, TechType.SeaTruckUpgradePerimeterDefense);
             prefab.SetGameObject(clone);
 
-            Log.LogDebug("Set Recipe...");
+            ModDebugLog.LogDebug("Set Recipe...");
             prefab.SetRecipe(new RecipeData()
                 {
                     craftAmount = 1,
@@ -57,7 +57,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         /// </summary>
         private static void ScoopAdded(SeaTruckUpgrades upgrade, SeaTruckMotor SeaTruck, int slotId)
         {
-            Log.LogDebug($"Fish Scoop upgrade added in slot {slotId} on {SeaTruck}.");
+            ModDebugLog.LogDebug($"Fish Scoop upgrade added in slot {slotId} on {SeaTruck}.");
             SeaTruck.GetComponent<FishScoop>()?.Equip(slotId);
         }
         
@@ -66,7 +66,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         /// </summary>
         private static void ScoopRemoved(SeaTruckUpgrades upgrade, SeaTruckMotor SeaTruck, int slotId)
         {
-            Log.LogDebug($"Fish Scoop upgrade removed from slot {slotId} on {SeaTruck}.");
+            ModDebugLog.LogDebug($"Fish Scoop upgrade removed from slot {slotId} on {SeaTruck}.");
             SeaTruck.GetComponent<FishScoop>()?.Unequip(slotId);
         }
         
@@ -75,7 +75,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         /// </summary>
         private static void ScoopToggled(SeaTruckUpgrades upgrade, SeaTruckMotor SeaTruck, int slotId, float charge, bool toggled)
         {
-            Log.LogDebug($"Fish Scoop toggled to {toggled} on {SeaTruck} .");
+            ModDebugLog.LogDebug($"Fish Scoop toggled to {toggled} on {SeaTruck} .");
         }
 
         /// <summary>
@@ -84,8 +84,8 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         /// <returns></returns>
         private static Sprite GetIconSprite()
         {
-            Texture2D iconTexture = CustomAssetBundleUtils.GetObjectFromAssetBundle<Texture2D>(IconAssetName) as Texture2D;
-            Sprite iconSprite = CustomAssetBundleUtils.GetSpriteFromTexture(iconTexture);
+            Texture2D iconTexture = ModAssetUtils.GetObjectFromAssetBundle<Texture2D>(IconAssetName) as Texture2D;
+            Sprite iconSprite = ModAssetUtils.GetSpriteFromTexture(iconTexture);
             return iconSprite;
         }
     }

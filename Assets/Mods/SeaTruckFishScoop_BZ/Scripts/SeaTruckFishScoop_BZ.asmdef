@@ -1,6 +1,8 @@
 {
     "name": "SeaTruckFishScoop_BZ",
-    "references": [],
+    "references": [
+        "GUID:a8101a7f788ddab4d835833e6de817ac"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,

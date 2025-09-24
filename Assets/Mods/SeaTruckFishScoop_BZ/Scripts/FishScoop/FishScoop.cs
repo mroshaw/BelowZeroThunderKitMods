@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using DaftAppleGames.ModUtils;
 using UnityEngine;
 using static DaftAppleGames.SeaTruckFishScoop_BZ.SeaTruckFishScoopPluginBz;
 using Random = UnityEngine.Random;
@@ -59,13 +60,13 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             _SeaTruckUpgrades = GetComponent<SeaTruckUpgrades>();
             if(!_SeaTruckUpgrades)
             {
-                Log.LogError("FishScoop Awake: Could not find SeaTruckUpgrades!");
+                ModDebugLog.LogError("FishScoop Awake: Could not find SeaTruckUpgrades!");
             }
             
             _mainMotor = GetComponentInParent<SeaTruckMotor>();
             if(!_mainMotor)
             {
-                Log.LogError("FishScoop Awake: Could not find SeaTruckMotor!");
+                ModDebugLog.LogError("FishScoop Awake: Could not find SeaTruckMotor!");
             }
         }
         
@@ -85,8 +86,8 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         // Set up the FMOD emitter for the custom purge sound
         private void ConfigureEmitters()
         {
-            CustomAudioUtils.ConfigureEmitter(_purgeEmitter, PurgeAudioAsset, AudioBusPath, audioVolume );
-            CustomAudioUtils.ConfigureEmitter(_fishReleasedEmitter, FishReleasedAudioAsset, AudioBusPath, audioVolume );
+            ModAudioUtils.ConfigureEmitter(_purgeEmitter, PurgeAudioAsset, AudioBusPath, audioVolume, ModAssetUtils, ModDebugLog);
+            ModAudioUtils.ConfigureEmitter(_fishReleasedEmitter, FishReleasedAudioAsset, AudioBusPath, audioVolume, ModAssetUtils, ModDebugLog);
         }
         
         /// <summary>
@@ -139,19 +140,19 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         /// </summary>
         private void FindQuickSlotId()
         {
-            Log.LogDebug("Finding quick slot ID...");
+            ModDebugLog.LogDebug("Finding quick slot ID...");
             for (int currSlot = 0; currSlot < SeaTruckUpgrades.slotIDs.Length; currSlot++)
             {
                 TechType techTypeInSlot = _SeaTruckUpgrades.modules.GetTechTypeInSlot(SeaTruckUpgrades.slotIDs[currSlot]);
                 if (techTypeInSlot == FishScoopModulePrefab.PrefabInfo.TechType)
                 {
                     _scoopQuickSlotId = currSlot;
-                    Log.LogDebug($"Found Fish Scoop in {currSlot}");
+                    ModDebugLog.LogDebug($"Found Fish Scoop in {currSlot}");
                     return;
                 }
             }
             // Not found
-            Log.LogDebug($"Could not find Fish Scoop in Quick Slots!");
+            ModDebugLog.LogDebug($"Could not find Fish Scoop in Quick Slots!");
             _scoopQuickSlotId = -1;
         }
         /// <summary>
@@ -176,7 +177,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         /// </summary>
         private bool ToggleScoop()
         {
-            Log.LogDebug($"Toggling fish scoop from: {_isOn}...");
+            ModDebugLog.LogDebug($"Toggling fish scoop from: {_isOn}...");
 
             // If we're not in the SeaTruck, call it a day
             if (!_mainMotor)
@@ -255,7 +256,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         /// </summary>
         private void SetQuickSlotToggleState()
         {
-            Debug.Log($"Setting quick slot {_scoopQuickSlotId} toggled state to {_isOn}");
+            ModDebugLog.LogDebug($"Setting quick slot {_scoopQuickSlotId} toggled state to {_isOn}");
             RaiseOnToggle(_SeaTruckUpgrades, _scoopQuickSlotId, _isOn);
         }
         
@@ -308,7 +309,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             }
 
             // We've passed our checks, now try to add the fish
-            Log.LogDebug("Taker is a supported fish");
+            ModDebugLog.LogDebug("Taker is a supported fish");
             bool fishAdded = AddFishToFreeAquarium(objectToScoop);
             return fishAdded;
         }
@@ -318,19 +319,19 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         /// </summary>
         private bool IsValidObject(GameObject takerGameObject)
         {
-            Log.LogDebug("In IsValidObject");
+            ModDebugLog.LogDebug("In IsValidObject");
             if (!takerGameObject.GetComponent<AquariumFish>())
             {
-                Log.LogDebug("IsValidObject: Not an AquariumFish. No Scoop.");
+                ModDebugLog.LogDebug("IsValidObject: Not an AquariumFish. No Scoop.");
                 return false;
             }
             WaterParkCreature waterParkCreature = takerGameObject.GetComponent<WaterParkCreature>();
             if (waterParkCreature && waterParkCreature.IsInsideWaterPark())
             {
-                Log.LogDebug("IsValidObject: Target IsInsideWaterPark. No Scoop.");
+                ModDebugLog.LogDebug("IsValidObject: Target IsInsideWaterPark. No Scoop.");
                 return false;
             }
-            Log.LogDebug("IsValidObject: Target IsInsideWaterPark. No Scoop.");
+            ModDebugLog.LogDebug("IsValidObject: Target IsInsideWaterPark. No Scoop.");
             return true;
         }
 
@@ -348,7 +349,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             // Check if we have any aquarium modules attached
             if (!IsAquariumAttached())
             {
-                Log.LogDebug($"Couldn't find any Aquariums!");
+                ModDebugLog.LogDebug($"Couldn't find any Aquariums!");
                 ShowAlert($"Cannot purge, no aquariums attached!");
                 return;
             }
@@ -360,18 +361,18 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             // Check if there are bioreactors in range
             List<BaseBioReactor> bioReactorsInRange = FindNearbyBioReactors();
             PurgeTarget purgeTarget = bioReactorsInRange.Count > 0 ? PurgeTarget.BioReactor : PurgeTarget.Water;
-            Log.LogDebug($"Attempting to purge to : {purgeTarget}");
+            ModDebugLog.LogDebug($"Attempting to purge to : {purgeTarget}");
             
             // Iterate over attached aquariums
             SeaTruckAquarium[] SeaTruckAquariums = _mainMotor.GetComponentsInChildren<SeaTruckAquarium>();
-            Log.LogDebug($"Found {SeaTruckAquariums.Length} aquarium modules");
+            ModDebugLog.LogDebug($"Found {SeaTruckAquariums.Length} aquarium modules");
             _purgeEmitter.Play();
             foreach (SeaTruckAquarium SeaTruckAquarium in SeaTruckAquariums)
             {
                 (int numFishInWater, int numFixInBioReactor) = PurgeFishFromAquarium(SeaTruckAquarium, purgeTarget, bioReactorsInRange);
                 totalFishInWater +=  numFishInWater;
                 totalFishInBioreactor +=  numFixInBioReactor;
-                Log.LogDebug($"Purged aquarium: {SeaTruckAquarium.name}");
+                ModDebugLog.LogDebug($"Purged aquarium: {SeaTruckAquarium.name}");
             }
             ShowAlert($"All aquariums purged!");
             if (totalFishInWater > 0)
@@ -391,11 +392,11 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         private bool IsAquariumAttached()
         {
             SeaTruckAquarium[] SeaTruckAquariums = _mainMotor.GetComponentsInChildren<SeaTruckAquarium>();
-            Log.LogDebug($"Found {SeaTruckAquariums.Length} aquarium modules");
+            ModDebugLog.LogDebug($"Found {SeaTruckAquariums.Length} aquarium modules");
             // Check to see if there are any aquariums
             if (SeaTruckAquariums.Length == 0)
             {
-                Log.LogDebug("No aquariums found.");
+                ModDebugLog.LogDebug("No aquariums found.");
                 return false;
             }
             return true;
@@ -421,12 +422,12 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             // We hit a supported fish with our SeaTruck cab. Iterate over all Aquarium modules and add the fish to
             // the first one with space
             SeaTruckAquarium[] SeaTruckAquariums = _mainMotor.GetComponentsInChildren<SeaTruckAquarium>();
-            Log.LogDebug($"Found {SeaTruckAquariums.Length} aquarium modules");
+            ModDebugLog.LogDebug($"Found {SeaTruckAquariums.Length} aquarium modules");
 
             // Check to see if there are any aquariums
             if (SeaTruckAquariums.Length == 0)
             {
-                Log.LogDebug("No aquariums found.");
+                ModDebugLog.LogDebug("No aquariums found.");
                 return false;
             }
 
@@ -436,11 +437,11 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             {
                 if (AddFishToAquarium(SeaTruckAquarium, fish))
                 {
-                    Log.LogDebug($"Fish successfully added {fish.name} as {friendlyFishName}");
+                    ModDebugLog.LogDebug($"Fish successfully added {fish.name} as {friendlyFishName}");
                     ShowAlert($"Scooped {friendlyFishName}!");
                     return true;
                 }
-                Log.LogDebug($"Unable to add fish to this aquarium ({SeaTruckAquarium.name}). Likely full or fish is already in one.");
+                ModDebugLog.LogDebug($"Unable to add fish to this aquarium ({SeaTruckAquarium.name}). Likely full or fish is already in one.");
             }
             
             if (ConfigFile.ReleaseFailedScoopFish)
@@ -478,19 +479,19 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
                         break;
                     
                     case PurgeTarget.BioReactor:
-                        Log.LogDebug("Attempting to add to BioReactor...");
+                        ModDebugLog.LogDebug("Attempting to add to BioReactor...");
                         // Try to add to one of the in range bioreactors
                         bool addedToReactor = false;
                         foreach (BaseBioReactor bioReactor in bioReactors)
                         {
                             if (bioReactor._container.HasRoomFor(fishPickupable))
                             {
-                                Log.LogDebug("Adding to BioReactor...");
+                                ModDebugLog.LogDebug("Adding to BioReactor...");
                                 InventoryItem item = new InventoryItem(fishPickupable);
                                 bioReactor._container.UnsafeAdd(item);
                                 addedToReactor = true;
                                 numFishInBioReactor++;
-                                Log.LogDebug("Successfully added to BioReactor!");
+                                ModDebugLog.LogDebug("Successfully added to BioReactor!");
                                 break;
                             }
                         }
@@ -498,7 +499,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
                         // If we were unable to add to a bioreactor, drop it in the ocean
                         if (!addedToReactor)
                         {
-                            Log.LogDebug("All BioReactors in range are full. Purging to ocean...");
+                            ModDebugLog.LogDebug("All BioReactors in range are full. Purging to ocean...");
                             fishPickupable.Drop(RandomPurgeLocation, PurgeVelocity, false);
                             numFishInWater++;
                         }
@@ -509,7 +510,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
 
                 // Remove from aquarium container
                 container.RemoveItem(fishPickupable, true);
-                Log.LogDebug($"Removed {fishPickupable.name}");
+                ModDebugLog.LogDebug($"Removed {fishPickupable.name}");
             }
             return (numFishInWater,  numFishInBioReactor);
         }
@@ -590,7 +591,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
                     bioReactorsInRange.Add(bioReactor);
                 }
             }
-            Log.LogDebug($"Found {bioReactorsInRange.Count} nearby bio reactors");
+            ModDebugLog.LogDebug($"Found {bioReactorsInRange.Count} nearby bio reactors");
             return bioReactorsInRange;
         }
     }

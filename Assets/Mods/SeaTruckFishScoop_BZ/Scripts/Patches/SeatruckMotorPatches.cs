@@ -23,7 +23,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
                 return;
             }
             
-            Log.LogDebug("Stopped piloting SeaTruck with a Fish Scoop. Setting scoop state...");
+            ModDebugLog.LogDebug("Stopped piloting SeaTruck with a Fish Scoop. Setting scoop state...");
             fishScoop.StopPiloting();
         }
     }
