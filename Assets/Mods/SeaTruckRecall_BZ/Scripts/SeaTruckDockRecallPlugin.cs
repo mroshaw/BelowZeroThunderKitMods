@@ -9,8 +9,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ
     // Mod supports "Teleporting" a SeaTruck, and forcing a an "Autopilot" behaviour
     public enum RecallMoveMethod
     {
-        Instant,
-        Smooth,
+        Teleport,
+        Autopilot,
     };
 
     [BepInPlugin(MyGuid, PluginName, VersionString)]

@@ -14,7 +14,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ
         /// Recall Config
         /// </summary>
         [Choice("Recall Method (Restart Required)", Tooltip="Smooth movement will attempt to drive the Seatruck to the dock. Instance will immediately move it and engage the dock.")]
-        public RecallMoveMethod RecallMoveMethod = RecallMoveMethod.Smooth;
+        public RecallMoveMethod RecallMoveMethod = RecallMoveMethod.Autopilot;
 
         /// <summary>
         /// Recaller NavGrid properties

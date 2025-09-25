@@ -7,7 +7,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
 {
     internal class NavGridHelper : MonoBehaviour
     {
-        [Header("Settings")]
+        [Header("Settings")] [SerializeField]
+        internal Transform gridCenterPosition;
         [SerializeField] internal float maxRange = 100.0f;
         [SerializeField] private int navGridCellExtends = 5;
         [SerializeField] private LayerMask navGridIncludeLayerMask;
@@ -41,28 +42,35 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
             _navGrid.OnPathingStatusChanged.AddListener(PathingStatusChangedHandler);
         }
         
-        internal IEnumerator RefreshNavGridAsync(Action<GenerateStatus> gridCompleteCallBack)
+        internal IEnumerator RefreshNavGridAsync(Vector3 centerPosition, Action<GenerateStatus> gridCompleteCallBack)
         {
 #if !UNITY_EDITOR
             navGridDebug = SeaTruckDockRecallPlugin.ConfigFile.EnableNavGridDebug;
             maxRange = SeaTruckDockRecallPlugin.ConfigFile.MaximumRange;
             navGridCellExtends = SeaTruckDockRecallPlugin.ConfigFile.CellExtents;
 #endif
-            yield return StartCoroutine(_navGrid.GenerateNavGridAsync(transform.position, navGridCellExtends, maxRange, navGridIncludeLayerMask,
+#if UNITY_EDITOR
+            centerPosition = gridCenterPosition.position;
+#endif
+            
+            yield return StartCoroutine(_navGrid.GenerateNavGridAsync(centerPosition, navGridCellExtends, maxRange, navGridIncludeLayerMask,
                 gridCompleteCallBack, navGridDebug, navGridDebugContainer, visualiserPrefab));
         }
         
         /// <summary>
         /// Refresh the internal grid
         /// </summary>
-        internal void RefreshNavGrid(Action<GenerateStatus> gridCompleteCallBack)
+        internal void RefreshNavGrid(Vector3 centerPosition, Action<GenerateStatus> gridCompleteCallBack)
         {
 #if !UNITY_EDITOR
             navGridDebug = SeaTruckDockRecallPlugin.ConfigFile.EnableNavGridDebug;
             maxRange = SeaTruckDockRecallPlugin.ConfigFile.MaximumRange;
             navGridCellExtends = SeaTruckDockRecallPlugin.ConfigFile.CellExtents;
 #endif
-            StartCoroutine(_navGrid.GenerateNavGridAsync(transform.position, navGridCellExtends, maxRange, navGridIncludeLayerMask,
+#if UNITY_EDITOR
+            centerPosition = gridCenterPosition.position;
+#endif
+            StartCoroutine(_navGrid.GenerateNavGridAsync(centerPosition, navGridCellExtends, maxRange, navGridIncludeLayerMask,
                 gridCompleteCallBack, navGridDebug, navGridDebugContainer, visualiserPrefab));
         }
 
@@ -71,6 +79,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
         /// </summary>
         internal void GenerateNavPath(Vector3 startPos, Vector3 endPos, Action<GenerateStatus, NavPath> pathGenCompleteCallBack)
         {
+#if UNITY_EDITOR
+            endPos = gridCenterPosition.position;
+#endif
 #if !UNITY_EDITOR
             pathDebug = SeaTruckDockRecallPlugin.ConfigFile.EnableNavGridDebug;
 #endif

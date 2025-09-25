@@ -236,10 +236,11 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
                 ModDebugLog.LogDebug($"AutoPilot BeginNavigation: autopilot is not ready. State is: {currentAutoPilotState}");
                 return false;
             }
-            
+
+#if !UNITY_EDITOR
             // Reset dockable time
             _dockable.timeUndocked = 0.0f;
-            
+#endif
             _totalWaypoints =  waypoints.Count;
             _currentWaypointIndex = 0;
             

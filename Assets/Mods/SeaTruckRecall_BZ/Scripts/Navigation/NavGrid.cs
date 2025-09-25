@@ -119,6 +119,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
             float genStartTime = Time.fixedTime;
             ModDebugLog.LogDebug($"Started Grid Generation: {genStartTime}");
             ModDebugLog.LogDebug($"Ocean Level is: {Ocean.GetOceanLevel()}");
+            ModDebugLog.LogDebug($"Grid Center is: {sourcePosition}");
             SetGridStatus(GenerateStatus.Generating);
             
             Vector3 direction = (sourcePosition).normalized;
@@ -128,7 +129,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
             ModDebugLog.LogDebug($"Num Extends: {numCellExtends}");
             ModDebugLog.LogDebug($"Range: {range}");
             ModDebugLog.LogDebug($"Cell Size: {cellSize}");
-            ModDebugLog.LogDebug($"NavGrid dimensions: x:{numCellExtends * 2}, y:{numCellExtends * 2}, z:{numCellExtends * 2}. Total cells: {Math.Pow(numCellExtends,3)}");
+            ModDebugLog.LogDebug($"NavGrid dimensions: x:{numCellExtends * 2}, y:{numCellExtends * 2}, z:{numCellExtends * 2}. Total cells: {Math.Pow(numCellExtends * 2,3)}");
 
             _navGrid = new NavCell[(numCellExtends * 2) + 1, (numCellExtends * 2) + 1, (numCellExtends * 2) + 1];
 

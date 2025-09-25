@@ -131,10 +131,10 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             onAutoPilotChanged?.Invoke(oldAutoPilot, newAutoPilot);
         }
         
-        private IEnumerator GenerateNavGridAsync()
+        private IEnumerator GenerateNavGridAsync(Vector3 centerPosition)
         {
             SetDockState(DockRecallState.Initialising);
-            yield return _navGridHelper.RefreshNavGridAsync(GridReadyHandler);
+            yield return _navGridHelper.RefreshNavGridAsync(centerPosition, GridReadyHandler);
         }
         
         /// <summary>
@@ -143,7 +143,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         internal void GenerateNavGrid()
         {
             SetDockState(DockRecallState.Initialising);
-            _navGridHelper.RefreshNavGrid(GridReadyHandler);
+            _navGridHelper.RefreshNavGrid(_startOfDockRunway.Position, GridReadyHandler);
         }
 
         private void GridReadyHandler(GenerateStatus gridStatus)
@@ -237,7 +237,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 #if UNITY_EDITOR
             if (instantNav)
 #else
-            if (ConfigFile.RecallMoveMethod == RecallMoveMethod.Instant)
+            if (ConfigFile.RecallMoveMethod == RecallMoveMethod.Teleport)
 #endif
             {
                 InstantNav();
