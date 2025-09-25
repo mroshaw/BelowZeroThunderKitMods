@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using DaftAppleGames.SeaTruckRecall_BZ.Navigation;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

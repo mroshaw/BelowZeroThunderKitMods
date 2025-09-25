@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
+namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 {
     /// <summary>
     /// Simple debug class to rotate the game object to face the camera

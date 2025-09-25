@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using static DaftAppleGames.SeaTruckRecall_BZ.SeaTruckDockRecallPlugin;
 
-namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
+namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 {
     public enum NavState { None, Idle, Moving, Blocked, Arrived }
     /// <summary>

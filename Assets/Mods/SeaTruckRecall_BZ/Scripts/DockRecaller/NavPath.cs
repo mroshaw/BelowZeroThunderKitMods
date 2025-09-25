@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
+namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 {
     internal class NavPath : List<NavCell>
     {

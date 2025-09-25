@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace DaftAppleGames.SubnauticaPets.BaseParts
+namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 {
     /// <summary>
     /// Provides functionality to interact with the Pet Console

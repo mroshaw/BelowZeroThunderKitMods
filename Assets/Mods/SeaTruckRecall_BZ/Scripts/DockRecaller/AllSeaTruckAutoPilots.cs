@@ -2,7 +2,7 @@
 using static DaftAppleGames.SeaTruckRecall_BZ.SeaTruckDockRecallPlugin;
 using UnityEngine;
 
-namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
+namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 {
     /// <summary>
     /// Simple static class to track a list of active AutoPilots

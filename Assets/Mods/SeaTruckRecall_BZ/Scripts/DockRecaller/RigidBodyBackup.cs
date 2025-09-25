@@ -1,7 +1,7 @@
 ﻿using static DaftAppleGames.SeaTruckRecall_BZ.SeaTruckDockRecallPlugin;
 using UnityEngine;
 
-namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
+namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 {
     internal class RigidBodyBackup
     {

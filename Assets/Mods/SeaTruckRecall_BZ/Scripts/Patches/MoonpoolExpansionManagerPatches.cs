@@ -1,5 +1,4 @@
 ﻿using DaftAppleGames.SeaTruckRecall_BZ.DockRecaller;
-using DaftAppleGames.SeaTruckRecall_BZ.Navigation;
 using HarmonyLib;
 using UnityEngine;
 using static DaftAppleGames.SeaTruckRecall_BZ.SeaTruckDockRecallPlugin;

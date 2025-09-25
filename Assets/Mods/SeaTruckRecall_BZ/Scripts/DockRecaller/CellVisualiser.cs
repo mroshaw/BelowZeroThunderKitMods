@@ -2,7 +2,7 @@
 using UnityEngine;
 using static DaftAppleGames.SeaTruckRecall_BZ.SeaTruckDockRecallPlugin;
 
-namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
+namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 {
     internal enum CellType { Start, End, NavCell, Route }
 

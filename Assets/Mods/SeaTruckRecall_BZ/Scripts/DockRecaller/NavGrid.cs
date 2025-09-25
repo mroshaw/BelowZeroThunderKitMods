@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using DaftAppleGames.SeaTruckRecall_BZ.DockRecaller;
 using UnityEngine;
 using UnityEngine.Events;
 using static DaftAppleGames.SeaTruckRecall_BZ.SeaTruckDockRecallPlugin;
 using Object = UnityEngine.Object;
 
-namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
+namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 {
     internal enum GenerateStatus
     {
@@ -210,93 +211,94 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Navigation
             return false;
         }
 
-        internal IEnumerator GeneratePathAsync(Vector3 startPos, Vector3 endPos,
-            Action<GenerateStatus, NavPath> pathCompleteAction = null,
-            bool debug = false, Transform debugContainer = null)
+internal IEnumerator GeneratePathAsync(Vector3 startPos, Vector3 endPos,
+    Action<GenerateStatus, NavPath> pathCompleteAction = null,
+    bool debug = false, Transform debugContainer = null)
+{
+
+    if (IsBusy)
+    {
+        ModDebugLog.LogDebug("NavGrid is busy!");
+        pathCompleteAction?.Invoke(GenerateStatus.Failed, null);
+        yield break;
+    }
+
+    if (_gridStatus != GenerateStatus.Success)
+    {
+        ModDebugLog.LogDebug("NavGrid grid is not ready for pathing!");
+        pathCompleteAction?.Invoke(GenerateStatus.Failed, null);
+        yield break;
+    }
+
+    Transform pathDebugContainer = debug ? GetGridDebugContainer(debugContainer) : null;
+
+    float genTime = Time.time;
+    ModDebugLog.LogDebug($"Started Path Generation: {genTime}");
+    SetPathingStatus(GenerateStatus.Generating);
+
+    // ---------------------- Optimised open set ----------------------
+    NavPriorityQueue<NavCell> openSet = new NavPriorityQueue<NavCell>();
+    HashSet<NavCell> closedSet = new HashSet<NavCell>();
+    Dictionary<NavCell, NavCell> cameFrom = new Dictionary<NavCell, NavCell>();
+    Dictionary<NavCell, float> gScore = new Dictionary<NavCell, float>();
+    Dictionary<NavCell, float> fScore = new Dictionary<NavCell, float>();
+
+    NavCell startCell = FindClosestWalkableCell(startPos);
+    NavCell targetCell = FindClosestWalkableCell(endPos);
+
+    openSet.Enqueue(startCell, Heuristic(startCell.Position, targetCell.Position));
+    gScore[startCell] = 0;
+    fScore[startCell] = Heuristic(startCell.Position, targetCell.Position);
+    // ----------------------------------------------------------------
+
+    while (openSet.Count > 0)
+    {
+        // Dequeue the cell with lowest fScore
+        NavCell current = openSet.Dequeue();
+
+        if (current.Position == targetCell.Position)
         {
+            // Reached destination
+            NavPath navPath = ReconstructPath(cameFrom, current);
 
-            if (IsBusy)
+            if (debug)
             {
-                ModDebugLog.LogDebug("NavGrid is busy!");
-                pathCompleteAction?.Invoke(GenerateStatus.Failed, null);
-                yield break;
+                UpdatePathVisualisers(pathDebugContainer, navPath);
             }
 
-            if (_gridStatus != GenerateStatus.Success)
-            {
-                ModDebugLog.LogDebug("NavGrid grid is not ready for pathing!");
-                pathCompleteAction?.Invoke(GenerateStatus.Failed, null);
-                yield break;
-            }
-
-            Transform pathDebugContainer = debug ? GetGridDebugContainer(debugContainer) : null;
-
-            float genTime = Time.time;
-            ModDebugLog.LogDebug($"Started Path Generation: {genTime}");
-            SetPathingStatus(GenerateStatus.Generating);
-
-            HashSet<NavCell> openSet = new HashSet<NavCell>();
-            HashSet<NavCell> closedSet = new HashSet<NavCell>();
-            Dictionary<NavCell, NavCell> cameFrom = new Dictionary<NavCell, NavCell>();
-            Dictionary<NavCell, float> gScore = new Dictionary<NavCell, float>();
-            Dictionary<NavCell, float> fScore = new Dictionary<NavCell, float>();
-
-            NavCell startCell = FindClosestWalkableCell(startPos);
-            NavCell targetCell = FindClosestWalkableCell(endPos);
-
-            openSet.Add(startCell);
-            gScore[startCell] = 0;
-            fScore[startCell] = Heuristic(startCell.Position, targetCell.Position);
-
-            while (openSet.Count > 0)
-            {
-                NavCell current = GetLowestFScore(openSet, fScore);
-
-                if (current.Position == targetCell.Position)
-                {
-                    // Reached our destination, so pathing is complete
-                    NavPath navPath = ReconstructPath(cameFrom, current);
-
-                    if (debug)
-                    {
-                        UpdatePathVisualisers(pathDebugContainer, navPath);
-                    }
-
-                    SetPathingStatus(GenerateStatus.Success);
-                    pathCompleteAction?.Invoke(GenerateStatus.Success, navPath);
-                    ModDebugLog.LogDebug($"Finished Path Generation: {Time.time}. Time taken: {Time.time - genTime}.  Number of path cells: {navPath.Count}");
-                    yield break;
-                }
-
-                openSet.Remove(current);
-                closedSet.Add(current);
-
-                foreach (NavCell neighbor in GetNeighbors(_navGrid, current))
-                {
-                    if (closedSet.Contains(neighbor) || neighbor.HasColliders)
-                    {
-                        continue;
-                    }
-
-                    float tentativeGScore = gScore[current] + Vector3.Distance(current.Position, neighbor.Position);
-
-                    if (!openSet.Contains(neighbor) || tentativeGScore < gScore[neighbor])
-                    {
-                        cameFrom[neighbor] = current;
-                        gScore[neighbor] = tentativeGScore;
-                        fScore[neighbor] = gScore[neighbor] + Heuristic(neighbor.Position, targetCell.Position);
-                        openSet.Add(neighbor);
-                    }
-                }
-
-                yield return null;
-            }
-
-            // No path found
-            ModDebugLog.LogDebug($"Finished Path Generation: {Time.time}. Time taken: {Time.time - genTime}. No path found.");
-            SetPathingStatus(GenerateStatus.Failed);
-            pathCompleteAction?.Invoke(GenerateStatus.Failed, null);
+            SetPathingStatus(GenerateStatus.Success);
+            pathCompleteAction?.Invoke(GenerateStatus.Success, navPath);
+            ModDebugLog.LogDebug($"Finished Path Generation: {Time.time}. Time taken: {Time.time - genTime}.  Number of path cells: {navPath.Count}");
+            yield break;
         }
+
+        closedSet.Add(current);
+
+        foreach (NavCell neighbor in GetNeighbors(_navGrid, current))
+        {
+            if (closedSet.Contains(neighbor) || neighbor.HasColliders)
+                continue;
+
+            float tentativeGScore = gScore[current] + Vector3.Distance(current.Position, neighbor.Position);
+
+            if (!gScore.ContainsKey(neighbor) || tentativeGScore < gScore[neighbor])
+            {
+                cameFrom[neighbor] = current;
+                gScore[neighbor] = tentativeGScore;
+                fScore[neighbor] = gScore[neighbor] + Heuristic(neighbor.Position, targetCell.Position);
+                openSet.Enqueue(neighbor, fScore[neighbor]);
+            }
+        }
+
+        yield return null;
+    }
+
+    // No path found
+    ModDebugLog.LogDebug($"Finished Path Generation: {Time.time}. Time taken: {Time.time - genTime}. No path found.");
+    SetPathingStatus(GenerateStatus.Failed);
+    pathCompleteAction?.Invoke(GenerateStatus.Failed, null);
+}
+
 
         private void UpdatePathVisualisers(Transform pathDebugContainer, NavPath navPath)
         {
