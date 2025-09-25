@@ -2,7 +2,7 @@
 
 This mod replaces the "Nothing Docked" console UI on the Seatruck Dock introduced in the "What the Dock" update to Below Zero. The new UI allows the player to automatically recall the closest Seatruck to the dock. The Seatruck will automatically pilot itself, avoiding terrain and obstacles, and will navigate all the way into the docking tube to dock.
 
-![](.\media~\recallui.png)
+![](https://raw.githubusercontent.com/mroshaw/BelowZeroThunderKitMods/master/Assets/Mods/SeaTruckRecall_BZ/media~/recallui.png)
 
 ## Implementation details
 
@@ -10,7 +10,7 @@ The navigation system works on the basis of a `NavGrid`. This is a three dimensi
 
 This 3D grid is generated with the Seatruck Dock in it's center and each cell is evaluated as to whether it's "walkable" by means of a sphere cast that detects colliders on a particular set of layers.
 
-![](.\media~\navgridexample.png)
+![](https://raw.githubusercontent.com/mroshaw/BelowZeroThunderKitMods/master/Assets/Mods/SeaTruckRecall_BZ/media~/navgridexample.png)
 
 Hopefully you can see in the screenshot above, the grid cube with it's center at the little chequered flag sphere that represents the end of the docking tube. Green cells are traversable, red cells are not.
 
@@ -20,7 +20,7 @@ The total number of cells generated and evaluated can be calculated as: `(cellEx
 
 A navigation agent, in this case our Seatruck, can use this grid to calculate a path from it's current location within the grid to the dock. It does this by traversing the grid, looking for a way to get from cell to cell without being blocked by an unpassable cell.
 
-![](.\media~\pathexample.png)
+![](https://raw.githubusercontent.com/mroshaw/BelowZeroThunderKitMods/master/Assets/Mods/SeaTruckRecall_BZ/media~/pathexample.png)
 
 In this screenshot, you can just make out the white spheres that represent the path from the Seatruck's original position to the end of the docking tube. This path is called pathfinding, and is implemented using the [A* path finding algorithm](https://en.wikipedia.org/wiki/A*_search_algorithm).
 
