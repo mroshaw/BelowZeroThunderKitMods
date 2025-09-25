@@ -235,7 +235,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 #if UNITY_EDITOR
             if (instantNav)
 #else
-            if (ConfigFile.RecallMoveMethod == RecallMoveMethod.Instant)
+            if (ConfigFile.RecallMoveMethod == RecallMoveMethod.Teleport)
 #endif
             {
                 InstantNav();

@@ -16111,7 +16111,7 @@ PrefabInstance:
     - target: {fileID: 6418034312203088033, guid: 123aa9f4a1528564baaa06789d599110,
         type: 3}
       propertyPath: maxRange
-      value: 100
+      value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 6418034312203088033, guid: 123aa9f4a1528564baaa06789d599110,
         type: 3}
@@ -16121,7 +16121,7 @@ PrefabInstance:
     - target: {fileID: 6418034312203088033, guid: 123aa9f4a1528564baaa06789d599110,
         type: 3}
       propertyPath: navGridCellExtends
-      value: 5
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6418034312203088039, guid: 123aa9f4a1528564baaa06789d599110,
         type: 3}
