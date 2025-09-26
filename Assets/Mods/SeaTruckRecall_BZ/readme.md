@@ -14,9 +14,7 @@ This 3D grid is generated with the Seatruck Dock in it's center and each cell is
 
 Hopefully you can see in the screenshot above, the grid cube with it's center at the little chequered flag sphere that represents the end of the docking tube. Green cells are traversable, red cells are not.
 
-The size and density of the grid is determined by the range (how far out from the center point the last cell sits on a particular axis) and the number of cell extents (that is, how many cells are created and evaluated in each axis from the center of the grid). A large range and small cell number gives good performance but poor accuracy. A small range and large cell number gives better accuracy but is more processor intensive - each cell must be evaluated as "walkable", so any combination of the two parameters that increase the number of cells means more calculations. Both parameters are configurable in the mod options.
-
-The total number of cells generated and evaluated can be calculated as: `(cellExtents + 1)^3` and the distance between each cell as: `maxRange\(cellExtents+1)`
+The size and density of the grid is determined by the range (how far out from the center point the last cell sits on a particular axis) and the distance between each cell in the grid. A large range and large cell distance gives good performance but poorer accuracy. The smaller the distance between the cells, the longer it takes to generate the grid and perform path finding - each cell must be evaluated as "traversable", so any combination of the two parameters that increase the number of cells means more calculations. Both parameters are configurable in the mod options.
 
 A navigation agent, in this case our Seatruck, can use this grid to calculate a path from it's current location within the grid to the dock. It does this by traversing the grid, looking for a way to get from cell to cell without being blocked by an unpassable cell.
 

@@ -43,7 +43,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                     visualiserSphere = CreateOrUpdateSphere(sphere,0.5f, Color.blue);
                     break;
                 case CellType.NavCell:
-                    visualiserSphere = CreateOrUpdateSphere(sphere,0.5f, navCell.HasColliders ? Color.red : Color.green);
+                    visualiserSphere = CreateOrUpdateSphere(sphere,0.5f, navCell.IsTraversable ? Color.green : Color.red);
                     break;
                 case CellType.Route:
                     visualiserSphere = CreateOrUpdateSphere(sphere,0.5f, Color.white);

@@ -19,7 +19,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ
         // Plugin properties
         private const string MyGuid = "com.mroshaw.SeaTruckrecallbz";
         private const string PluginName = "Sea Truck Recall Mod BZ";
-        private const string VersionString = "1.2.0";
+        private const string VersionString = "1.0.0";
 
         private const string AssetBundleName = "seatruckrecallbzassetbundle";
         

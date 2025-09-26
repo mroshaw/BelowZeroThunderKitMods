@@ -10,7 +10,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
     internal struct NavCell : IEquatable<NavCell>
     {
         internal Vector3 Position;
-        internal bool HasColliders;
+        internal bool IsTraversable;
         internal string Name;
 
         public bool Equals(NavCell other)
@@ -28,7 +28,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             unchecked
             {
                 int hashCode = Position.GetHashCode();
-                hashCode = (hashCode * 397) ^ HasColliders.GetHashCode();
+                hashCode = (hashCode * 397) ^ IsTraversable.GetHashCode();
                 hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
                 return hashCode;
             }

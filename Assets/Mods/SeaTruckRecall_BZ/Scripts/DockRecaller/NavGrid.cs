@@ -31,6 +31,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
         private GenerateStatus _gridStatus = GenerateStatus.Idle;
         private GenerateStatus _pathStatus = GenerateStatus.Idle;
+
+        private const int YieldFrameCount = 5;
         
         private bool IsBusy => _gridStatus == GenerateStatus.Generating || _pathStatus == GenerateStatus.Generating;
         internal bool IsPathingReady => _gridStatus == GenerateStatus.Success && _pathStatus == GenerateStatus.Success;
@@ -41,15 +43,13 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         internal readonly PathingStatusChangedEvent OnPathingStatusChanged = new PathingStatusChangedEvent();
 
         // Cached RayCastHits for collider checks
-        private Collider[] _colliderHitCache;
-        private int _colliderHitCacheSize = 100;
+        private readonly Collider[] _colliderHitCache = new Collider[100];
+        private readonly RaycastHit[] _hitCache =  new RaycastHit[10];
 
         internal NavGrid()
         {
             SetGridStatus(GenerateStatus.Idle);
             SetPathingStatus(GenerateStatus.Idle);
-
-            _colliderHitCache = new Collider[_colliderHitCacheSize];
         }
 
         private void SetGridStatus(GenerateStatus newStatus)
@@ -98,7 +98,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             return newContainer.transform;
         }
 
-        internal IEnumerator GenerateNavGridAsync(Vector3 sourcePosition, int numCellExtends, float range, LayerMask colliderLayerMask,
+        internal IEnumerator GenerateNavGridAsync(Vector3 sourcePosition, float range, float distanceBetweenCells, LayerMask colliderLayerMask,
             Action<GenerateStatus> gridCompleteAction = null,
            bool debug = false,  Transform debugContainer = null, CellVisualiser debugVisualiser = null)
         {
@@ -124,51 +124,66 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             
             Vector3 direction = (sourcePosition).normalized;
 
-            float cellSize = range/(numCellExtends * 2);
+            int numCellExtents =  (int) (Math.Ceiling(range / distanceBetweenCells)) / 2;
+            int cellsInRow = (numCellExtents * 2) + 1;
             
-            ModDebugLog.LogDebug($"Num Extends: {numCellExtends}");
             ModDebugLog.LogDebug($"Range: {range}");
-            ModDebugLog.LogDebug($"Cell Size: {cellSize}");
-            ModDebugLog.LogDebug($"NavGrid dimensions: x:{numCellExtends * 2}, y:{numCellExtends * 2}, z:{numCellExtends * 2}. Total cells: {Math.Pow(numCellExtends * 2,3)}");
+            ModDebugLog.LogDebug($"Distance between cells: {distanceBetweenCells}");
+            ModDebugLog.LogDebug($"Number of cell extents: {numCellExtents}");
+            ModDebugLog.LogDebug($"NavGrid dimensions: x:{cellsInRow}, y:{cellsInRow}, z:{cellsInRow}. Total cells: {Math.Pow(cellsInRow,3)}");
 
-            _navGrid = new NavCell[(numCellExtends * 2) + 1, (numCellExtends * 2) + 1, (numCellExtends * 2) + 1];
+            _navGrid = new NavCell[cellsInRow, cellsInRow, cellsInRow];
 
             Vector3 right = Vector3.Cross(direction, Vector3.up).normalized;
             Vector3 up = Vector3.Cross(right, direction).normalized;
 
-            for (int x = -numCellExtends; x < numCellExtends; x++)
+            int iterations = 0;
+            
+            for (int x = -numCellExtents; x < numCellExtents; x++)
             {
-                for (int y = -numCellExtends; y <= numCellExtends; y++)
+                for (int y = -numCellExtents; y <= numCellExtents; y++)
                 {
-                    for (int z = -numCellExtends; z <= numCellExtends; z++)
+                    for (int z = -numCellExtents; z <= numCellExtents; z++)
                     {
-                        Vector3 cellPosition = sourcePosition + (direction * (x * cellSize)) + (up * (y * cellSize)) + (right * (z * cellSize));
+                        iterations++;
+                        Vector3 cellPosition = sourcePosition + (direction * (x * distanceBetweenCells)) + (up * (y * distanceBetweenCells)) + (right * (z * distanceBetweenCells));
 
-                        int numColliderHits = Physics.OverlapBoxNonAlloc(cellPosition, Vector3.one * (cellSize * 0.5f), _colliderHitCache, Quaternion.identity, colliderLayerMask, QueryTriggerInteraction.Ignore);
+                        // If above sea level, mark as invalid
+                        bool isTraversable = true;
+#if !UNITY_EDITOR
+                        isTraversable = !(cellPosition.y > Ocean.GetOceanLevel() - 2.0f);
 
-                        // If the cell is above sea level, mark as "invalid"
-#if UNITY_EDITOR
-                        bool hasCollider =  HasValidColliders(numColliderHits, _colliderHitCache);
-#else
-                        bool hasCollider = cellPosition.y > Ocean.GetOceanLevel() - 2.0f || HasValidColliders(numColliderHits, _colliderHitCache);
+                        // If below the terrain, mark as invalid
+                        if (isTraversable)
+                        {
+                            isTraversable = Physics.RaycastNonAlloc(cellPosition, Vector3.down, _hitCache) != 0;
+                        }
 #endif
-                        int cellXIndex = x + numCellExtends;
-                        int cellYIndex = y + numCellExtends;
-                        int cellZIndex = z + numCellExtends;
+                        int numColliderHits = Physics.OverlapBoxNonAlloc(cellPosition, Vector3.one * (distanceBetweenCells * 0.5f), _colliderHitCache, Quaternion.identity, colliderLayerMask, QueryTriggerInteraction.Ignore);
+
+                        // Check if the cell contains any colliders
+                        if (isTraversable)
+                        {
+                            isTraversable = !(HasValidColliders(numColliderHits, _colliderHitCache));
+                        }
+
+                        int cellXIndex = x + numCellExtents;
+                        int cellYIndex = y + numCellExtents;
+                        int cellZIndex = z + numCellExtents;
 
                         string cellName = $"(X:{cellXIndex}, Y:{cellYIndex}, Z:{cellZIndex})";
 
-                        _navGrid[cellXIndex, cellYIndex, cellZIndex] = new NavCell { Position = cellPosition, HasColliders = hasCollider, Name = cellName };
+                        _navGrid[cellXIndex, cellYIndex, cellZIndex] = new NavCell { Position = cellPosition, IsTraversable = isTraversable, Name = cellName };
 
                         totalCells++;
 
-                        if (hasCollider)
+                        if (isTraversable)
                         {
-                            totalBlockedCells++;
+                            totalClearCells++;
                         }
                         else
                         {
-                            totalClearCells++;
+                            totalBlockedCells++;
                         }
 
                         if (debug)
@@ -182,12 +197,17 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                         }
                     }
 
-                    yield return null;
+                    // Yield every n frames for performance
+                    if (iterations % YieldFrameCount == 0)
+                    {
+                        yield return null;
+                    }
                 }
             }
 
             float genEndTime = Time.fixedTime;
             ModDebugLog.LogDebug($"Finished Grid Generation: {Time.time}. Time taken: {genEndTime - genStartTime}");
+            ModDebugLog.LogDebug($"Number of iterations: {iterations}");
             ModDebugLog.LogDebug($"Cells created: {totalCells}, Blocked cells: {totalBlockedCells}, Clear cells: {totalClearCells}");
             SetGridStatus(GenerateStatus.Success);
             gridCompleteAction?.Invoke(GenerateStatus.Success);
@@ -248,8 +268,10 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             gScore[startCell] = 0;
             fScore[startCell] = Heuristic(startCell.Position, targetCell.Position);
 
+            int iterations = 0;
             while (openSet.Count > 0)
             {
+                iterations++;
                 NavCell current = GetLowestFScore(openSet, fScore);
 
                 if (current.Position == targetCell.Position)
@@ -264,7 +286,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
                     SetPathingStatus(GenerateStatus.Success);
                     pathCompleteAction?.Invoke(GenerateStatus.Success, navPath);
-                    ModDebugLog.LogDebug($"Finished Path Generation: {Time.time}. Time taken: {Time.time - genTime}.  Number of path cells: {navPath.Count}");
+                    ModDebugLog.LogDebug($"Finished Path Generation: {Time.time}. Time taken: {Time.time - genTime}.");
+                    ModDebugLog.LogDebug($"Number of iterations: {iterations}");
+                    ModDebugLog.LogDebug($"Number of path cells: {navPath.Count}");
                     yield break;
                 }
 
@@ -273,7 +297,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
                 foreach (NavCell neighbor in GetNeighbors(_navGrid, current))
                 {
-                    if (closedSet.Contains(neighbor) || neighbor.HasColliders)
+                    if (closedSet.Contains(neighbor) || !neighbor.IsTraversable)
                     {
                         continue;
                     }
@@ -289,11 +313,18 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                     }
                 }
 
-                yield return null;
+                // Yield every n frames for performance
+                if (iterations % YieldFrameCount == 0)
+                {
+                    yield return null;
+                }
             }
 
             // No path found
-            ModDebugLog.LogDebug($"Finished Path Generation: {Time.time}. Time taken: {Time.time - genTime}. No path found.");
+            ModDebugLog.LogDebug($"Finished Path Generation: {Time.time}. Time taken: {Time.time - genTime}.");
+            ModDebugLog.LogDebug($"Number of iterations: {iterations}");
+            ModDebugLog.LogDebug("No path found!");
+
             SetPathingStatus(GenerateStatus.Failed);
             pathCompleteAction?.Invoke(GenerateStatus.Failed, null);
         }
@@ -326,7 +357,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
             foreach (NavCell cell in _navGrid)
             {
-                if (cell.HasColliders || string.IsNullOrEmpty(cell.Name))
+                if (!cell.IsTraversable || string.IsNullOrEmpty(cell.Name))
                 {
                     continue; // Skip blocked cells
                 }
@@ -403,7 +434,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                     newZ >= 0 && newZ < gridZ)
                 {
                     NavCell neighbor = grid[newX, newY, newZ];
-                    if (!neighbor.HasColliders) // Only add walkable cells
+                    if (neighbor.IsTraversable) // Only add walkable cells
                     {
                         neighbors.Add(neighbor);
                     }

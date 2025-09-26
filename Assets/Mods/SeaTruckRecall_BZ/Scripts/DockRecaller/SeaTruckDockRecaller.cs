@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEngine.Events;
 using static DaftAppleGames.SeaTruckRecall_BZ.SeaTruckDockRecallPlugin;
@@ -12,6 +13,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
     {
         None,
         Initialising,
+        NoTrucksFound,
         FindingPath,
         PathingError,
         Ready,
@@ -129,10 +131,10 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             onAutoPilotChanged?.Invoke(oldAutoPilot, newAutoPilot);
         }
         
-        private IEnumerator GenerateNavGridAsync()
+        private IEnumerator GenerateNavGridAsync(Vector3 centerPosition)
         {
             SetDockState(DockRecallState.Initialising);
-            yield return _navGridHelper.RefreshNavGridAsync(GridReadyHandler);
+            yield return _navGridHelper.RefreshNavGridAsync(centerPosition, GridReadyHandler);
         }
         
         /// <summary>
@@ -141,7 +143,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         internal void GenerateNavGrid()
         {
             SetDockState(DockRecallState.Initialising);
-            _navGridHelper.RefreshNavGrid(GridReadyHandler);
+            _navGridHelper.RefreshNavGrid(_startOfDockRunway.Position, GridReadyHandler);
         }
 
         private void GridReadyHandler(GenerateStatus gridStatus)
@@ -226,6 +228,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             {
                 // Couldn't find a closest SeaTruck
                 ModDebugLog.LogDebug("No SeaTrucks found!");
+                SetDockState(DockRecallState.NoTrucksFound);
+                SetDockState(DockRecallState.Ready);
                 return;
             }
 

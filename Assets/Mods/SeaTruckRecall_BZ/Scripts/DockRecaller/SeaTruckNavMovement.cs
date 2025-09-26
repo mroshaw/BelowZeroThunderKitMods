@@ -14,14 +14,13 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
     {
         // Movement properties for this method of navigation
         [Header("Movement")]
-        [SerializeField] private float rotateSpeed = 35.0f;
+        [SerializeField] private float rotateSpeed = 15.0f;
         [SerializeField] private float moveSpeed = 2.5f;
         [SerializeField] private float slowDistance = 1.0f;
-        [SerializeField] private float slowingAngle = 10f;
 
         [SerializeField] private float moveDistanceThreshold = 0.2f;
         [SerializeField] private float skipWaypointThreshold = 1.0f;
-        [SerializeField] private float rotateAngleThreshold = 0.01f;
+        [SerializeField] private float rotateAngleThreshold = 0.1f;
         
         [Header("Navigation")]
         [SerializeField] List<Waypoint> waypoints = new List<Waypoint>();

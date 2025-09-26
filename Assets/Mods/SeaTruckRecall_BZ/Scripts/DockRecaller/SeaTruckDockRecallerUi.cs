@@ -34,6 +34,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             {
                 { DockRecallState.Initialising, "INITIALISING..." },
                 { DockRecallState.Ready, "READY" },
+                { DockRecallState.NoTrucksFound, "NOTHING IN RANGE!" },
                 { DockRecallState.FindingPath, "FINDING PATH" },
                 { DockRecallState.Recalling, "RECALLING" },
                 { DockRecallState.Stuck, "ROUTE BLOCKED - ABORTED!" },
@@ -49,6 +50,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             {
                 { DockRecallState.Initialising, "RECALLER IS INITIALISING. PLEASE WAIT..." },
                 { DockRecallState.Ready, "RECALLER IS READY!" },
+                { DockRecallState.NoTrucksFound, "NO SEATRUCKS WITHIN RANGE!" },
                 { DockRecallState.FindingPath, "FINDING PATH FOR SELECTED SEATRUCK..." },
                 { DockRecallState.Recalling, "RECALLING CLOSEST SEATRUCK!" },
                 { DockRecallState.Stuck, "ERROR: STRUCK ROUTE IS BLOCKED - ABORTED!" },
@@ -294,7 +296,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         /// </summary>
         private void AutoPilotStateChangedHandler(AutoPilotState oldAutoPilotState, AutoPilotState newAutoPilotState)
         {
-            // LogDebug($"SeaTruckDockRecallerUi: Updating UI with AutoPilotState: {autoPilotState.ToString()}");
+            ModDebugLog.LogDebug($"RecallerUI: AutoPilotState changed to: {newAutoPilotState.ToString()}");
             autoPilotStatusText.text = $"{AutoPilotDisplayText}{GetAutoPilotStateText(newAutoPilotState)}";
             autoPilotPreviousStatusText.text =
                 $"{AutoPilotPreviousDisplayText}{GetAutoPilotStateText(oldAutoPilotState)}";

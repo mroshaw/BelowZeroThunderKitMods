@@ -82,7 +82,6 @@ GameObject:
   - component: {fileID: 889064588}
   - component: {fileID: 889064591}
   - component: {fileID: 889064590}
-  - component: {fileID: 889064589}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -120,17 +119,17 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 889064587}
   m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 328bc77d9009b0b40b59d9af7a1f8263, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -151,19 +150,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!135 &889064589
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 889064587}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &939927055
 GameObject:
   m_ObjectHideFlags: 0
@@ -422,38 +408,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25f9224dc29cf644f90e4a1e55849dc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxRange: 500
   createGridOnStart: 1
-  parkingDockConnection: {x: 0, y: 0, z: 0}
-  parkingTimeout: 20
-  parkingMoveSpeed: 0.3
-  parkingRotateSpeed: 0.5
+  instantNav: 0
   currentAutoPilot: {fileID: 0}
   onAutoPilotChanged:
     m_PersistentCalls:
       m_Calls: []
   onDockingStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  onDockReady:
-    m_PersistentCalls:
-      m_Calls: []
-  onDocked:
-    m_PersistentCalls:
-      m_Calls: []
-  onNavAborted:
-    m_PersistentCalls:
-      m_Calls: []
-  onRecalling:
-    m_PersistentCalls:
-      m_Calls: []
-  onPathingFailed:
-    m_PersistentCalls:
-      m_Calls: []
-  onSeaTruckArrived:
-    m_PersistentCalls:
-      m_Calls: []
-  onParking:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &6418034312203088033
@@ -468,7 +429,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1116b75974c51a42abee46d310a73da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridCenterPosition: {fileID: 0}
   maxRange: 100
+  distanceBetweenCells: 5
   navGridCellExtends: 8
   navGridIncludeLayerMask:
     serializedVersion: 2
@@ -477,6 +440,12 @@ MonoBehaviour:
   pathDebug: 1
   navGridDebugContainer: {fileID: 6418034311839299087}
   visualiserPrefab: {fileID: 939927056}
+  onGridStatusChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  onPathingStatusChanged:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &6418034312300149817
 GameObject:
   m_ObjectHideFlags: 0
