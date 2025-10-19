@@ -89,6 +89,12 @@ crashlytics-build.properties
 /[Aa]ssets/ThirdPartyAssets/
 /[Aa]ssets/SubnauticaRefAssets.meta
 /[Aa]ssets/SubnauticaRefAssets
+/[Aa]ssets/NatureManufacture Assets.meta
+/[Aa]ssets/NatureManufacture Assets/
 
 # Always ignore screenshots, videos etc
 **/ModMedia/
+
+# Ignore TEST mods
+/[Aa]ssets/Mods/SeaTruckDockTest_BZ.meta
+/[Aa]ssets/Mods/SeaTruckDockTest_BZ/
