@@ -9,33 +9,33 @@ namespace DaftAppleGames.SeaTruckSpeedMod_BZ
     /// 
     internal class SeaTruckHistoryItem
     {
-        private readonly SeaTruckMotor _seaTruckInstance;
+        private readonly SeaTruckMotor _SeaTruckInstance;
         private readonly float _originalSeaTruckDrag;
         private readonly float _originalPowerEfficiencyFactor;
 
-        public SeaTruckMotor SeaTruckInstance => _seaTruckInstance;
+        public SeaTruckMotor SeaTruckInstance => _SeaTruckInstance;
 
         public SeaTruckHistoryItem(SeaTruckMotor truckInstance)
         {
-            _seaTruckInstance = truckInstance;
+            _SeaTruckInstance = truckInstance;
             _originalSeaTruckDrag = truckInstance.pilotingDrag;
             _originalPowerEfficiencyFactor = truckInstance.powerEfficiencyFactor;
         }
 
         /// <summary>
-        /// Apply a multiplier to the seatruck speed
+        /// Apply a multiplier to the SeaTruck speed
         /// </summary>
         internal void ApplyDragdModifier(float modifier)
         {
-            _seaTruckInstance.pilotingDrag = _originalSeaTruckDrag / modifier;
+            _SeaTruckInstance.pilotingDrag = _originalSeaTruckDrag / modifier;
             Log.LogInfo($"Updated SeaTruck. Drag modifier: {modifier}, from: {_originalSeaTruckDrag} to: {_originalSeaTruckDrag / modifier}");
         }
         /// <summary>
-        /// Apply a multiplier to the seatruck power efficiency
+        /// Apply a multiplier to the SeaTruck power efficiency
         /// </summary>
         internal void ApplyPowerModifier(float modifier)
         {
-            _seaTruckInstance.powerEfficiencyFactor = _originalPowerEfficiencyFactor / modifier;
+            _SeaTruckInstance.powerEfficiencyFactor = _originalPowerEfficiencyFactor / modifier;
             Log.LogInfo($"Updated SeaTruck. Power Efficiency modifier: {modifier}, from: {_originalPowerEfficiencyFactor} to: {_originalPowerEfficiencyFactor / modifier}");
         }
 

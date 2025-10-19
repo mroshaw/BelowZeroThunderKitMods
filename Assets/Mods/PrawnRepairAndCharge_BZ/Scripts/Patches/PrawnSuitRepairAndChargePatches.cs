@@ -59,11 +59,11 @@ namespace DaftAppleGames.PrawnSuitRepairAndCharge_BZ
                     if (ConfigFile.ConsumeSeaTruckPower)
                     {
                         // Get the SeaTruckDockingBay that we're docked to
-                        SeaTruckDockingBay seaTruckDockingBay = dockable.bay as SeaTruckDockingBay;
-                        Log.LogDebug($"Found SeaTruckDockingBay: {seaTruckDockingBay.name}");
+                        SeaTruckDockingBay SeaTruckDockingBay = dockable.bay as SeaTruckDockingBay;
+                        Log.LogDebug($"Found SeaTruckDockingBay: {SeaTruckDockingBay.name}");
 
                         // Get the amount of Energy left in the SeaTruck (found via the Relay attached to the DockingBay)
-                        float currentSeaTruckPower = GetSeaTruckPower(seaTruckDockingBay);
+                        float currentSeaTruckPower = GetSeaTruckPower(SeaTruckDockingBay);
 
                         // Draw the power from the SeaTruck
                         float powerToRepair = healthToAdd * ConfigFile.SeaTruckPowerUseRepairModifier;
@@ -77,12 +77,12 @@ namespace DaftAppleGames.PrawnSuitRepairAndCharge_BZ
 
                         if(totalPowerRequired > currentSeaTruckPower)
                         {
-                            ErrorMessage.AddMessage($"Prawn Suit not recharged! Insufficient Seatruck power!");
+                            ErrorMessage.AddMessage($"Prawn Suit not recharged! Insufficient SeaTruck power!");
                             return;
                         }
 
                         // Remove the required power from the SeaTruck
-                        int totalPowerInt = (int)RemoveSeatruckPower(seaTruckDockingBay, totalPowerRequired);
+                        int totalPowerInt = (int)RemoveSeaTruckPower(SeaTruckDockingBay, totalPowerRequired);
                         ErrorMessage.AddMessage($"Process consumed {totalPowerInt} energy.");
                     }
 
@@ -99,7 +99,7 @@ namespace DaftAppleGames.PrawnSuitRepairAndCharge_BZ
             /// <summary>
             /// Remove the specified amount of power from the given SeaTruck
             /// </summary>
-            private static float RemoveSeatruckPower(SeaTruckDockingBay seaTruckDockingBay, float powerToRemove)
+            private static float RemoveSeaTruckPower(SeaTruckDockingBay seaTruckDockingBay, float powerToRemove)
             {
                 PowerRelay powerRelay = seaTruckDockingBay.relay;
                 IPowerInterface powerInterface = powerRelay.GetComponent<IPowerInterface>();
@@ -109,11 +109,11 @@ namespace DaftAppleGames.PrawnSuitRepairAndCharge_BZ
             }
 
             /// <summary>
-            /// Get the current power of the specified Seatruck
+            /// Get the current power of the specified SeaTruck
             /// </summary>
-            private static float GetSeaTruckPower(SeaTruckDockingBay seaTruckDockingBay)
+            private static float GetSeaTruckPower(SeaTruckDockingBay SeaTruckDockingBay)
             {
-                PowerRelay powerRelay = seaTruckDockingBay.relay;
+                PowerRelay powerRelay = SeaTruckDockingBay.relay;
                 float currentPower = powerRelay.GetPower();
                 Log.LogDebug($"Current SeaTruck power: {currentPower}");
                 return currentPower;

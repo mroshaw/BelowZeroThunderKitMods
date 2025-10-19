@@ -13,7 +13,7 @@ namespace DaftAppleGames.SeaTruckSpeedMod_BZ
         }
 
         /// <summary>
-        /// Apply the given drag modifier to all seatruck instances
+        /// Apply the given drag modifier to all SeaTruck instances
         /// </summary>
         internal static void UpdateAllDrag(float multiplier)
         {
@@ -24,7 +24,7 @@ namespace DaftAppleGames.SeaTruckSpeedMod_BZ
         }
 
         /// <summary>
-        /// Apply the given power efficiency modifier to all seatruck instances
+        /// Apply the given power efficiency modifier to all SeaTruck instances
         /// </summary>
         internal static void UpdateAllPowerEfficiency(float multiplier)
         {
@@ -38,22 +38,22 @@ namespace DaftAppleGames.SeaTruckSpeedMod_BZ
         /// <summary>
         /// Add a new SeaTruck
         /// </summary>
-        internal static void AddSeaTruck(SeaTruckMotor seaTruck)
+        internal static void AddSeaTruck(SeaTruckMotor SeaTruck)
         {
-            SeaTruckHistoryItem newSeaglideItem = new SeaTruckHistoryItem(seaTruck);
+            SeaTruckHistoryItem newSeaglideItem = new SeaTruckHistoryItem(SeaTruck);
             SeaTruckInstanceHistory.Add(newSeaglideItem);
         }
 
         /// <summary>
         /// Remove a SeaTruck
         /// </summary>
-        internal static void RemoveSeaTruck(SeaTruckMotor seaTruck)
+        internal static void RemoveSeaTruck(SeaTruckMotor SeaTruck)
         {
-            foreach (SeaTruckHistoryItem seaTruckHistoryItem in SeaTruckInstanceHistory.ToList())
+            foreach (SeaTruckHistoryItem SeaTruckHistoryItem in SeaTruckInstanceHistory.ToList())
             {
-                if (seaTruckHistoryItem.SeaTruckInstance == seaTruck)
+                if (SeaTruckHistoryItem.SeaTruckInstance == SeaTruck)
                 {
-                    SeaTruckInstanceHistory.Remove(seaTruckHistoryItem);
+                    SeaTruckInstanceHistory.Remove(SeaTruckHistoryItem);
                 }
             }
         }
