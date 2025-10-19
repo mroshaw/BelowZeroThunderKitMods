@@ -196,16 +196,16 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 1
+  m_Intensity: 1.09
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
-    m_Strength: 1
+    m_Strength: 0.372
     m_Bias: 0.05
     m_NormalBias: 0.4
     m_NearPlane: 0.2
@@ -252,13 +252,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 317618806}
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalRotation: {x: -0.9292934, y: 0.0706017, z: -0.24900338, w: -0.2634892}
   m_LocalPosition: {x: -14.53, y: 27.84, z: 28.07}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: -211.66, y: -30, z: 0}
 --- !u!1 &344174119
 GameObject:
   m_ObjectHideFlags: 0
@@ -6775,6 +6775,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e82c4cd1d6e34144c9a4e0984253904f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minTravelDistance: 2
+  maxTravelDistance: 10
+  minTravelAngle: 30
+  maxTravelAngle: 140
 --- !u!114 &3133581913969077741
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6787,6 +6791,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e05eb1d6cbc5864989727685a755833, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  moveSpeed: 0.8
+  rotateSpeed: 4
+  arrivalTolerance: 0.05
   targetMarker: {fileID: 0}
   isGrounded: 0
   moveDirection: {x: 0, y: 0, z: 0}
