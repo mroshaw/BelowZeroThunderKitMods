@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 111d97bfefabac143886f94e73f5a274, type: 3}
+  m_Name: FishSettings
+  m_EditorClassIdentifier: 
+  baseSpeed: 0.3
+  randomSpeedModifier: 0.1
+  turnSpeed: 3
+  arrivalDistance: 0.15
+  stopRoll: 0
+  limitPitch: 1
+  pitchScaling: 30
+  minPitch: -15
+  maxPitch: 15
+  randomDarting: 1
+  dartSpeedMultiplier: 1.4
+  dartDuration: 1
+  dartIntervalMin: 15
+  dartIntervalMax: 60
+  avoidOtherFish: 1
+  avoidanceRadius: 0.1
+  avoidanceStrength: 0.5
+  applyNoise: 1
+  noiseInfluence: 0.5
+  noiseSpeed: 0.2
+  clampToBounds: 1
+  steerFromBounds: 1
+  boundaryMargin: 0.05
+  boundarySteerStrength: 0.5
+  culling: 1
+  cullingDistanceFromPlayer: 30

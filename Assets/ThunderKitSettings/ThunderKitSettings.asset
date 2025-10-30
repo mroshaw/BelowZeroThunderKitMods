@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9057f7f601990a4883b2cb295c4f43e, type: 3}
   m_Name: ThunderKitSettings
   m_EditorClassIdentifier: 
-  FirstLoad: 1
+  FirstLoad: 0
   ShowOnStartup: 1
   GameExecutable: SubnauticaZero.exe
   GamePath: E:\Games\Steam\steamapps\common\SubnauticaZero
@@ -36,9 +36,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d2966f882a48f0245a2e23cfe98906a1, type: 2}
   - {fileID: 11400000, guid: a26a710d612a2c14d92361131311514d, type: 2}
   QuickAccessManifests:
-  - {fileID: 11400000, guid: 87fefca873535b841bb06e2482f7d0a4, type: 2}
   - {fileID: 11400000, guid: cd4f87d00905059449c19d50b129df10, type: 2}
   - {fileID: 11400000, guid: 4a8c87bb1d52fad48a5bce85fe2ece58, type: 2}
+  - {fileID: 11400000, guid: 87fefca873535b841bb06e2482f7d0a4, type: 2}
   - {fileID: 11400000, guid: 7df9d204f07547b44bfc68609f911564, type: 2}
   - {fileID: 11400000, guid: 0b1140e9772cef749a158373c6da463f, type: 2}
   - {fileID: 11400000, guid: a30a98415ec3ab2458517de70b6d9fdd, type: 2}

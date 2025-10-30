@@ -91,6 +91,8 @@ crashlytics-build.properties
 /[Aa]ssets/SubnauticaRefAssets
 /[Aa]ssets/NatureManufacture Assets.meta
 /[Aa]ssets/NatureManufacture Assets/
+/[Aa]ssets/Plugins.meta
+/[Aa]ssets/Plugins/
 
 # Always ignore screenshots, videos etc
 **/ModMedia/

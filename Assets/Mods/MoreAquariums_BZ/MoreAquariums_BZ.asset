@@ -1,0 +1,80 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-6872063687626615479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17d1008b78cb6e846889b7778282fbef, type: 3}
+  m_Name: AssetBundleDefinitions
+  m_EditorClassIdentifier: 
+  StagingPaths:
+  - <ManifestPluginStaging>/Assets
+  assetBundles:
+  - assetBundleName: biggeraquariumsassetbundle
+    assets:
+    - {fileID: 2800000, guid: 8c81a3642dd621945ad9f52ea2c0dcf0, type: 3}
+    - {fileID: 3432708091018669541, guid: b588b5a3b1675a346875d2b7faaf5615, type: 3}
+    - {fileID: 2800000, guid: a0121f3b624625b40a43065122c93995, type: 3}
+    - {fileID: 1901438420583079910, guid: 54fcf6b8e72158b4894a0663ef7a0e09, type: 3}
+    - {fileID: 241501260581000164, guid: 11a7ba02341541649bbf47009d4355b8, type: 3}
+    - {fileID: 2800000, guid: 92e4df23474a9af45a851a882dd031b2, type: 3}
+    - {fileID: 5860637205128845850, guid: 4db648c0b9094e541994e488513cc8e7, type: 3}
+    - {fileID: 2800000, guid: 5e21a56d31b24ae42ae014c1f3347f12, type: 3}
+--- !u!114 &-121899452589423327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f22bb7fd1d3b56a48bc52f8e407901d6, type: 3}
+  m_Name: ManifestIdentity
+  m_EditorClassIdentifier: 
+  StagingPaths: []
+  Author: Daft Apple Games
+  Name: BiggerAquariums_BZ
+  Description: Adds several new aquariums to the builder
+  Version: 1.3.0
+  Dependencies: []
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e563561e08b6a3642a487177f5cfbb37, type: 3}
+  m_Name: MoreAquariums_BZ
+  m_EditorClassIdentifier: 
+  Data:
+  - {fileID: -121899452589423327}
+  - {fileID: 8876472120765660631}
+  - {fileID: -6872063687626615479}
+  identity: {fileID: -121899452589423327}
+  QuickAccess: 1
+--- !u!114 &8876472120765660631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b7e13dda513544419a89926bd12ad8a, type: 3}
+  m_Name: AssemblyDefinitions
+  m_EditorClassIdentifier: 
+  StagingPaths:
+  - <ManifestPluginStaging>
+  definitions:
+  - {fileID: 5897886265953266890, guid: a8101a7f788ddab4d835833e6de817ac, type: 3}
+  - {fileID: 5897886265953266890, guid: 224286437dfc28847b133efcbb5059cc, type: 3}
