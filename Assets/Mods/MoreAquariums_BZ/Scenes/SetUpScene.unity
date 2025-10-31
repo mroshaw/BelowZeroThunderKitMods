@@ -19998,6 +19998,7 @@ MonoBehaviour:
   aquariumMesh: {fileID: 0}
   aquariumGlassMesh: {fileID: 0}
   newAquariumModel: {fileID: 0}
+  bubblesAudioClip: {fileID: 0}
   bubbles1Transform: {fileID: 0}
   bubbles2Transform: {fileID: 0}
   coral1Transform: {fileID: 0}
@@ -29911,6 +29912,7 @@ MonoBehaviour:
   aquariumMesh: {fileID: 0}
   aquariumGlassMesh: {fileID: 0}
   newAquariumModel: {fileID: 0}
+  bubblesAudioClip: {fileID: 0}
   bubbles1Transform: {fileID: 0}
   bubbles2Transform: {fileID: 0}
   coral1Transform: {fileID: 0}
@@ -38697,6 +38699,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: SphericalAquariumPrefab
       objectReference: {fileID: 0}
+    - target: {fileID: 7895781908437560730, guid: 4db648c0b9094e541994e488513cc8e7,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: defe1ae37ed15414ab323cded3749aa9, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4db648c0b9094e541994e488513cc8e7, type: 3}
 --- !u!33 &143470169453382098
@@ -59198,6 +59205,7 @@ MonoBehaviour:
   aquariumMesh: {fileID: 1020204562047975999}
   aquariumGlassMesh: {fileID: 8967286747874575575}
   newAquariumModel: {fileID: 0}
+  bubblesAudioClip: {fileID: 0}
   bubbles1Transform: {fileID: 8723700635538699469}
   bubbles2Transform: {fileID: 3826318159352286868}
   coral1Transform: {fileID: 3969192975663508278}
@@ -62565,6 +62573,7 @@ MonoBehaviour:
   aquariumMesh: {fileID: 15956598139725791}
   aquariumGlassMesh: {fileID: 1519796475162439605}
   newAquariumModel: {fileID: 0}
+  bubblesAudioClip: {fileID: 0}
   bubbles1Transform: {fileID: 1108087575781834488}
   bubbles2Transform: {fileID: 5478374783414718297}
   coral1Transform: {fileID: 8025022220972325643}
@@ -70590,6 +70599,7 @@ MonoBehaviour:
   aquariumMesh: {fileID: 2728782335407528591}
   aquariumGlassMesh: {fileID: 6914792809384203593}
   newAquariumModel: {fileID: 0}
+  bubblesAudioClip: {fileID: 0}
   bubbles1Transform: {fileID: 5009740422907628988}
   bubbles2Transform: {fileID: 1943391735016344350}
   coral1Transform: {fileID: 5236408133126471864}

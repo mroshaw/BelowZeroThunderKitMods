@@ -27,6 +27,7 @@ namespace DaftAppleGames.MoreAquariums
             WaveScale = 0.9f,
             PostConfigAction = PostConfigAction,
             ReplaceModel = false,
+            AddBubbleAudio = false,
             
             // Recipe for the builder
             Recipe = new RecipeData(

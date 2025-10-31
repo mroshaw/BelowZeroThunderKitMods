@@ -11,10 +11,10 @@ namespace DaftAppleGames.MoreAquariums
 
         internal FishSettings FishSettings => fishSettings;
         internal List<Collider> MovementColliders => movementColliders;
-        internal List<AquariumFishPlus> ActiveFishList => _activeFishList;
+        internal List<AquariumFishExt> ActiveFishList => _activeFishList;
         
-        private readonly List<AquariumFishPlus> _fishList = new List<AquariumFishPlus>();
-        private readonly List<AquariumFishPlus> _activeFishList = new List<AquariumFishPlus>();
+        private readonly List<AquariumFishExt> _fishList = new List<AquariumFishExt>();
+        private readonly List<AquariumFishExt> _activeFishList = new List<AquariumFishExt>();
         private bool _isCulled;
         
         /// <summary>
@@ -24,7 +24,7 @@ namespace DaftAppleGames.MoreAquariums
         {
             ModDebugLog.LogDebug("FishManager is refreshing attached fish...");
             // Refresh attached fish
-            foreach (AquariumFishPlus fish in GetComponentsInChildren<AquariumFishPlus>(true))
+            foreach (AquariumFishExt fish in GetComponentsInChildren<AquariumFishExt>(true))
             {
                 ModDebugLog.LogDebug($"Updating {fish.name}...");
                 fish.SetFishManager(this);
@@ -50,17 +50,17 @@ namespace DaftAppleGames.MoreAquariums
         /// <summary>
         /// Add a new fish to the manager
         /// </summary>
-        /// <param name="newFishPlus"></param>
-        internal void AddActiveFish(AquariumFishPlus newFishPlus)
+        /// <param name="newFishExt"></param>
+        internal void AddActiveFish(AquariumFishExt newFishExt)
         {
-            if (!_fishList.Contains(newFishPlus))
+            if (!_fishList.Contains(newFishExt))
             {
-                _fishList.Add(newFishPlus);
+                _fishList.Add(newFishExt);
             }
 
-            if (!_activeFishList.Contains(newFishPlus))
+            if (!_activeFishList.Contains(newFishExt))
             {
-                _activeFishList.Add(newFishPlus);
+                _activeFishList.Add(newFishExt);
             }
             
         }
@@ -68,11 +68,11 @@ namespace DaftAppleGames.MoreAquariums
         /// <summary>
         /// Remove a fish from the manager
         /// </summary>
-        internal void RemoveActiveFish(AquariumFishPlus fishPlusToRemove)
+        internal void RemoveActiveFish(AquariumFishExt fishExtToRemove)
         {
-            if (_fishList.Contains(fishPlusToRemove))
+            if (_fishList.Contains(fishExtToRemove))
             {
-                _activeFishList.Remove(fishPlusToRemove);
+                _activeFishList.Remove(fishExtToRemove);
             }
         }
 
@@ -107,7 +107,7 @@ namespace DaftAppleGames.MoreAquariums
         /// </summary>
         private void SetFishActiveState(bool state)
         {
-            foreach (AquariumFishPlus fish in _fishList)
+            foreach (AquariumFishExt fish in _fishList)
             {
                 fish.gameObject.SetActive(state);
             }

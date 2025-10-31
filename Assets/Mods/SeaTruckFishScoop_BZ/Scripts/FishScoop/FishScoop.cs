@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using DaftAppleGames.ModUtils;
+using Nautilus.Utility;
 using UnityEngine;
 using static DaftAppleGames.SeaTruckFishScoop_BZ.SeaTruckFishScoopPluginBz;
 using Random = UnityEngine.Random;
@@ -86,8 +87,15 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         // Set up the FMOD emitter for the custom purge sound
         private void ConfigureEmitters()
         {
-            ModAudioUtils.ConfigureEmitter(_purgeEmitter, PurgeAudioAsset, AudioBusPath, audioVolume, ModAssetUtils, ModDebugLog);
-            ModAudioUtils.ConfigureEmitter(_fishReleasedEmitter, FishReleasedAudioAsset, AudioBusPath, audioVolume, ModAssetUtils, ModDebugLog);
+            // Purge audio
+            ModAudioUtils.RegisterSound(PurgeAudioAsset, AudioUtils.BusPaths.PlayerSFXs, ModAssetUtils, ModDebugLog, 1.0f, 7.0f, 0, true);
+            FMODAsset purgeAudioAsset =  AudioUtils.GetFmodAsset(PurgeAudioAsset);
+            ModAudioUtils.ConfigureEmitter(_purgeEmitter, purgeAudioAsset, ModDebugLog);
+            
+            // Release audio
+            ModAudioUtils.RegisterSound(PurgeAudioAsset, AudioUtils.BusPaths.PlayerSFXs, ModAssetUtils, ModDebugLog, 1.0f, 7.0f, 0, true);
+            FMODAsset releaseAudioAsset =  AudioUtils.GetFmodAsset(PurgeAudioAsset);
+            ModAudioUtils.ConfigureEmitter(_fishReleasedEmitter, releaseAudioAsset, ModDebugLog);
         }
         
         /// <summary>

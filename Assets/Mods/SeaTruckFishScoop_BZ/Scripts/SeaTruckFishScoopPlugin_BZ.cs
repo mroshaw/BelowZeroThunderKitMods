@@ -13,8 +13,8 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         private const string MyGuid = "com.mroshaw.SeaTruckfishscoopmodbz";
         private const string PluginName = "Sea Truck Fish Scoop Mod BZ";
         private const string VersionString = "3.2.0";
-
         private const string AssetBundleName = "seatruckfishscoopassetbundle";
+
         
         // Config file / UI initialisation
         internal static ModConfigFile ConfigFile = OptionsPanelHandler.RegisterModOptions<ModConfigFile>();

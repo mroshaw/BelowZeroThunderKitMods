@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 106142410}
-  - component: {fileID: 1585635806078973428}
+  - component: {fileID: 5189632940207087442}
   m_Layer: 0
   m_Name: Rocks
   m_TagString: Untagged
@@ -40,7 +40,7 @@ Transform:
   m_Father: {fileID: 5747813556211692667}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1585635806078973428
+--- !u!114 &5189632940207087442
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2743,6 +2743,7 @@ MonoBehaviour:
   aquariumMesh: {fileID: 7269070882360284284}
   aquariumGlassMesh: {fileID: 1637797447210357396}
   newAquariumModel: {fileID: 0}
+  bubblesAudioClip: {fileID: 8300000, guid: da3f28a57f190a042a75a493f2bad770, type: 3}
   bubbles1Transform: {fileID: 1429994391581237902}
   bubbles2Transform: {fileID: 6904374226870065367}
   coral1Transform: {fileID: 6763830684495920501}
@@ -3003,8 +3004,8 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 0df1ef761f0e5c7479ad4f312345dcb4, type: 2}
-  - {fileID: 2100000, guid: e733336ab2e11b3408365cdcb0adb5ac, type: 2}
   - {fileID: 2100000, guid: 73a3f1ca34897fc43baca9c85f7cbc72, type: 2}
+  - {fileID: 2100000, guid: 0df1ef761f0e5c7479ad4f312345dcb4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

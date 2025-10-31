@@ -31,6 +31,7 @@ namespace DaftAppleGames.MoreAquariums
             public float WaveScale;
             public Action<GameObject> PostConfigAction;
             public bool ReplaceModel;
+            public bool AddBubbleAudio;
         }
 
         public static PrefabInfo Info;

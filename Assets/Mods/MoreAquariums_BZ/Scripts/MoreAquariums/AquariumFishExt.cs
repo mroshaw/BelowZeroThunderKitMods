@@ -8,7 +8,7 @@ namespace DaftAppleGames.MoreAquariums
     /// Implements procedural movement and path-finding, within the bounds
     /// of one of more colliders
     /// </summary>
-    public class AquariumFishPlus : MonoBehaviour
+    public class AquariumFishExt : MonoBehaviour
     {
         [Header("Settings")]
         [SerializeField] private List<Collider> movementColliders = new List<Collider>();
@@ -379,7 +379,7 @@ namespace DaftAppleGames.MoreAquariums
             
             int count = 0;
 
-            foreach (AquariumFishPlus fish in fishManager.ActiveFishList)
+            foreach (AquariumFishExt fish in fishManager.ActiveFishList)
             {
                 // Don't avoid self
                 if (fish == this)

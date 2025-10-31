@@ -2,21 +2,21 @@
 
 namespace DaftAppleGames.MoreAquariums
 {
-    public class CurvedAquariumPlus : AquariumBase
+    internal class LShapedAquarium : AquariumBase
     {
         // Non-static properties of the aquarium component
         public override int StorageHeight => 4;
         public override int StorageWidth => 4;
         
-        // Static properties of the prefab
+        // Properties of the Aquarium
         private static readonly PrefabData Data = new PrefabData
         {
-            ClassId = "CurvedAquarium",
-            DisplayName = "Curved Aquarium",
-            Description = "A double-sized, curved aquarium for use in long rooms.",
-            IconAssetName = "CurvedAquariumIcon.png",
-            PrefabAssetName = "CurvedAquariumPrefab.prefab",
-            AquariumType = AquariumType.Curved,
+            ClassId = "LShapedAquarium",
+            DisplayName = "L Shaped Aquarium",
+            Description = "A double-sized, L shaped aquarium for use in long rooms.",
+            IconAssetName = "LShapedAquariumIcon.png",
+            PrefabAssetName = "LShapedAquariumPrefab.prefab",
+            AquariumType = AquariumType.LShaped,
             StorageHeight = 4,
             StorageWidth = 4,
             AllowConstructionOnConstructables = false,

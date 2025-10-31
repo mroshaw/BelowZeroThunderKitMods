@@ -272,7 +272,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &8124530003819858548
 Transform:
   m_ObjectHideFlags: 0
@@ -528,7 +528,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeY:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 0
       maxCurve:
@@ -545,7 +545,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeZ:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 0
       maxCurve:
@@ -2454,7 +2454,6 @@ ParticleSystemRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: e66a5c1fbcae27f4b9ca190f3b83c8aa, type: 2}
-  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2623,7 +2622,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8124659928729939719
 Transform:
   m_ObjectHideFlags: 0
@@ -2902,7 +2901,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &8125039674061246312
 Transform:
   m_ObjectHideFlags: 0
@@ -2943,7 +2942,7 @@ MeshRenderer:
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 977b2dcf25d56da459dbd3eb99524a94, type: 2}
+  - {fileID: 2100000, guid: e733336ab2e11b3408365cdcb0adb5ac, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2987,8 +2986,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8130409520255946916}
-  m_LocalRotation: {x: -0.479341, y: 0.80047655, z: 0.08395426, w: 0.34988743}
-  m_LocalPosition: {x: -1.8987787, y: 0.19101782, z: 0.09023044}
+  m_LocalRotation: {x: -0.4981931, y: 0.7927227, z: 0.07458787, w: 0.34326532}
+  m_LocalPosition: {x: -1.898768, y: 0.19102131, z: 0.090235814}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 8124741183132944461}
@@ -3079,7 +3078,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8130466027512516042}
-  m_LocalRotation: {x: -0.61548275, y: 0.67777026, z: -0.015190963, w: -0.40196732}
+  m_LocalRotation: {x: -0.6191369, y: 0.6872853, z: -0.015860667, w: -0.3795482}
   m_LocalPosition: {x: -1.3635665, y: -0.40409872, z: -0.038109172}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -3110,7 +3109,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8130467797214719814}
-  m_LocalRotation: {x: -0.6970668, y: 0.7043565, z: 0.000690701, w: -0.13408722}
+  m_LocalRotation: {x: -0.68302715, y: 0.71841806, z: -0.0019618126, w: -0.13170277}
   m_LocalPosition: {x: 0.1385035, y: 0.9817592, z: 0.13399398}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -3307,7 +3306,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8130534924970053720}
-  m_LocalRotation: {x: 0.21538316, y: -0.5599295, z: 0.29386124, w: 0.7441335}
+  m_LocalRotation: {x: 0.21538316, y: -0.55992955, z: 0.29386124, w: 0.74413353}
   m_LocalPosition: {x: -0.67702734, y: 0.73994595, z: -0.089628056}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -3541,7 +3540,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeY:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 0
       maxCurve:
@@ -3558,7 +3557,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeZ:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 0
       maxCurve:
@@ -3818,7 +3817,7 @@ ParticleSystem:
         m_RotationOrder: 4
     y:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 1
       scalar: 1
       minScalar: 0
       maxCurve:
@@ -3835,7 +3834,7 @@ ParticleSystem:
         m_RotationOrder: 4
     z:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 1
       scalar: 1
       minScalar: 0
       maxCurve:
@@ -5629,7 +5628,6 @@ ParticleSystemRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: aaec4d62dca71c045aa73a58c161282a, type: 2}
-  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -8098,7 +8096,6 @@ ParticleSystemRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 61abd00da69e5494ab972528cfcf105d, type: 2}
-  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -8659,7 +8656,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8133078297743641250
 Transform:
   m_ObjectHideFlags: 0
@@ -9087,7 +9084,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeY:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 0
       maxCurve:
@@ -9104,7 +9101,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeZ:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 0
       maxCurve:
@@ -11013,7 +11010,6 @@ ParticleSystemRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: e66a5c1fbcae27f4b9ca190f3b83c8aa, type: 2}
-  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

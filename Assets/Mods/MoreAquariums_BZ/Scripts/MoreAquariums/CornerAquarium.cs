@@ -23,6 +23,7 @@ namespace DaftAppleGames.MoreAquariums
             UseCustomMovement = false,
             WaveScale = 1.0f,
             ReplaceModel = false,
+            AddBubbleAudio = true,
             
             // Recipe for the builder
             Recipe = new RecipeData(

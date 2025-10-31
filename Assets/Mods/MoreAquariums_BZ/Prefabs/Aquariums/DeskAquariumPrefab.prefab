@@ -2131,6 +2131,7 @@ MonoBehaviour:
   aquariumMesh: {fileID: 6188589237992672409}
   aquariumGlassMesh: {fileID: 4689239716780891169}
   newAquariumModel: {fileID: 0}
+  bubblesAudioClip: {fileID: 8300000, guid: da3f28a57f190a042a75a493f2bad770, type: 3}
   bubbles1Transform: {fileID: 8491070892301886343}
   bubbles2Transform: {fileID: 0}
   coral1Transform: {fileID: 4148209119702447003}
@@ -4942,8 +4943,8 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 0df1ef761f0e5c7479ad4f312345dcb4, type: 2}
-  - {fileID: 2100000, guid: e733336ab2e11b3408365cdcb0adb5ac, type: 2}
-  - {fileID: 2100000, guid: 73a3f1ca34897fc43baca9c85f7cbc72, type: 2}
+  - {fileID: 2100000, guid: a1a27c571df338e4db5f8a066f9cb8b1, type: 2}
+  - {fileID: 2100000, guid: 0df1ef761f0e5c7479ad4f312345dcb4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
