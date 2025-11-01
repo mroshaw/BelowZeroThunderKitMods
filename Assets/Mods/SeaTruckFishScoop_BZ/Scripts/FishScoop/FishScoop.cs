@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using DaftAppleGames.ModUtils;
+using DaftAppleGames.ModTools;
 using Nautilus.Utility;
 using UnityEngine;
 using static DaftAppleGames.SeaTruckFishScoop_BZ.SeaTruckFishScoopPluginBz;

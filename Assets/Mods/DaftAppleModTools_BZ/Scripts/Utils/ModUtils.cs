@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
 
-namespace DaftAppleGames.ModUtils
+namespace DaftAppleGames.ModTools
 {
     /// <summary>
     /// Static LogUtils class for common functions

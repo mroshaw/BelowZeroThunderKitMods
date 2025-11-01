@@ -6,7 +6,7 @@ using Nautilus.Handlers;
 using Nautilus.Utility;
 using UnityEngine;
 
-namespace DaftAppleGames.ModUtils
+namespace DaftAppleGames.ModTools
 {
     /// <summary>
     /// Wrapper around Unity and Nautilus audio utils

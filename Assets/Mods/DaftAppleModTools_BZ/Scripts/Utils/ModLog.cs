@@ -1,7 +1,7 @@
 ﻿using BepInEx.Logging;
 using UnityEngine;
 
-namespace DaftAppleGames.ModUtils
+namespace DaftAppleGames.ModTools
 {
     public enum LogLevel { Info, Debug, Warning, Error }
 

@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using DaftAppleGames.ModTools;
 using DaftAppleGames.ModUtils;
 using Nautilus.Utility;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using static DaftAppleGames.MoreAquariums.MoreAquariumsPlugin;
-using Nautilus.Utility.ThunderkitUtilities;
 
 namespace DaftAppleGames.MoreAquariums
 {
@@ -21,37 +22,41 @@ namespace DaftAppleGames.MoreAquariums
     /// <summary>
     /// Component to allow switching out the new aquarium models on existing prefabs
     /// </summary>
-    public class AquariumHelper : MonoBehaviour
+    public class AquariumConfigurator : MonoBehaviour
     {
-        [Header("Mesh/Model")]
-        [SerializeField] private MeshFilter aquariumMesh;
-        [SerializeField] private MeshFilter aquariumGlassMesh;
-        [SerializeField] private GameObject newAquariumModel;
-        
-        [Header("Main Objects")]
-        [SerializeField] private Transform bubbles1Transform;
-        [SerializeField] private Transform bubbles2Transform;
-        [SerializeField] private Transform coral1Transform;
-        [SerializeField] private Transform coral2Transform;
-        [SerializeField] private Transform[] existingCoralTransforms;
-        [SerializeField] private Transform[] newCoralTransforms;
-        [SerializeField] private GameObject rocksObject;
-        [SerializeField] private GameObject colliderObject;
-        
-        [Header("Constructable")]
-        [SerializeField] private GameObject constructableBoundsObject;
+        [BoxGroup("Aquarium")] [SerializeField] private int storageHeight;
+        [BoxGroup("Aquarium")] [SerializeField] private int storageWidth;
+        [BoxGroup("Aquarium")] [SerializeField] [InlineEditor] private RecipePreset recipe;
+        [BoxGroup("Aquarium")] [SerializeField] private bool useCustomMovement;
+        [BoxGroup("Aquarium")] [SerializeField] private bool allowConstructionOnConstructables;
+        [BoxGroup("Aquarium")] [SerializeField] private float waveScale;
+        [BoxGroup("Aquarium")] [SerializeField] private bool replaceExistingModel;
+        [BoxGroup("Aquarium")] [SerializeField] private bool addBubbleAudio;
 
-        [Header("Fish Animation")]
-        [SerializeField] private Animator animator1;
-        [SerializeField] private Animator animator2;
-        [SerializeField] private GameObject[] existingTrackObjects;
-        [SerializeField] private GameObject[] existingAttachObjects;
-        [SerializeField] private GameObject[] newTrackObjects;
-        [SerializeField] private GameObject[] newAttachObjects;
-
-        [Header("Custom Movement")]
-        [SerializeField] private FishSettings fishSettings;
-        [SerializeField] private GameObject[] movementColliderObjects;
+        [BoxGroup("Mesh Model")] [SerializeField] private MeshFilter aquariumMesh;
+        [BoxGroup("Mesh Model")] [SerializeField] private MeshFilter aquariumGlassMesh;
+        [BoxGroup("Mesh Model")] [SerializeField] private GameObject newAquariumModel;
+        
+        [BoxGroup("Object References")] [SerializeField] private Transform bubbles1Transform;
+        [BoxGroup("Object References")] [SerializeField] private Transform bubbles2Transform;
+        [BoxGroup("Object References")] [SerializeField] private Transform coral1Transform;
+        [BoxGroup("Object References")] [SerializeField] private Transform coral2Transform;
+        [BoxGroup("Object References")] [SerializeField] private Transform[] existingCoralTransforms;
+        [BoxGroup("Object References")] [SerializeField] private Transform[] newCoralTransforms;
+        [BoxGroup("Object References")] [SerializeField] private GameObject rocksObject;
+        [BoxGroup("Object References")] [SerializeField] private GameObject colliderObject;
+        
+        [BoxGroup("Constructable")] [SerializeField] private GameObject constructableBoundsObject;
+        
+        [BoxGroup("Fish")] [SerializeField] private Animator animator1;
+        [BoxGroup("Fish")] [SerializeField] private Animator animator2;
+        [BoxGroup("Fish")] [SerializeField] private GameObject[] existingTrackObjects;
+        [BoxGroup("Fish")] [SerializeField] private GameObject[] existingAttachObjects;
+        [BoxGroup("Fish")] [SerializeField] private GameObject[] newTrackObjects;
+        [BoxGroup("Fish")] [SerializeField] private GameObject[] newAttachObjects;
+        
+        [BoxGroup("Custom Fish")] [SerializeField] private FishSettings fishSettings;
+        [BoxGroup("Custom Fish")] [SerializeField] private GameObject[] movementColliderObjects;
         
         // Used to control the waving animation of the coral and plants
         private static readonly int WaveUpMinParam = Shader.PropertyToID("_WaveUpMin");
@@ -62,7 +67,7 @@ namespace DaftAppleGames.MoreAquariums
         /// <summary>
         /// Takes the "vanilla" aquarium prefab, and reconfigures it as the new aquarium 
         /// </summary>
-        internal void ConfigureAquariumPrefab(GameObject vanillaAquariumGo, AquariumBase.PrefabData prefabData)
+        internal void ConfigureAquariumPrefab(GameObject vanillaAquariumGo, Action<GameObject> postConfigAction)
         {
             ModDebugLog.LogDebug($"Configuring aquarium prefab: {vanillaAquariumGo}");
 
@@ -73,35 +78,35 @@ namespace DaftAppleGames.MoreAquariums
             GameObject aquariumModel = vanillaConstructable.model;
             
             // Configure Storage Container
-            ConfigureStorageContainer(vanillaAquariumGo, prefabData.StorageWidth, prefabData.StorageHeight);
+            ConfigureStorageContainer(vanillaAquariumGo, storageWidth, storageHeight);
             
             // Replace the model meshes
-            ConfigureMeshes(vanillaAquariumGo, aquariumModel, prefabData.ReplaceModel);
+            ConfigureMeshes(vanillaAquariumGo, aquariumModel);
             
             // Duplicate and reposition coral
-            ConfigureCoral(aquariumModel, prefabData.WaveScale);
+            ConfigureCoral(aquariumModel);
 
             // Configure rocks
             ConfigureRocks(vanillaAquariumGo);
             
             // Duplicate and reposition bubbles
-            ConfigureBubbles(vanillaAquariumGo, prefabData.AddBubbleAudio);
+            ConfigureBubbles(vanillaAquariumGo);
             
             // Replace the collider
             ConfigureCollider(vanillaAquariumGo);
            
             // If configured, allow construction on other constructables
-            vanillaConstructable.allowedOnConstructables = prefabData.AllowConstructionOnConstructables;
-            ConfigureConstructable(vanillaAquariumGo, prefabData.AllowConstructionOnConstructables, prefabData.ReplaceModel);
+            vanillaConstructable.allowedOnConstructables = allowConstructionOnConstructables;
+            ConfigureConstructable(vanillaAquariumGo);
             
             // Reposition tracks and add new
-            ConfigureTracks(vanillaAquariumGo, prefabData.UseCustomMovement);
+            ConfigureTracks(vanillaAquariumGo);
 
             // Add the new component
-            AddAquariumComponent(vanillaAquariumGo, prefabData.AquariumType);
+            AddAquariumComponent(vanillaAquariumGo);
             
             // Call post-prefab config action
-            prefabData.PostConfigAction?.Invoke(vanillaAquariumGo);
+            postConfigAction?.Invoke(vanillaAquariumGo);
             
             ModDebugLog.LogDebug("Done configuring prefab!");
         }
@@ -109,7 +114,7 @@ namespace DaftAppleGames.MoreAquariums
         /// <summary>
         /// Configure the Constructable based on the aquarium prefab data
         /// </summary>
-        private void ConfigureConstructable(GameObject vanillaAquariumGo, bool allowConstructionOnConstructables, bool replaceModel)
+        private void ConfigureConstructable(GameObject vanillaAquariumGo)
         {
             ModDebugLog.LogDebug($"Configuring constructable...");
             Constructable vanillaConstructable = vanillaAquariumGo.GetComponent<Constructable>();
@@ -151,9 +156,9 @@ namespace DaftAppleGames.MoreAquariums
         /// <summary>
         /// Apply appropriate changes to meshes or game model 
         /// </summary>
-        private void ConfigureMeshes(GameObject vanillaAquariumGo, GameObject aquariumModel, bool replaceModel)
+        private void ConfigureMeshes(GameObject vanillaAquariumGo, GameObject aquariumModel)
         {
-            if (replaceModel)
+            if (replaceExistingModel)
             {
                 ReplaceModel(vanillaAquariumGo, aquariumModel);
             }
@@ -218,7 +223,7 @@ namespace DaftAppleGames.MoreAquariums
         /// <summary>
         /// Copies then repositions the second coral object to make things a bit more natural
         /// </summary>
-        private void ConfigureCoral(GameObject aquariumModelGo, float waveScale)
+        private void ConfigureCoral(GameObject aquariumModelGo)
         {
             ModDebugLog.LogDebug("Configuring coral...");
             Transform coralTransform = aquariumModelGo.transform.Find("Coral");
@@ -345,7 +350,7 @@ namespace DaftAppleGames.MoreAquariums
         /// <summary>
         /// Copy and reposition and second set of bubbles
         /// </summary>
-        private void ConfigureBubbles(GameObject vanillaAquariumGo, bool addBubbleAudio)
+        private void ConfigureBubbles(GameObject vanillaAquariumGo)
         {
             // Duplicate the bubbles
             ModDebugLog.LogDebug("Repositioning bubbles...");
@@ -380,6 +385,7 @@ namespace DaftAppleGames.MoreAquariums
             // Add bubbles audio to the main game object
             if (addBubbleAudio)
             {
+                ModDebugLog.LogDebug("Adding bubbles emitter to custom aquarium...");
                 AddCustomEmitter(vanillaAquariumGo);
             }
         }
@@ -422,7 +428,7 @@ namespace DaftAppleGames.MoreAquariums
         /// <summary>
         /// Reconfigures existing Fish Tracks (animation bones) and adds new ones
         /// </summary>
-        private void ConfigureTracks(GameObject vanillaAquariumGo, bool customMovement)
+        private void ConfigureTracks(GameObject vanillaAquariumGo)
         {
             // We'll use this to reset the trackObjects on the Aquarium component
             int trackArrayLength = newTrackObjects == null || newTrackObjects.Length > 0 ? 16 : 8;
@@ -430,7 +436,7 @@ namespace DaftAppleGames.MoreAquariums
             GameObject[] updatedTrackObjects = new GameObject[trackArrayLength];
 
             // If using custom movement, we'll need a FishManager on the Game Object with some settings
-            if (customMovement)
+            if (useCustomMovement)
             {
                 ConfigureCustomMovement(vanillaAquariumGo);
             }
@@ -479,7 +485,7 @@ namespace DaftAppleGames.MoreAquariums
                 ModDebugLog.LogDebug($"Looking for track in root: {existingTrack.name}");
                 GameObject existingTrackGo = trackRoot.transform.Find(existingTrack.name).gameObject;
                 existingTrackGo.transform.localPosition = existingTrack.transform.localPosition;
-                existingTrackGo.transform.localRotation = customMovement ? Quaternion.identity : existingTrack.transform.localRotation;
+                existingTrackGo.transform.localRotation = useCustomMovement ? Quaternion.identity : existingTrack.transform.localRotation;
                 existingTrackGo.transform.localScale = existingTrack.transform.localScale;
                 
                 ModDebugLog.LogDebug($"Looking for attach in track: {existingAttach.name}");
@@ -488,7 +494,7 @@ namespace DaftAppleGames.MoreAquariums
                 existingAttachGo.transform.localPosition = existingAttach.transform.localPosition;
                 existingAttachGo.transform.localRotation = existingAttach.transform.localRotation;
 
-                if (customMovement)
+                if (useCustomMovement)
                 {
                     // Add custom movement component
                     ModDebugLog.LogDebug("Adding custom movement script...");
@@ -523,7 +529,7 @@ namespace DaftAppleGames.MoreAquariums
                     newAttachGo.transform.localPosition = newAttach.transform.localPosition;
                     ModDebugLog.LogDebug($"Track created successfully");
 
-                    if (customMovement)
+                    if (useCustomMovement)
                     {
                         // Add custom movement component
                         ModDebugLog.LogDebug("Adding customer movement script...");
@@ -548,7 +554,7 @@ namespace DaftAppleGames.MoreAquariums
             anim2.runtimeAnimatorController = animator2.runtimeAnimatorController;
             ModDebugLog.LogDebug($"Animators updated");
 
-            if (customMovement)
+            if (useCustomMovement)
             {
                 ModDebugLog.LogDebug($"Disabling animators...");
                 anim1.enabled = false;
@@ -598,29 +604,9 @@ namespace DaftAppleGames.MoreAquariums
         /// <summary>
         /// Add the correct component
         /// </summary>
-        private void AddAquariumComponent(GameObject vanillaAquariumGo, AquariumType aquariumType)
+        private void AddAquariumComponent(GameObject vanillaAquariumGo)
         {
-            switch (aquariumType)
-            {
-                case AquariumType.Double:
-                    vanillaAquariumGo.AddComponent<DoubleAquarium>();
-                    break;
-                case AquariumType.Curved:
-                    vanillaAquariumGo.AddComponent<CurvedAquarium>();
-                    break;
-                case AquariumType.LShaped:
-                    vanillaAquariumGo.AddComponent<LShapedAquarium>();
-                    break;
-                case AquariumType.Corner:
-                    vanillaAquariumGo.AddComponent<CornerAquarium>();
-                    break;
-                case AquariumType.Desk:
-                    vanillaAquariumGo.AddComponent<DeskAquarium>();
-                    break;
-                case AquariumType.Spherical:
-                    vanillaAquariumGo.AddComponent<SphericalAquarium>();
-                    break;
-            }
+            vanillaAquariumGo.AddComponent<CustomAquarium>();
         }
     }
 }

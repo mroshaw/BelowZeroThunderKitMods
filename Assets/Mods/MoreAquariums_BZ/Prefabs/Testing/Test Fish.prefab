@@ -197,7 +197,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3350879048794601229}
-  - component: {fileID: 8548581696631645712}
+  - component: {fileID: 9201709333523695737}
   m_Layer: 0
   m_Name: Test Fish
   m_TagString: Untagged
@@ -220,7 +220,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8548581696631645712
+--- !u!114 &9201709333523695737
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -229,35 +229,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 3350879048794601230}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed3a2e8d75f7baf439a98f26af5c9e9c, type: 3}
+  m_Script: {fileID: 11500000, guid: c4f9835427df0d94089712a3830a7a90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  aquariumBounds: {fileID: 0}
+  movementColliders: []
   fishManager: {fileID: 0}
-  baseSpeed: 0.2
-  randomSpeedModifier: 0.1
-  turnSpeed: 2
-  arrivalDistance: 0.1
-  stopRoll: 0
-  limitPitch: 1
-  pitchScaling: 30
-  minPitch: -20
-  maxPitch: 20
-  randomDarting: 1
-  dartSpeedMultiplier: 1.4
-  dartDuration: 0.8
-  dartIntervalMin: 15
-  dartIntervalMax: 60
-  avoidOtherFish: 1
-  avoidanceRadius: 0.1
-  avoidanceStrength: 2
-  applyNoise: 1
-  noiseInfluence: 0.5
-  noiseSpeed: 0.2
-  clampToBounds: 1
-  steerFromBounds: 1
-  boundaryMargin: 0.05
-  boundarySteerStrength: 0.2
+  fishSettings: {fileID: 0}
   currentDirection: {x: 0, y: 0, z: 0}
   currentSpeed: 0
   targetPosition: {x: 0, y: 0, z: 0}

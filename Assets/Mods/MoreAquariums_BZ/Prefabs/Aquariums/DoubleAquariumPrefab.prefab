@@ -2740,10 +2740,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 286e0dcabf7d9a44e8229da699ba0faf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  storageHeight: 4
+  storageWidth: 4
+  recipe: {fileID: 0}
+  useCustomMovement: 0
+  allowConstructionOnConstructables: 0
+  waveScale: 1
+  replaceExistingModel: 0
+  addBubbleAudio: 1
   aquariumMesh: {fileID: 7269070882360284284}
   aquariumGlassMesh: {fileID: 1637797447210357396}
   newAquariumModel: {fileID: 0}
-  bubblesAudioClip: {fileID: 8300000, guid: da3f28a57f190a042a75a493f2bad770, type: 3}
   bubbles1Transform: {fileID: 1429994391581237902}
   bubbles2Transform: {fileID: 6904374226870065367}
   coral1Transform: {fileID: 6763830684495920501}

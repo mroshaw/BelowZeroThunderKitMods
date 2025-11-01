@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using BepInEx;
-using DaftAppleGames.ModUtils;
+using DaftAppleGames.ModTools;
 using HarmonyLib;
 using Nautilus.Handlers;
 

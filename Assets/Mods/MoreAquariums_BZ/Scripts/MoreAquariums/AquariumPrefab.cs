@@ -8,12 +8,8 @@ using static DaftAppleGames.MoreAquariums.MoreAquariumsPlugin;
 
 namespace DaftAppleGames.MoreAquariums
 {
-    public abstract class AquariumBase : MonoBehaviour
+    public abstract class AquariumPrefab
     {
-        // Aquarium component properties
-        public abstract int StorageHeight { get; }
-        public abstract int StorageWidth { get; }
-        
         // Aquarium prefab properties
         internal struct PrefabData
         {
@@ -23,55 +19,49 @@ namespace DaftAppleGames.MoreAquariums
             public string IconAssetName;
             public string PrefabAssetName;
             public RecipeData Recipe;
-            public AquariumType AquariumType;
-            public bool UseCustomMovement;
-            public int StorageHeight;
-            public int StorageWidth;
-            public bool AllowConstructionOnConstructables;
-            public float WaveScale;
+            
             public Action<GameObject> PostConfigAction;
-            public bool ReplaceModel;
-            public bool AddBubbleAudio;
         }
 
         public static PrefabInfo Info;
         private const TechType CloneTechType = TechType.Aquarium;
         
-        internal static void RegisterInternal(PrefabData prefabData)
+        internal static void RegisterInternal(string classId, string displayName, string description,
+            string iconAssetName, string prefabAssetName, RecipeData recipeData, Action<GameObject> postConfigAction = null)
         {
             Info = PrefabInfo
-                .WithTechType(prefabData.ClassId, prefabData.DisplayName, prefabData.Description, unlockAtStart: true)
-                .WithIcon(ModAssetUtils.GetObjectFromAssetBundle<Sprite>(prefabData.IconAssetName) as Sprite);
+                .WithTechType(classId, displayName, description, unlockAtStart: true)
+                .WithIcon(ModAssetUtils.GetObjectFromAssetBundle<Sprite>(iconAssetName) as Sprite);
             CustomPrefab aquariumPrefab = new CustomPrefab(Info);
             
             // Clone the existing Aquarium
             PrefabTemplate aquariumTemplate = new CloneTemplate(aquariumPrefab.Info, CloneTechType)
             {
                 // Reconfigure the prefab, once it's been created
-                ModifyPrefab = go => ConfigurePrefab(go, prefabData)
+                ModifyPrefab = go => ConfigurePrefab(go, prefabAssetName, postConfigAction)
             };
             
             // Set the recipe, unlock and register
             aquariumPrefab.SetGameObject(aquariumTemplate);
-            aquariumPrefab.SetRecipe(prefabData.Recipe);
+            aquariumPrefab.SetRecipe(recipeData);
             aquariumPrefab.SetUnlock(TechType.Aquarium)
                 .WithPdaGroupCategory(TechGroup.InteriorModules, TechCategory.InteriorModule);
             aquariumPrefab.Register();
-            ModDebugLog.LogDebug($"{prefabData.DisplayName} registered successfully!");
+            ModDebugLog.LogDebug($"{displayName} registered successfully!");
         }
 
         /// <summary>
         /// Configure the new prefab, using the new model asset
         /// </summary>
-        private static void ConfigurePrefab(GameObject prefabGameObject, PrefabData prefabData)
+        private static void ConfigurePrefab(GameObject prefabGameObject, string prefabAssetName, Action<GameObject> postConfigAction = null)
         {
             // Get new model from the asset bundle
             GameObject newModelInstance =
-                ModAssetUtils.GetPrefabInstanceFromAssetBundle(prefabData.PrefabAssetName, false);
+                ModAssetUtils.GetPrefabInstanceFromAssetBundle(prefabAssetName, false);
             
             // Call the helper to replace and reconfigure the prefab
-            AquariumHelper helper = newModelInstance.GetComponent<AquariumHelper>();
-            helper.ConfigureAquariumPrefab(prefabGameObject, prefabData);
+            AquariumConfigurator configurator = newModelInstance.GetComponent<AquariumConfigurator>();
+            configurator.ConfigureAquariumPrefab(prefabGameObject, postConfigAction);
         }
     }
 }

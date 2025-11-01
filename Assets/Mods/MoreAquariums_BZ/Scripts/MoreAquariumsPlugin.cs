@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using BepInEx;
-using DaftAppleGames.ModUtils;
+using DaftAppleGames.ModTools;
 using HarmonyLib;
 using Nautilus.Handlers;
 using Nautilus.Utility;
@@ -22,8 +22,8 @@ namespace DaftAppleGames.MoreAquariums
         internal static ModAssetBundleUtils ModAssetUtils;
         
         // Config file / UI initialisation
-#if !UNITY_EDITOR
         private static readonly Harmony Harmony = new Harmony(MyGuid);
+#if !UNITY_EDITOR
         internal static readonly ModConfigFile ConfigFile = OptionsPanelHandler.RegisterModOptions<ModConfigFile>();
 #else
         internal static readonly ModConfigFile ConfigFile;
@@ -38,32 +38,29 @@ namespace DaftAppleGames.MoreAquariums
 #else
             ModDebugLog =  new ModLog(Logger, ConfigFile.DetailedLogging);            
             ModAssetUtils = new ModAssetBundleUtils(AssetBundleName, Assembly.GetExecutingAssembly(),true, ModDebugLog);
-
             // Register custom sounds
             RegisterCustomSounds();
-
+#endif
             // Register our prefabs
-            DoubleAquarium.Register();
-            CornerAquarium.Register();
-            DeskAquarium.Register();
-            SphericalAquarium.Register();
+            DoubleAquariumPrefab.Register();
+            CornerAquariumPrefab.Register();
+            DeskAquariumPrefab.Register();
+            SphericalAquariumPrefab.Register();
             
             // Patch in our MOD
             Harmony.PatchAll();
             ModDebugLog.LogInfo($"PluginName: {PluginName}, VersionString: {VersionString} is loaded.");
-#endif
         }
-
-#if !UNITY_EDITOR
+        
         /// <summary>
         /// Register custom sounds for use in the mod
         /// </summary>
         private void RegisterCustomSounds()
         {
+            ModDebugLog.LogDebug("Registering FMOD asset...");
             ModAudioUtils.RegisterSound(BubblesAudioClipName, AudioUtils.BusPaths.PlayerSFXs, ModAssetUtils, ModDebugLog, 1.0f, 10.0f, 0, true);
             BubblesFMODAsset = AudioUtils.GetFmodAsset(BubblesAudioClipName);
+            ModDebugLog.LogDebug($"Registered FMOD Asset: {BubblesFMODAsset.name}");
         }
-#endif
-        
     }
 }

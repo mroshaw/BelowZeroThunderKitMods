@@ -5,40 +5,30 @@ using static DaftAppleGames.MoreAquariums.MoreAquariumsPlugin;
 
 namespace DaftAppleGames.MoreAquariums
 {
-    public class DeskAquarium : AquariumBase
+    /// <summary>
+    /// Describes a Desk Aquarium prefab
+    /// </summary>
+    public class DeskAquariumPrefab : AquariumPrefab
     {
-        // Non-static properties of the aquarium component
-        public override int StorageHeight => 1;
-        public override int StorageWidth => 2;
+        /// Properties of the aquarium
+        private const string ClassId = "DeskAquarium";
+        private const string DisplayName = "Desk Aquarium";
+        private const string Description = "A miniature aquarium to place on a desk, table or shelf.";
+        private const string IconAssetName = "DeskAquariumIcon.png";
+        private const string PrefabAssetName = "DeskAquariumPrefab.prefab";
         
-        // Properties of the Aquarium
-        private static readonly PrefabData Data = new PrefabData
-        {
-            ClassId = "DeskAquarium",
-            DisplayName = "Desk Aquarium",
-            Description = "A miniature aquarium to place on a desk, table or shelf.",
-            IconAssetName = "DeskAquariumIcon.png",
-            PrefabAssetName = "DeskAquariumPrefab.prefab",
-            AquariumType = AquariumType.Desk,
-            StorageHeight = 1,
-            StorageWidth = 2,
-            AllowConstructionOnConstructables = true,
-            UseCustomMovement = true,
-            WaveScale = 0.9f,
-            PostConfigAction = PostConfigAction,
-            ReplaceModel = false,
-            AddBubbleAudio = false,
+        // Recipe for the builder
+        private static readonly RecipeData Recipe = new RecipeData(
+            new Ingredient(TechType.Titanium, 1),
+            new Ingredient(TechType.Glass, 1));
             
-            // Recipe for the builder
-            Recipe = new RecipeData(
-                new Ingredient(TechType.Titanium, 1),
-                new Ingredient(TechType.Glass, 1)),
-        };
-
+        // Register the prefab
+        public static void Register() => RegisterInternal(ClassId, DisplayName, Description, IconAssetName, PrefabAssetName, Recipe, ResizeBubbleParticles);
+        
         /// <summary>
         /// Perform aquarium type specific post configuration of the new prefab
         /// </summary>
-        internal static void PostConfigAction(GameObject newPrefabGo)
+        private static void ResizeBubbleParticles(GameObject newPrefabGo)
         {
             ModDebugLog.LogError("Running PostConfigAction for DeskAquarium...");
             Transform mainBubblesTransform = newPrefabGo.transform.Find("Bubbles/xBubbles");
@@ -214,8 +204,5 @@ namespace DaftAppleGames.MoreAquariums
             velocityOverLifetimeModule.y = linearY;
             velocityOverLifetimeModule.z = linearZ;
         }
-        
-        // Register the prefab
-        public static void Register() => RegisterInternal(Data);
     }
 }

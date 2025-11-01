@@ -27,7 +27,7 @@ namespace DaftAppleGames.MoreAquariums.Patches
                 }
                 
                 // Custom aquariums already have emitters
-                if (__instance.GetComponent<AquariumBase>())
+                if (__instance.GetComponent<CustomAquarium>())
                 {
                     ModDebugLog.LogDebug("Custom aquarium. Skipping bubble emitter...");
                     return;
@@ -38,7 +38,7 @@ namespace DaftAppleGames.MoreAquariums.Patches
                 if (bubblesTransform)
                 {
                     ModDebugLog.LogDebug("Adding bubble emitter to vanilla aquarium...");
-                    AquariumHelper.AddCustomEmitter(bubblesTransform.gameObject);
+                    AquariumConfigurator.AddCustomEmitter(bubblesTransform.gameObject);
                 }
             }
     }

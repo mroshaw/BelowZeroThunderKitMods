@@ -3,7 +3,7 @@ using System.Reflection;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace DaftAppleGames.ModUtils
+namespace DaftAppleGames.ModTools
 {
     /// <summary>
     /// Wrappers around the AssetBundle Unity methods
@@ -82,7 +82,7 @@ namespace DaftAppleGames.ModUtils
         /// </summary>
         public Object GetObjectFromAssetBundle<T>(string objectName) where T : Object
         {
-            _modLog.LogDebug($"ModUtils: Looking for GameObject named {objectName} in Asset Bundle.");
+            _modLog.LogDebug($"ModUtils: Looking for object of type {typeof(T)} named {objectName} in Asset Bundle.");
             
             LoadAssetBundle();
 
