@@ -16,6 +16,8 @@ You can find non-ThunderKit Subnautica mods in my [Subnautica Mods](https://gith
 - [Booster Tank Speed Mod BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/BoosterTankSpeedModifier_BZ) - adds a configurable modifier to alter the speed of the Suit Booster Tank.
 - [Sea Truck Fish Scoop BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/SeaTruckFishScoop_BZ) - adds a Fish Scoop to the Sea Truck, causing fish to be sucked into aquariums, rather than being squished.
 - [Subnautica Cheater BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/SubnauticaCheater_BZ) - adds cheats for infinite oxygen and health, mainly for use in debugging and testing other mods.
+- [More Aquariums BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/MoreAquariums_BZ) - adds new buildable aquariums to the habitat builder, and a custom fish movement component.
+- [Aqua Eclipse Now BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/AquaEclipseNow_BZ) - adds new console commands to force a solar eclipse to occur.
 
 ## Make your own mods
 
