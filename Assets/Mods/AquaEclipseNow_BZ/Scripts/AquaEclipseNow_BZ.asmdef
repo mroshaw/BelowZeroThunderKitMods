@@ -1,0 +1,21 @@
+{
+    "name": "AquaEclipseNow_BZ",
+    "references": [
+        "GUID:a8101a7f788ddab4d835833e6de817ac"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "0Harmony.dll",
+        "Assembly-CSharp_publicized.dll",
+        "Assembly-CSharp-firstpass_publicized.dll",
+        "BepInEx.dll",
+        "Nautilus.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
