@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-212750318014058512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17d1008b78cb6e846889b7778282fbef, type: 3}
+  m_Name: AssetBundleDefinitions
+  m_EditorClassIdentifier: 
+  StagingPaths:
+  - <ManifestPluginStaging>/Assets
+  assetBundles:
+  - assetBundleName: startupcommandassetbundle
+    assets:
+    - {fileID: 1062537915255775223, guid: b2ab0d07455584e4abe008f594ca5944, type: 3}
+--- !u!114 &-121899452589423327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f22bb7fd1d3b56a48bc52f8e407901d6, type: 3}
+  m_Name: ManifestIdentity
+  m_EditorClassIdentifier: 
+  StagingPaths: []
+  Author: Daft Apple Games
+  Name: StartupCommands_BZ
+  Description: Adds configurable startup command scripts
+  Version: 1.0.0
+  Dependencies: []
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e563561e08b6a3642a487177f5cfbb37, type: 3}
+  m_Name: StartupCommands_BZ
+  m_EditorClassIdentifier: 
+  Data:
+  - {fileID: -121899452589423327}
+  - {fileID: 8876472120765660631}
+  - {fileID: -212750318014058512}
+  identity: {fileID: -121899452589423327}
+  QuickAccess: 1
+--- !u!114 &8876472120765660631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b7e13dda513544419a89926bd12ad8a, type: 3}
+  m_Name: AssemblyDefinitions
+  m_EditorClassIdentifier: 
+  StagingPaths:
+  - <ManifestPluginStaging>
+  definitions:
+  - {fileID: 5897886265953266890, guid: e56775fa29453c148ab57893d76a8b44, type: 3}
+  - {fileID: 5897886265953266890, guid: a8101a7f788ddab4d835833e6de817ac, type: 3}

@@ -1,0 +1,24 @@
+{
+    "name": "StartupCommands_BZ",
+    "references": [
+        "GUID:2bafac87e7f4b9b418d9448d219b01ab",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:a8101a7f788ddab4d835833e6de817ac"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "0Harmony.dll",
+        "Assembly-CSharp_publicized.dll",
+        "Assembly-CSharp-firstpass_publicized.dll",
+        "BepInEx.dll",
+        "Nautilus.dll",
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
