@@ -18,6 +18,7 @@ You can find non-ThunderKit Subnautica mods in my [Subnautica Mods](https://gith
 - [Subnautica Cheater BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/SubnauticaCheater_BZ) - adds cheats for infinite oxygen and health, mainly for use in debugging and testing other mods.
 - [More Aquariums BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/MoreAquariums_BZ) - adds new buildable aquariums to the habitat builder, and a custom fish movement component.
 - [Aqua Eclipse Now BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/AquaEclipseNow_BZ) - adds new console commands to force a solar eclipse to occur.
+- [Startup Commands BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/StartupCommands_BZ) - allow players to configure a list of console commands to run every time the game is started.
 
 ## Make your own mods
 
