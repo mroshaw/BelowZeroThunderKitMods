@@ -3,7 +3,7 @@
 namespace DaftAppleGames.SubnauticaPets.Pets
 {
     /// <summary>
-    /// Simple MonoBehaviour class to manage Pet DNA collectible behaviour
+    ///     Simple MonoBehaviour class to manage Pet DNA collectible behaviour
     /// </summary>
     internal class PetDna : MonoBehaviour
     {

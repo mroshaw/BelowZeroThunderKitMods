@@ -1,15 +1,12 @@
-﻿using UnityEngine;
-using Random = UnityEngine.Random;
-
-namespace DaftAppleGames.SubnauticaPets.Pets
+﻿namespace DaftAppleGames.SubnauticaPets.Pets
 {
     /// <summary>
-    /// Simple action to kill pet
+    ///     Simple action to kill pet
     /// </summary>
     internal class KilledAction : PetAction
     {
         private SimpleMovement _simpleMovement;
-        
+
         internal override void Init()
         {
             _simpleMovement = GetComponent<SimpleMovement>();
@@ -23,7 +20,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         internal override void EndAction()
         {
         }
-        
+
         internal override void UpdateAction()
         {
         }

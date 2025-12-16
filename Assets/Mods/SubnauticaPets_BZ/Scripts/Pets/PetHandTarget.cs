@@ -1,11 +1,10 @@
-﻿
-using DaftAppleGames.SubnauticaPets.Utils;
+﻿using static DaftAppleGames.SubnauticaPets.SubnauticaPetsPlugin;
 
 namespace DaftAppleGames.SubnauticaPets.Pets
 {
     /// <summary>
-    /// Template MonoBehaviour class. Use this to add new functionality and behaviours to
-    /// the game.
+    ///     Template MonoBehaviour class. Use this to add new functionality and behaviours to
+    ///     the game.
     /// </summary>
     internal class PetHandTarget : HandTarget, IHandTarget
     {
@@ -13,45 +12,36 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         private Pet _pet;
 
         /// <summary>
-        /// Initialise the component
+        ///     Initialise the component
         /// </summary>
         private void Start()
         {
             _pet = GetComponent<Pet>();
-            if (!_pet)
-            {
-                LogUtils.LogError(LogArea.MonoUtils, "PetHandTarget: GameObject MUST have a Pet component!");
-            }
+            if (!_pet) ModDebugLog.LogError("PetHandTarget: GameObject MUST have a Pet component!");
         }
 
         /// <summary>
-        /// Handles a Mouse Hover over a pet
+        ///     Handles a Mouse Hover over a pet
         /// </summary>
         public void OnHandHover(GUIHand hand)
         {
-            if (!_pet)
-            {
-                return;
-            }
+            if (!_pet) return;
 
-            HandReticle main = HandReticle.main;
+            var main = HandReticle.main;
 
-            // LogUtils.LogDebug(LogArea.MonoPets, $"OnHandOver... hand.IsFreeToInteract is: {hand.IsFreeToInteract()}");
+            // ModDebugLog.LogDebug($"OnHandOver... hand.IsFreeToInteract is: {hand.IsFreeToInteract()}");
 
             // Check for right mouse click
-            if (GameInput.GetButtonDown(GameInput.Button.RightHand) )
+            if (GameInput.GetButtonDown(GameInput.Button.RightHand))
             {
                 // Walk towards the player
-                LogUtils.LogDebug(LogArea.MonoPets, "PetHandTarget: Walking to player...");
+                ModDebugLog.LogDebug("PetHandTarget: Walking to player...");
                 _pet.MoveToPlayer();
                 return;
             }
 
             // If hand is not free, allow the method to continue
-            if (!hand.IsFreeToInteract())
-            {
-                return;
-            }
+            if (!hand.IsFreeToInteract()) return;
 
             // Set the cursor and cursor text
             main.SetIcon(HandReticle.IconType.Hand);
@@ -62,29 +52,24 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             else
             {
                 main.SetText(HandReticle.TextType.Hand, $"Pet {_pet.PetName}", false, GameInput.Button.LeftHand);
-                main.SetText(HandReticle.TextType.HandSubscript, $"Beckon {_pet.PetName}", false, GameInput.Button.RightHand);
+                main.SetText(HandReticle.TextType.HandSubscript, $"Beckon {_pet.PetName}", false,
+                    GameInput.Button.RightHand);
             }
         }
 
         /// <summary>
-        /// Handles a click on a pet
+        ///     Handles a click on a pet
         /// </summary>
         public void OnHandClick(GUIHand hand)
         {
-            if (!_pet)
-            {
-                return;
-            }
+            if (!_pet) return;
 
-            LogUtils.LogDebug(LogArea.MonoPets, "PetHandTarget: In OnHandClick");
+            ModDebugLog.LogDebug("PetHandTarget: In OnHandClick");
 
-            if (!hand.IsFreeToInteract() || _pet.IsDead)
-            {
-                return;
-            }
+            if (!hand.IsFreeToInteract() || _pet.IsDead) return;
 
             // Play random animation
-            LogUtils.LogDebug(LogArea.MonoPets, "PetHandTarget: Playing animation...");
+            ModDebugLog.LogDebug("PetHandTarget: Playing animation...");
             _pet.PlayAnimation();
         }
     }

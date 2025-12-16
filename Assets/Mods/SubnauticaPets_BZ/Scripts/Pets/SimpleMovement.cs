@@ -4,17 +4,15 @@ using UnityEngine.Events;
 namespace DaftAppleGames.SubnauticaPets.Pets
 {
     /// <summary>
-    /// Simple movement using Unity CharacterController
+    ///     Simple movement using Unity CharacterController
     /// </summary>
     internal class SimpleMovement : MonoBehaviour
     {
-        [Header("Movement Settings")]
-        [SerializeField] private float moveSpeed = 0.8f;
+        [Header("Movement Settings")] [SerializeField] private float moveSpeed = 0.8f;
         [SerializeField] private float rotateSpeed = 4.0f;
         [SerializeField] private float arrivalTolerance = 0.05f;
 
-        [Header("Debug")]
-        [Header("Debug Movement")] [SerializeField] private Transform targetMarker;
+        [Header("Debug")] [Header("Debug Movement")] [SerializeField] private Transform targetMarker;
         [SerializeField] private bool isGrounded;
         [SerializeField] private Vector3 moveDirection;
         [SerializeField] private Vector3 moveTarget;
@@ -22,18 +20,14 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         [SerializeField] private bool isMoving;
 
         [SerializeField] internal UnityEvent onArrived = new UnityEvent();
-        [SerializeField] internal ControllerColliderHitEvent OnHitObstacle = new ControllerColliderHitEvent();
-        
+
         private CharacterController _charController;
         private PetAnimator _petAnimator;
         private Rigidbody _rigidbody;
-        
-        internal class ControllerColliderHitEvent : UnityEvent<Vector3>
-        {
-        }
-        
+        [SerializeField] internal ControllerColliderHitEvent OnHitObstacle = new ControllerColliderHitEvent();
+
         /// <summary>
-        /// Private setter for IsMoving
+        ///     Private setter for IsMoving
         /// </summary>
         private bool IsMoving
         {
@@ -45,58 +39,63 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             }
         }
 
-        private void OnEnable()
-        {
-            _rigidbody = GetComponent<Rigidbody>();
-            _rigidbody.isKinematic = true;
-            _rigidbody.useGravity = false;
-        }
-        
         private void Awake()
         {
             _charController = gameObject.GetComponent<CharacterController>();
             _petAnimator = GetComponent<PetAnimator>();
         }
-        
+
         private void Update()
         {
             // Ensure Rigidbody is always Kinematic
             _rigidbody.isKinematic = true;
-            
-            if (!IsMoving)
-            {
-                return;
-            }
-            
+
+            if (!IsMoving) return;
+
             CheckIsGrounded();
             SetMoveDirection();
             MoveToTarget();
             RotateToTarget();
         }
 
+        private void OnEnable()
+        {
+            _rigidbody = GetComponent<Rigidbody>();
+            _rigidbody.isKinematic = true;
+            _rigidbody.useGravity = false;
+        }
+
+        private void OnControllerColliderHit(ControllerColliderHit hit)
+        {
+            // Check for ground hit
+            // If the normal points up, it's probably ground
+            if (Vector3.Angle(hit.normal, Vector3.up) < 45f)
+                // Ground contact — ignore
+                return;
+            // ModDebugLog.LogDebug($"{gameObject.name} hit: {hit.gameObject.name}");
+            OnHitObstacle?.Invoke(hit.normal);
+        }
+
         internal void SetMoveSpeed(float newMoveSpeed)
         {
             moveSpeed = newMoveSpeed;
         }
-        
+
         internal void MoveToNewTarget(Vector3 target)
         {
             moveTarget = target;
             IsMoving = true;
-            
-            if (targetMarker)
-            {
-                targetMarker.position = target;
-            }
+
+            if (targetMarker) targetMarker.position = target;
         }
 
         internal void Stop()
         {
             IsMoving = false;
         }
-        
+
         /// <summary>
-        /// Set the direction to the target
+        ///     Set the direction to the target
         /// </summary>
         private void SetMoveDirection()
         {
@@ -104,9 +103,9 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             moveDirection = (moveTarget - transform.position).normalized;
             moveDirection.y = 0;
         }
-        
+
         /// <summary>
-        /// Move towards the target using the CharacterController
+        ///     Move towards the target using the CharacterController
         /// </summary>
         private void MoveToTarget()
         {
@@ -124,11 +123,11 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             // Rotate smoothly towards the target
             if (moveDirection != Vector3.zero)
             {
-                Quaternion lookRotation = Quaternion.LookRotation(moveDirection);
+                var lookRotation = Quaternion.LookRotation(moveDirection);
                 transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, rotateSpeed * Time.deltaTime);
             }
         }
-        
+
         private void CheckIsGrounded()
         {
             isGrounded = _charController.isGrounded;
@@ -139,18 +138,9 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             distanceToTarget = Vector3.Distance(transform.position, moveTarget);
             return distanceToTarget < arrivalTolerance;
         }
-        
-        private void OnControllerColliderHit(ControllerColliderHit hit)
+
+        internal class ControllerColliderHitEvent : UnityEvent<Vector3>
         {
-            // Check for ground hit
-            // If the normal points up, it's probably ground
-            if (Vector3.Angle(hit.normal, Vector3.up) < 45f)
-            {
-                // Ground contact — ignore
-                return;
-            }
-            // LogUtils.LogDebug(LogArea.MonoPets, $"{gameObject.name} hit: {hit.gameObject.name}");
-            OnHitObstacle?.Invoke(hit.normal);
         }
     }
 }

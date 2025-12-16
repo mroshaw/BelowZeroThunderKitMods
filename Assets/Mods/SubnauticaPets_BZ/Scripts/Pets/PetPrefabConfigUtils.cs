@@ -1,20 +1,24 @@
-﻿using DaftAppleGames.SubnauticaPets.Extensions;
-using Nautilus.Handlers;
-using Nautilus.Utility;
+﻿using System;
 using System.Collections.Generic;
+using DaftAppleGames.ModTools;
+using DaftAppleGames.SubnauticaPets.Extensions;
 using DaftAppleGames.SubnauticaPets.Utils;
 using Nautilus.Assets;
 using Nautilus.Assets.Gadgets;
 using Nautilus.Crafting;
+using Nautilus.Handlers;
+using Nautilus.Utility;
 using UnityEngine;
 using UnityEngine.AI;
+using Object = UnityEngine.Object;
+using static DaftAppleGames.SubnauticaPets.SubnauticaPetsPlugin;
 
 namespace DaftAppleGames.SubnauticaPets.Pets
 {
     internal static class PetPrefabConfigUtils
     {
         /// <summary>
-        /// Adds and configures components for Custom Pets
+        ///     Adds and configures components for Custom Pets
         /// </summary>
         internal static void AddCustomPetComponents(GameObject targetGameObject, string audioClipName, string busPath,
             float audioVolume)
@@ -27,30 +31,32 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             targetGameObject.EnsureComponent<KilledAction>();
             targetGameObject.EnsureComponent<SleepAction>();
 
-            LiveMixin liveMixin = targetGameObject.EnsureComponent<LiveMixin>();
+            var liveMixin = targetGameObject.EnsureComponent<LiveMixin>();
             liveMixin.data = ScriptableObject.CreateInstance<LiveMixinData>();
             liveMixin.data.maxHealth = 50;
             liveMixin.health = 50;
 
-            CustomPet customPet = targetGameObject.EnsureComponent<CustomPet>();
+            var customPet = targetGameObject.EnsureComponent<CustomPet>();
             customPet.babyScaleSize = 1.0f;
-            PetAnimator petAnimator = targetGameObject.EnsureComponent<PetAnimator>();
-            CreatureDeath creatureDeath = targetGameObject.EnsureComponent<CreatureDeath>();
+            var petAnimator = targetGameObject.EnsureComponent<PetAnimator>();
+            var creatureDeath = targetGameObject.EnsureComponent<CreatureDeath>();
             creatureDeath.liveMixin = liveMixin;
             creatureDeath.respawn = false;
             creatureDeath.useRigidbody = targetGameObject.GetComponent<Rigidbody>();
 
-            LogUtils.LogDebug(LogArea.Prefabs, "Setting up FMOD Emitter");
+            ModDebugLog.LogDebug("Setting up FMOD Emitter");
             FMOD_CustomEmitter customEmitter = targetGameObject.EnsureComponent<FMOD_CustomEmitter>();
-            CustomAudioUtils.ConfigureEmitter(customEmitter, audioClipName, busPath, audioVolume);
+            ModAudioUtils.RegisterSound(audioClipName, busPath, ModAssetUtils, ModDebugLog, 0.1f, 8.0f, 0, true);
+            FMODAsset petFmodAsset = AudioUtils.GetFmodAsset(audioClipName);
+            ModAudioUtils.ConfigureEmitter(customEmitter,  petFmodAsset, ModDebugLog);
 
             // Configure the CharacterController collider to interact with the MoonPool blocker
-            CharacterController characterController = targetGameObject.GetComponent<CharacterController>();
+            var characterController = targetGameObject.GetComponent<CharacterController>();
         }
 
         /// <summary>
-        /// Adds the specified child pet class component to the given creature GameObject
-        /// based on the given PetCreatureType
+        ///     Adds the specified child pet class component to the given creature GameObject
+        ///     based on the given PetCreatureType
         /// </summary>
         internal static void AddPetComponent(GameObject targetGameObject)
         {
@@ -59,215 +65,195 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
         internal static void ConfigureLargeWorldEntity(GameObject targetGameObject, bool state)
         {
-            LargeWorldEntity largeWorldEntity = targetGameObject.GetComponent<LargeWorldEntity>();
-            if (largeWorldEntity)
-            {
-                largeWorldEntity.cellLevel = LargeWorldEntity.CellLevel.Global;
-                // largeWorldEntity.enabled = state;
-            }
+            var largeWorldEntity = targetGameObject.GetComponent<LargeWorldEntity>();
+            if (largeWorldEntity) largeWorldEntity.cellLevel = LargeWorldEntity.CellLevel.Global;
+            // largeWorldEntity.enabled = state;
         }
 
         internal static void AddPrefabIdentifier(GameObject targetGameObject, string classId, TechType techType)
         {
             targetGameObject.EnsureComponent<PrefabIdentifier>().ClassId = classId;
 
-            if (techType != TechType.None)
-            {
-                targetGameObject.EnsureComponent<TechTag>().type = techType;
-            }
+            if (techType != TechType.None) targetGameObject.EnsureComponent<TechTag>().type = techType;
         }
 
         /// <summary>
-        /// Adds a Capsule Collider to DNA prefab
+        ///     Adds a Capsule Collider to DNA prefab
         /// </summary>
         internal static void AddDnaCapsuleCollider(GameObject targetGameObject)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddDnaCapsuleCollider started...");
+            ModDebugLog.LogDebug("AddDnaCapsuleCollider started...");
 
-            Collider collider = targetGameObject.GetComponentInChildren<Collider>(true);
+            var collider = targetGameObject.GetComponentInChildren<Collider>(true);
             if (collider)
             {
                 Object.Destroy(collider);
-                CapsuleCollider newCollider = collider.gameObject.AddComponent<CapsuleCollider>();
+                var newCollider = collider.gameObject.AddComponent<CapsuleCollider>();
                 newCollider.center = new Vector3(0, 0, 0);
                 newCollider.radius = 0.18f;
                 newCollider.height = 0.73f;
                 newCollider.direction = 1;
             }
 
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddDnaCapsuleCollider done.");
+            ModDebugLog.LogDebug("AddDnaCapsuleCollider done.");
         }
 
         /// <summary>
-        /// Configure the animator component
+        ///     Configure the animator component
         /// </summary>
         internal static void ConfigureAnimator(GameObject targetGameObject, bool isEnabled)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "ConfigureAnimator started...");
-            Creature creature = targetGameObject.GetComponent<Creature>();
-            Animator animator = creature.GetAnimator();
+            ModDebugLog.LogDebug("ConfigureAnimator started...");
+            var creature = targetGameObject.GetComponent<Creature>();
+            var animator = creature.GetAnimator();
             animator.enabled = isEnabled;
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "ConfigureAnimator done.");
+            ModDebugLog.LogDebug("ConfigureAnimator done.");
         }
 
         /// <summary>
-        /// Adds the ScaleOnStart component
+        ///     Adds the ScaleOnStart component
         /// </summary>
         internal static void AddScaleOnStart(GameObject targetGameObject, float scaleFactor)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddScaleOnStart started...");
-            ScaleOnStart scaleOnStart = targetGameObject.AddComponent<ScaleOnStart>();
+            ModDebugLog.LogDebug("AddScaleOnStart started...");
+            var scaleOnStart = targetGameObject.AddComponent<ScaleOnStart>();
             scaleOnStart.Scale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddScaleOnStart done.");
+            ModDebugLog.LogDebug("AddScaleOnStart done.");
         }
 
         /// <summary>
-        /// Add VFX Fabricator component
+        ///     Add VFX Fabricator component
         /// </summary>
         internal static void AddVFXFabricating(GameObject targetGameObject, string pathToModel, float minY, float maxY,
             Vector3 posOffset, float scaleFactor, Vector3 eulerOffset)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddVFXFabricating started...");
-            GameObject modelGameObject = targetGameObject.GetComponentInChildren<Animator>().gameObject;
+            ModDebugLog.LogDebug("AddVFXFabricating started...");
+            var modelGameObject = targetGameObject.GetComponentInChildren<Animator>().gameObject;
             if (modelGameObject != null)
-            {
                 PrefabUtils.AddVFXFabricating(modelGameObject, pathToModel, minY, maxY, posOffset, scaleFactor,
                     eulerOffset);
-            }
 
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddVFXFabricating done.");
+            ModDebugLog.LogDebug("AddVFXFabricating done.");
         }
 
         /// <summary>
-        /// Adds a Prefab Identifier component
+        ///     Adds a Prefab Identifier component
         /// </summary>
         internal static void AddPrefabIdentifier(GameObject targetGameObject)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddPrefabIdentifier started...");
-            PrefabIdentifier prefabIdentifier = targetGameObject.GetComponent<PrefabIdentifier>();
-            if (!prefabIdentifier)
-            {
-                targetGameObject.AddComponent<PrefabIdentifier>();
-            }
+            ModDebugLog.LogDebug("AddPrefabIdentifier started...");
+            var prefabIdentifier = targetGameObject.GetComponent<PrefabIdentifier>();
+            if (!prefabIdentifier) targetGameObject.AddComponent<PrefabIdentifier>();
 
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddPrefabIdentifier done.");
+            ModDebugLog.LogDebug("AddPrefabIdentifier done.");
         }
 
         /// <summary>
-        /// Sets all Mesh Renderers to the given colour
+        ///     Sets all Mesh Renderers to the given colour
         /// </summary>
         internal static void SetMeshRenderersColor(GameObject targetGameObject, string modelGameObjectName, Color color)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "SetMeshRenderersColor started...");
+            ModDebugLog.LogDebug("SetMeshRenderersColor started...");
             targetGameObject.FindChild(modelGameObjectName).GetComponent<MeshRenderer>().material.color = color;
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "SetMeshRenderersColor done.");
+            ModDebugLog.LogDebug("SetMeshRenderersColor done.");
         }
 
         /// <summary>
-        /// Adds a RotateModel component
+        ///     Adds a RotateModel component
         /// </summary>
         /// <param name="targetGameObject"></param>
         /// <param name="modelGameObjectName"></param>
         internal static void AddRotateModel(GameObject targetGameObject, string modelGameObjectName)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddRotateModel started...");
-            GameObject dnaGameObject = targetGameObject.transform.Find(modelGameObjectName).gameObject;
-            RotateModel rotateModel = dnaGameObject.AddComponent<RotateModel>();
+            ModDebugLog.LogDebug("AddRotateModel started...");
+            var dnaGameObject = targetGameObject.transform.Find(modelGameObjectName).gameObject;
+            var rotateModel = dnaGameObject.AddComponent<RotateModel>();
             rotateModel.RotationSpeed = 0.1f;
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddRotateModel done.");
+            ModDebugLog.LogDebug("AddRotateModel done.");
         }
 
         /// <summary>
-        /// Adds a TechTag component
+        ///     Adds a TechTag component
         /// </summary>
         internal static void AddTechTag(GameObject targetGameObject, TechType techType)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddTechTag started...");
-            TechTag techTag = targetGameObject.GetComponent<TechTag>();
-            if (techTag == null)
-            {
-                techTag = targetGameObject.AddComponent<TechTag>();
-            }
+            ModDebugLog.LogDebug("AddTechTag started...");
+            var techTag = targetGameObject.GetComponent<TechTag>();
+            if (techTag == null) techTag = targetGameObject.AddComponent<TechTag>();
 
             techTag.type = techType;
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddTechTag done");
+            ModDebugLog.LogDebug("AddTechTag done");
         }
 
         /// <summary>
-        /// Updates the Pickupable component
+        ///     Updates the Pickupable component
         /// </summary>
         internal static void UpdatePickupable(GameObject targetGameObject, bool isPickupable)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "UpdatePickupable started...");
+            ModDebugLog.LogDebug("UpdatePickupable started...");
             // Prevent fragments from being phsyically picked up
-            Pickupable pickupable = targetGameObject.GetComponent<Pickupable>();
-            if (pickupable)
-            {
-                pickupable.isPickupable = isPickupable;
-            }
+            var pickupable = targetGameObject.GetComponent<Pickupable>();
+            if (pickupable) pickupable.isPickupable = isPickupable;
 
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "UpdatePickupable done.");
+            ModDebugLog.LogDebug("UpdatePickupable done.");
         }
 
         /// <summary>
-        /// Adds the SimpleMovement component
+        ///     Adds the SimpleMovement component
         /// </summary>
         internal static void AddSimpleMovement(GameObject targetGameObject)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddSimpleMovement started...");
+            ModDebugLog.LogDebug("AddSimpleMovement started...");
             // Add simple movement component
-            SimpleMovement movement = targetGameObject.GetComponent<SimpleMovement>();
+            var movement = targetGameObject.GetComponent<SimpleMovement>();
             if (movement == null)
             {
                 movement = targetGameObject.AddComponent<SimpleMovement>();
                 movement.SetMoveSpeed(1.0f);
             }
 
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddSimpleMovement done.");
+            ModDebugLog.LogDebug("AddSimpleMovement done.");
         }
 
         /// <summary>
-        /// Add the WorldForces component
+        ///     Add the WorldForces component
         /// </summary>
         internal static void AddWorldForces(GameObject targetGameObject)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddWorldForces started...");
-            WorldForces worldForces = targetGameObject.GetComponent<WorldForces>();
-            if (worldForces == null)
-            {
-                worldForces = targetGameObject.AddComponent<WorldForces>();
-            }
+            ModDebugLog.LogDebug("AddWorldForces started...");
+            var worldForces = targetGameObject.GetComponent<WorldForces>();
+            if (worldForces == null) worldForces = targetGameObject.AddComponent<WorldForces>();
 
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddWorldForces done.");
+            ModDebugLog.LogDebug("AddWorldForces done.");
         }
 
         /// <summary>
-        /// Add the PetHandTarget component
+        ///     Add the PetHandTarget component
         /// </summary>
         internal static void AddPetHandTarget(GameObject targetGameObject)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddPetHandTarget started...");
+            ModDebugLog.LogDebug("AddPetHandTarget started...");
             targetGameObject.AddComponent<PetHandTarget>();
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddPetHandTarget done.");
+            ModDebugLog.LogDebug("AddPetHandTarget done.");
         }
 
         /// <summary>
-        /// Sets the pet scale
+        ///     Sets the pet scale
         /// </summary>
         internal static void SetScale(GameObject targetGameObject, Vector3 scaleFactor)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "SetScale started...");
+            ModDebugLog.LogDebug("SetScale started...");
             targetGameObject.transform.localScale = scaleFactor;
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "SetScale done.");
+            ModDebugLog.LogDebug("SetScale done.");
         }
 
         /// <summary>
-        /// Configure Pet Traits for "friendly" creatures
+        ///     Configure Pet Traits for "friendly" creatures
         /// </summary>
         internal static void ConfigurePetTraits(GameObject targetGameObject)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "ConfigurePetTraits started...");
-            Creature creature = targetGameObject.GetComponent<Creature>();
+            ModDebugLog.LogDebug("ConfigurePetTraits started...");
+            var creature = targetGameObject.GetComponent<Creature>();
             if (creature)
             {
                 creature.Friendliness.Value = 1.0f;
@@ -279,16 +265,16 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 creature.Tired.Value = 0.0f;
             }
 
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "ConfigurePetTraits done.");
+            ModDebugLog.LogDebug("ConfigurePetTraits done.");
         }
 
         /// <summary>
-        /// Adds a RigidBody, if not one already
+        ///     Adds a RigidBody, if not one already
         /// </summary>
         internal static void AddRigidBody(GameObject targetGameObject)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddRigidBody started...");
-            Rigidbody rigidbody = targetGameObject.GetComponent<Rigidbody>();
+            ModDebugLog.LogDebug("AddRigidBody started...");
+            var rigidbody = targetGameObject.GetComponent<Rigidbody>();
             if (rigidbody == null)
             {
                 rigidbody = targetGameObject.AddComponent<Rigidbody>();
@@ -298,157 +284,147 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 rigidbody.isKinematic = false;
             }
 
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddRigidBody done.");
+            ModDebugLog.LogDebug("AddRigidBody done.");
         }
 
 
         /// <summary>
-        /// Update the state of the RigidBody
+        ///     Update the state of the RigidBody
         /// </summary>
         internal static void SetRigidBodyKinematic(GameObject targetGameObject, bool isKinematic)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "SetRigidBodyKinematic started...");
-            Rigidbody rigidbody = targetGameObject.GetComponent<Rigidbody>();
+            ModDebugLog.LogDebug("SetRigidBodyKinematic started...");
+            var rigidbody = targetGameObject.GetComponent<Rigidbody>();
             if (rigidbody != null)
             {
                 rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
                 rigidbody.isKinematic = isKinematic;
             }
 
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "SetRigidBodyKinematic done.");
+            ModDebugLog.LogDebug("SetRigidBodyKinematic done.");
         }
 
         /// <summary>
-        /// Adds the Freeze On Settle component
+        ///     Adds the Freeze On Settle component
         /// </summary>
         internal static void AddFreezeOnSettle(GameObject targetGameObject)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddFreezeOnSettle started...");
-            FreezeOnSettle freeze = targetGameObject.GetComponent<FreezeOnSettle>();
+            ModDebugLog.LogDebug("AddFreezeOnSettle started...");
+            var freeze = targetGameObject.GetComponent<FreezeOnSettle>();
             if (freeze == null)
             {
                 freeze = targetGameObject.AddComponent<FreezeOnSettle>();
                 freeze.ConfigureParams(FreezeCheckType.Velocity, 0.025f, 5f, 2.0f, 3.0f);
             }
 
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddFreezeOnSettle done.");
+            ModDebugLog.LogDebug("AddFreezeOnSettle done.");
         }
 
         /// <summary>
-        /// Adds the Align to Floor component
+        ///     Adds the Align to Floor component
         /// </summary>
         internal static void AddAlignToFloor(GameObject targetGameObject)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddAlignToFloor started...");
-            AlignToFloorOnStart alignToFloor = targetGameObject.GetComponent<AlignToFloorOnStart>();
-            if (alignToFloor == null)
-            {
-                alignToFloor = targetGameObject.AddComponent<AlignToFloorOnStart>();
-            }
+            ModDebugLog.LogDebug("AddAlignToFloor started...");
+            var alignToFloor = targetGameObject.GetComponent<AlignToFloorOnStart>();
+            if (alignToFloor == null) alignToFloor = targetGameObject.AddComponent<AlignToFloorOnStart>();
 
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "AddAlignToFloor done.");
+            ModDebugLog.LogDebug("AddAlignToFloor done.");
         }
 
         /// <summary>
-        /// Resize the box collider
+        ///     Resize the box collider
         /// </summary>
         internal static void ResizeCollider(GameObject targetGameObject, Vector3 colliderCenter, Vector3 colliderSize)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "ResizeCollider started...");
-            BoxCollider collider = targetGameObject.GetComponentInChildren<BoxCollider>(true);
+            ModDebugLog.LogDebug("ResizeCollider started...");
+            var collider = targetGameObject.GetComponentInChildren<BoxCollider>(true);
             if (collider)
             {
                 collider.center = colliderCenter;
                 collider.size = colliderSize;
             }
 
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "ResizeCollider done.");
+            ModDebugLog.LogDebug("ResizeCollider done.");
         }
 
         /// <summary>
-        /// Deletes the old model
+        ///     Deletes the old model
         /// </summary>
         internal static void RemoveOldModel(GameObject targetGameObject, string modelNameHint)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "RemoveOldModel started...");
-            GameObject oldModelGameObject = targetGameObject.FindChild(modelNameHint);
-            if (oldModelGameObject != null)
-            {
-                Object.Destroy(oldModelGameObject);
-            }
+            ModDebugLog.LogDebug("RemoveOldModel started...");
+            var oldModelGameObject = targetGameObject.FindChild(modelNameHint);
+            if (oldModelGameObject != null) Object.Destroy(oldModelGameObject);
 
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "RemoveOldModel done.");
+            ModDebugLog.LogDebug("RemoveOldModel done.");
         }
 
         /// <summary>
-        /// Configures the Sky and SkyApplier, to ensure
-        /// creature mesh shaders don't look "dull".
+        ///     Configures the Sky and SkyApplier, to ensure
+        ///     creature mesh shaders don't look "dull".
         /// </summary>
         internal static void ConfigureSkyApplier(GameObject targetGameObject)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "ConfigureSkyApplier started...");
-            Pet pet = targetGameObject.GetComponent<Pet>();
+            ModDebugLog.LogDebug("ConfigureSkyApplier started...");
+            var pet = targetGameObject.GetComponent<Pet>();
 
-            SkyApplier skyApplier = targetGameObject.EnsureComponent<SkyApplier>();
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "Pet: ConfigureSkyApplier added SkyApplier component.");
+            var skyApplier = targetGameObject.EnsureComponent<SkyApplier>();
+            ModDebugLog.LogDebug("Pet: ConfigureSkyApplier added SkyApplier component.");
 
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "Pet: ConfigureSkyApplier setting SkyApplier Sky.");
+            ModDebugLog.LogDebug("Pet: ConfigureSkyApplier setting SkyApplier Sky.");
             // skyApplier.SetSky(Skies.BaseInterior);
 
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "Pet: ConfigureSkyApplier updating renderers...");
-            Renderer[] creatureRenderers = targetGameObject.GetComponentsInChildren<Renderer>(true);
-            LogUtils.LogDebug(LogArea.PetConfigUtils,
-                $"Pet: ConfigureSkyApplier found {creatureRenderers.Length} renderers...");
+            ModDebugLog.LogDebug("Pet: ConfigureSkyApplier updating renderers...");
+            var creatureRenderers = targetGameObject.GetComponentsInChildren<Renderer>(true);
+            ModDebugLog.LogDebug($"Pet: ConfigureSkyApplier found {creatureRenderers.Length} renderers...");
             // skyApplier.anchorSky = Skies.Auto;
             // skyApplier.emissiveFromPower = false;
             skyApplier.dynamic = false;
-            if (creatureRenderers.Length > 0)
-            {
-                skyApplier.renderers = creatureRenderers;
-            }
+            if (creatureRenderers.Length > 0) skyApplier.renderers = creatureRenderers;
 
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "ConfigureSkyApplier done.");
+            ModDebugLog.LogDebug("ConfigureSkyApplier done.");
         }
 
         /// <summary>
-        /// Prevents a Pet from floating on death
+        ///     Prevents a Pet from floating on death
         /// </summary>
         internal static void PreventFloatingOnDeath(GameObject targetGameObject)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "PreventFloatingOnDeath started...");
+            ModDebugLog.LogDebug("PreventFloatingOnDeath started...");
             // Remove the CreatureDeath component, to prevent floating on death
             targetGameObject.DestroyComponentsInChildren<CreatureDeath>();
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "PreventFloatingOnDeath done.");
+            ModDebugLog.LogDebug("PreventFloatingOnDeath done.");
         }
 
         /// <summary>
-        /// Remove the given behaviour from the behavior array
+        ///     Remove the given behaviour from the behavior array
         /// </summary>
-        private static Behaviour[] RemoveBehaviourItem(Behaviour[] array, System.Type typeToRemove)
+        private static Behaviour[] RemoveBehaviourItem(Behaviour[] array, Type typeToRemove)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "RemoveBehaviourItem started...");
-            List<Behaviour> behaviourList = new List<Behaviour>(array);
-            Behaviour behaviorToRemove = behaviourList.Find(x => x.GetType() == typeToRemove);
+            ModDebugLog.LogDebug("RemoveBehaviourItem started...");
+            var behaviourList = new List<Behaviour>(array);
+            var behaviorToRemove = behaviourList.Find(x => x.GetType() == typeToRemove);
             behaviourList.Remove(behaviorToRemove);
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "RemoveBehaviourItem done.");
+            ModDebugLog.LogDebug("RemoveBehaviourItem done.");
             return behaviourList.ToArray();
         }
 
         /// <summary>
-        /// Sets up a PDA Databank entry
+        ///     Sets up a PDA Databank entry
         /// </summary>
         internal static void ConfigureDatabankEntry(string encyKey, string encyPath, string mainImageTextureName,
             string popupImageTextureName)
         {
-            Texture2D mainImage =
-                CustomAssetBundleUtils.GetObjectFromAssetBundle<Texture2D>(mainImageTextureName) as Texture2D;
-            Sprite popupImageSprite =
-                CustomAssetBundleUtils.GetObjectFromAssetBundle<Sprite>(popupImageTextureName) as Sprite;
+            var mainImage =
+                ModAssetUtils.GetObjectFromAssetBundle<Texture2D>(mainImageTextureName) as Texture2D;
+            var popupImageSprite =
+                ModAssetUtils.GetObjectFromAssetBundle<Sprite>(popupImageTextureName) as Sprite;
             if (!popupImageSprite)
             {
-                Texture2D popupImageTexture =
-                    CustomAssetBundleUtils.GetObjectFromAssetBundle<Texture2D>(popupImageTextureName) as Texture2D;
-                popupImageSprite = CustomAssetBundleUtils.GetSpriteFromTexture(popupImageTexture);
+                var popupImageTexture =
+                    ModAssetUtils.GetObjectFromAssetBundle<Texture2D>(popupImageTextureName) as Texture2D;
+                popupImageSprite = ModAssetUtils.GetSpriteFromTexture(popupImageTexture);
             }
 
             PDAHandler.AddEncyclopediaEntry(encyKey, encyPath, null, null,
@@ -459,14 +435,14 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             string audioClipName,
             TechType techType, TechType dnaTechType)
         {
-            CustomPrefab prefab = new CustomPrefab(prefabInfo);
+            var prefab = new CustomPrefab(prefabInfo);
 
-            GameObject prefabGameObject =
-                CustomAssetBundleUtils.GetObjectFromAssetBundle<GameObject>(bundlePrefabName) as GameObject;
+            var prefabGameObject =
+                ModAssetUtils.GetObjectFromAssetBundle<GameObject>(bundlePrefabName) as GameObject;
 
-            GameObject model = prefabGameObject.transform.Find("model").gameObject;
-            Transform petEyes = prefabGameObject.transform.Find("Eyes");
-            SimpleMovement simpleMovement = prefabGameObject.AddComponent<SimpleMovement>();
+            var model = prefabGameObject.transform.Find("model").gameObject;
+            var petEyes = prefabGameObject.transform.Find("Eyes");
+            var simpleMovement = prefabGameObject.AddComponent<SimpleMovement>();
 
             // Standard components
             PrefabUtils.AddBasicComponents(prefabGameObject, classId, prefabInfo.TechType,
@@ -486,95 +462,91 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
             // Set the recipe, depends on whether in "Adventure" or "Creative" mode.
             RecipeData recipe = null;
-            if (SubnauticaPetsPlugin.ModConfig.ModMode == ModMode.Adventure)
+            if (ConfigFile.ModMode == ModMode.Adventure)
             {
                 if (dnaTechType != TechType.None)
-                {
                     recipe = new RecipeData(
                         new Ingredient(TechType.Gold, 1),
                         new Ingredient(TechType.Titanium, 1),
                         new Ingredient(TechType.Salt, 1),
                         new Ingredient(dnaTechType, 2));
-                }
                 else
-                {
                     recipe = new RecipeData(
                         new Ingredient(TechType.Gold, 1),
                         new Ingredient(TechType.Titanium, 1),
                         new Ingredient(TechType.Salt, 1));
-                }
             }
             else
             {
                 recipe = new RecipeData(new Ingredient(TechType.Titanium, 1));
             }
 
-            CraftingGadget crafting = prefab.SetRecipe(recipe);
+            var crafting = prefab.SetRecipe(recipe);
             prefab.Register();
         }
 
         /// <summary>
-        /// Destroy the EmpAttack component
+        ///     Destroy the EmpAttack component
         /// </summary>
         internal static void DestroyEmpAttack(GameObject targetGameObject)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "DestroyEmpAttack started...");
+            ModDebugLog.LogDebug("DestroyEmpAttack started...");
             targetGameObject.DestroyComponentsInChildren<EMPAttack>();
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "DestroyEmpAttack done.");
+            ModDebugLog.LogDebug("DestroyEmpAttack done.");
         }
 
         /// <summary>
-        /// Destroy the AttackLastTarget component
+        ///     Destroy the AttackLastTarget component
         /// </summary>
         internal static void DestroyAttackLastTarget(GameObject targetGameObject)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "DestroyAttackLastTarget started...");
+            ModDebugLog.LogDebug("DestroyAttackLastTarget started...");
             targetGameObject.DestroyComponentsInChildren<AttackLastTarget>();
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "DestroyAttackLastTarget done.");
+            ModDebugLog.LogDebug("DestroyAttackLastTarget done.");
         }
-        
+
         /// <summary>
-        /// Configure Swimming components
+        ///     Configure Swimming components
         /// </summary>
         /// <param name="targetGameObject"></param>
         internal static void ConfigureSwimming(GameObject targetGameObject)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "ConfigureSwimming started...");
+            ModDebugLog.LogDebug("ConfigureSwimming started...");
             // Prevent Pet from swimming in interiors   
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "... ConfigurePetCreature:  LandCreatureGravity...");
-            LandCreatureGravity landCreatureGravity = targetGameObject.GetComponent<LandCreatureGravity>();
+            ModDebugLog.LogDebug("... ConfigurePetCreature:  LandCreatureGravity...");
+            var landCreatureGravity = targetGameObject.GetComponent<LandCreatureGravity>();
             landCreatureGravity.forceLandMode = true;
             landCreatureGravity.enabled = true;
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "ConfigureSwimming done.");
+            ModDebugLog.LogDebug("ConfigureSwimming done.");
         }
 
         /// <summary>
-        /// Cleans up all the NavMesh related components on the Pet Game Object
+        ///     Cleans up all the NavMesh related components on the Pet Game Object
         /// </summary>
         internal static void CleanNavUpMesh(GameObject targetGameObject)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "CleanNavUpMesh started...");
+            ModDebugLog.LogDebug("CleanNavUpMesh started...");
             // Remove NavMesh components
             targetGameObject.DestroyComponentsInChildren<MoveOnNavMesh>();
             targetGameObject.DisableComponentsInChildren<NavMeshFollowing>();
             targetGameObject.DisableComponentsInChildren<NavMeshAgent>();
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "CleanNavUpMesh done.");
+            ModDebugLog.LogDebug("CleanNavUpMesh done.");
         }
 
         /// <summary>
-        /// Override the SnowStalker movement
+        ///     Override the SnowStalker movement
         /// </summary>
         internal static void ConfigureMovement(GameObject targetGameObject)
         {
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "ConfigureMovement started...");
-            SnowStalkerBaby snowStalker = targetGameObject.GetComponent<SnowStalkerBaby>();
+            ModDebugLog.LogDebug("ConfigureMovement started...");
+            var snowStalker = targetGameObject.GetComponent<SnowStalkerBaby>();
 
             // Add a SurfaceMovement component, get that little bugger moving around!
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "... Configuring movement components ...");
-            OnSurfaceTracker onSurfaceTracker = targetGameObject.GetComponent<OnSurfaceTracker>();
-            WalkBehaviour walkBehaviour = targetGameObject.GetComponent<WalkBehaviour>();
-            OnSurfaceMovement onSurfaceMovement = targetGameObject.AddComponent<OnSurfaceMovement>();
-            MoveOnSurface moveOnSurface = targetGameObject.GetComponent<MoveOnSurface>();
+            ModDebugLog.LogDebug("... Configuring movement components ...");
+            var onSurfaceTracker = targetGameObject.GetComponent<OnSurfaceTracker>();
+            var walkBehaviour = targetGameObject.GetComponent<WalkBehaviour>();
+            var onSurfaceMovement = targetGameObject.AddComponent<OnSurfaceMovement>();
+            var moveOnSurface = targetGameObject.GetComponent<MoveOnSurface>();
 
             // Configure walking and movement components
             onSurfaceMovement.onSurfaceTracker = onSurfaceTracker;
@@ -584,24 +556,24 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             walkBehaviour.onSurfaceMovement = onSurfaceMovement;
             walkBehaviour.onSurfaceTracker = onSurfaceTracker;
             snowStalker.onSurfaceMovement = onSurfaceMovement;
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "... Configuring movement components ... Done");
+            ModDebugLog.LogDebug("... Configuring movement components ... Done");
 
             // Add Obstacle Avoidance components
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "... Configuring AvoidObstaclesOnLand...");
-            AvoidObstaclesOnLand avoidObstaclesOnLand = targetGameObject.AddComponent<AvoidObstaclesOnLand>();
-            AvoidObstaclesOnSurface avoidObstaclesOnSurface = targetGameObject.AddComponent<AvoidObstaclesOnSurface>();
+            ModDebugLog.LogDebug("... Configuring AvoidObstaclesOnLand...");
+            var avoidObstaclesOnLand = targetGameObject.AddComponent<AvoidObstaclesOnLand>();
+            var avoidObstaclesOnSurface = targetGameObject.AddComponent<AvoidObstaclesOnSurface>();
             avoidObstaclesOnLand.creature = snowStalker;
             avoidObstaclesOnSurface.creature = snowStalker;
             avoidObstaclesOnLand.swimBehaviour = walkBehaviour;
             avoidObstaclesOnLand.scanDistance = 0.5f;
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "... Configuring AvoidObstaclesOnLand... Done");
+            ModDebugLog.LogDebug("... Configuring AvoidObstaclesOnLand... Done");
 
             // Configure swim behaviour
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "... Configuring SwimRandom and LastTarget...");
-            LastTarget lastTarget = targetGameObject.AddComponent<LastTarget>();
-            SwimRandom swimRandom = targetGameObject.GetComponent<SwimRandom>();
+            ModDebugLog.LogDebug("... Configuring SwimRandom and LastTarget...");
+            var lastTarget = targetGameObject.AddComponent<LastTarget>();
+            var swimRandom = targetGameObject.GetComponent<SwimRandom>();
             swimRandom.swimBehaviour = walkBehaviour;
-            LogUtils.LogDebug(LogArea.PetConfigUtils, "ConfigureMovement started... Done.");
+            ModDebugLog.LogDebug("ConfigureMovement started... Done.");
         }
     }
 }

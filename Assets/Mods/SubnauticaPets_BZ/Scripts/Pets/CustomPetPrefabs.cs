@@ -1,7 +1,6 @@
-﻿using DaftAppleGames.SubnauticaPets.Pets;
-using DaftAppleGames.SubnauticaPets.Utils;
-using Nautilus.Assets;
+﻿using Nautilus.Assets;
 using UnityEngine;
+using static DaftAppleGames.SubnauticaPets.SubnauticaPetsPlugin;
 
 namespace DaftAppleGames.SubnauticaPets.Pets
 {
@@ -20,21 +19,21 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         // Cat
         internal static class CatPetPrefab
         {
-            // Init PrefabInfo
-            internal static PrefabInfo Info;
             private const string ClassId = "CatPet";
             private const string PrefabAssetName = "PetCat.prefab";
             private const string IconTextureAssetName = "CatIcon_Small.png";
             private const string AudioAssetName = "CatMeow.wav";
-            
+            // Init PrefabInfo
+            internal static PrefabInfo Info;
+
             /// <summary>
-            /// Register Cat
+            ///     Register Cat
             /// </summary>
             internal static void Register()
             {
                 Info = PrefabInfo
                     .WithTechType(ClassId, null, null, unlockAtStart: true)
-                    .WithIcon(CustomAssetBundleUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
+                    .WithIcon(ModAssetUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
                 PetPrefabConfigUtils.RegisterCustomPet(Info, ClassId, PrefabAssetName,
                     AudioAssetName,
                     Info.TechType, PetDnaPrefabs.CatDnaPrefab.Info.TechType);
@@ -43,18 +42,18 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
         internal static class DogPetPrefab
         {
-            // Init PrefabInfo
-            internal static PrefabInfo Info;
             private const string ClassId = "DogPet";
             private const string PrefabAssetName = "PetDog.prefab";
             private const string IconTextureAssetName = "DogIcon_Small.png";
             private const string AudioAssetName = "DogBark.wav";
-            
+            // Init PrefabInfo
+            internal static PrefabInfo Info;
+
             internal static void Register()
             {
                 Info = PrefabInfo
                     .WithTechType(ClassId, null, null, unlockAtStart: true)
-                    .WithIcon(CustomAssetBundleUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
+                    .WithIcon(ModAssetUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
                 PetPrefabConfigUtils.RegisterCustomPet(Info, ClassId, PrefabAssetName,
                     AudioAssetName,
                     Info.TechType, TechType.None);
@@ -63,21 +62,21 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
         internal static class RabbitPetPrefab
         {
-            // Init PrefabInfo
-            internal static PrefabInfo Info;
             private const string ClassId = "RabbitPet";
             private const string PrefabAssetName = "PetRabbit.prefab";
             private const string IconTextureAssetName = "RabbitIcon_Small.png";
             private const string AudioAssetName = "RabbitSqueak.wav";
-            
+            // Init PrefabInfo
+            internal static PrefabInfo Info;
+
             /// <summary>
-            /// Register Cat
+            ///     Register Cat
             /// </summary>
             internal static void Register()
             {
                 Info = PrefabInfo
                     .WithTechType(ClassId, null, null, unlockAtStart: true)
-                    .WithIcon(CustomAssetBundleUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
+                    .WithIcon(ModAssetUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
                 PetPrefabConfigUtils.RegisterCustomPet(Info, ClassId, PrefabAssetName,
                     AudioAssetName,
                     Info.TechType, TechType.None);
@@ -86,21 +85,21 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
         internal static class SealPetPrefab
         {
-            // Init PrefabInfo
-            internal static PrefabInfo Info;
             private const string ClassId = "SealPet";
             private const string PrefabAssetName = "PetSeal.prefab";
             private const string IconTextureAssetName = "SealIcon_Small.png";
             private const string AudioAssetName = "SealBark.wav";
+            // Init PrefabInfo
+            internal static PrefabInfo Info;
 
             /// <summary>
-            /// Register Cat
+            ///     Register Cat
             /// </summary>
             internal static void Register()
             {
                 Info = PrefabInfo
                     .WithTechType(ClassId, null, null, unlockAtStart: true)
-                    .WithIcon(CustomAssetBundleUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
+                    .WithIcon(ModAssetUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
                 PetPrefabConfigUtils.RegisterCustomPet(Info, ClassId, PrefabAssetName,
                     AudioAssetName,
                     Info.TechType, TechType.None);
@@ -109,21 +108,21 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
         internal static class WalrusPetPrefab
         {
-            // Init PrefabInfo
-            internal static PrefabInfo Info;
             private const string ClassId = "WalrusPet";
             private const string PrefabAssetName = "PetWalrus.prefab";
             private const string IconTextureAssetName = "WalrusIcon_Small.png";
             private const string AudioAssetName = "WalrusSound.wav";
-            
+            // Init PrefabInfo
+            internal static PrefabInfo Info;
+
             /// <summary>
-            /// Register Walrus
+            ///     Register Walrus
             /// </summary>
             internal static void Register()
             {
                 Info = PrefabInfo
                     .WithTechType(ClassId, null, null, unlockAtStart: true)
-                    .WithIcon(CustomAssetBundleUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
+                    .WithIcon(ModAssetUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
                 PetPrefabConfigUtils.RegisterCustomPet(Info, ClassId, PrefabAssetName,
                     AudioAssetName,
                     Info.TechType, TechType.None);
@@ -133,21 +132,21 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         // Fox
         internal static class FoxPetPrefab
         {
-            // Init PrefabInfo
-            internal static PrefabInfo Info;
             private const string ClassId = "FoxPet";
             private const string PrefabAssetName = "PetFox.prefab";
             private const string IconTextureAssetName = "FoxIcon_Small.png";
             private const string AudioAssetName = "FoxSound.wav";
-            
+            // Init PrefabInfo
+            internal static PrefabInfo Info;
+
             /// <summary>
-            /// Register Cat
+            ///     Register Cat
             /// </summary>
             internal static void Register()
             {
                 Info = PrefabInfo
                     .WithTechType(ClassId, null, null, unlockAtStart: true)
-                    .WithIcon(CustomAssetBundleUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
+                    .WithIcon(ModAssetUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
                 PetPrefabConfigUtils.RegisterCustomPet(Info, ClassId, PrefabAssetName,
                     AudioAssetName,
                     Info.TechType, TechType.None);

@@ -2,10 +2,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace DaftAppleGames.SubnauticaPets.BaseParts 
+namespace DaftAppleGames.SubnauticaPets.BaseParts
 {
     /// <summary>
-    /// An entry in the Pet Console scroll list view
+    ///     An entry in the Pet Console scroll list view
     /// </summary>
     public class ConsoleScrollViewEntry : MonoBehaviour
     {
@@ -14,15 +14,15 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         [SerializeField] private TMP_Text nameText;
 
         internal Button Button => button;
-        
+
         internal void SetText(string text)
         {
             nameText.text = text;
         }
-        
+
         internal void SetBackgroundColor(Color newColor)
         {
-            Color buttonColour = newColor;
+            var buttonColour = newColor;
             buttonColour.a = 128;
             backgroundImage.color = buttonColour;
         }

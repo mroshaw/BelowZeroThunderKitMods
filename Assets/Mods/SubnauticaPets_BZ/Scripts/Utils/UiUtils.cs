@@ -1,11 +1,12 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static DaftAppleGames.SubnauticaPets.SubnauticaPetsPlugin;
 
 namespace DaftAppleGames.SubnauticaPets.Utils
 {
     /// <summary>
-    /// Utilities class to help construct custom UIs
+    ///     Utilities class to help construct custom UIs
     /// </summary>
     internal static class UiUtils
     {
@@ -14,30 +15,28 @@ namespace DaftAppleGames.SubnauticaPets.Utils
         internal const string CustomButtonTexture = "CustomButtonTexture.png";
 
         /// <summary>
-        /// Creates a new button and returns it as a GameObject
+        ///     Creates a new button and returns it as a GameObject
         /// </summary>
         public static Button CreateButton(GameObject sourceUi, string sourceButtonName, string newButtonName,
             string newButtonTextKey, GameObject targetUi, Vector3 localPosition, bool isInteractable)
         {
             GameObject origButtonGameObject = null;
 
-            foreach (Transform child in sourceUi.GetComponentsInChildren<Transform>(true))
-            {
+            foreach (var child in sourceUi.GetComponentsInChildren<Transform>(true))
                 if (child.name == sourceButtonName && child.GetComponent<Button>())
                 {
                     origButtonGameObject = child.gameObject;
                     break;
                 }
-            }
 
             if (!origButtonGameObject)
             {
-                LogUtils.LogError(LogArea.Utilities, $"UiUtils: CreateButton can't find a Button in {sourceUi}");
+                ModDebugLog.LogError($"UiUtils: CreateButton can't find a Button in {sourceUi}");
                 return null;
             }
 
             // Clone the button Game Object
-            GameObject newButtonGameObject = Object.Instantiate(origButtonGameObject);
+            var newButtonGameObject = Object.Instantiate(origButtonGameObject);
 
             // Set new button properties
             newButtonGameObject.name = newButtonName;
@@ -48,24 +47,25 @@ namespace DaftAppleGames.SubnauticaPets.Utils
 
             // Add translation component on label
             newButtonGameObject.SetActive(false);
-            TextMeshProUGUI label = newButtonGameObject.GetComponentInChildren<TextMeshProUGUI>(true);
+            var label = newButtonGameObject.GetComponentInChildren<TextMeshProUGUI>(true);
             if (label)
             {
-                TranslationLiveUpdate liveTranslation = label.gameObject.AddComponent<TranslationLiveUpdate>();
+                var liveTranslation = label.gameObject.AddComponent<TranslationLiveUpdate>();
                 liveTranslation.textComponent = label;
                 liveTranslation.translationKey = newButtonTextKey;
             }
             else
             {
-                LogUtils.LogError(LogArea.Utilities, $"UiUtils: Couldn't find TextMeshProUGUI on {newButtonGameObject.name}!");
+                ModDebugLog.LogError($"UiUtils: Couldn't find TextMeshProUGUI on {newButtonGameObject.name}!");
             }
+
             newButtonGameObject.GetComponent<Button>().interactable = isInteractable;
             newButtonGameObject.SetActive(true);
             return newButtonGameObject.GetComponent<Button>();
         }
 
         /// <summary>
-        /// Creates a Text Entry object from the source UI
+        ///     Creates a Text Entry object from the source UI
         /// </summary>
         /// <param name="sourceUi"></param>
         /// <param name="sourceTextName"></param>
@@ -74,27 +74,26 @@ namespace DaftAppleGames.SubnauticaPets.Utils
         /// <param name="targetUi"></param>
         /// <param name="localPosition"></param>
         /// <returns></returns>
-        public static TMP_InputField CreateTextEntry(GameObject sourceUi, string sourceTextName, string newTextName, string tipTextKey, GameObject targetUi, Vector3 localPosition)
+        public static TMP_InputField CreateTextEntry(GameObject sourceUi, string sourceTextName, string newTextName,
+            string tipTextKey, GameObject targetUi, Vector3 localPosition)
         {
             GameObject origTextGameObject = null;
 
-            foreach (Transform child in sourceUi.GetComponentsInChildren<Transform>(true))
-            {
+            foreach (var child in sourceUi.GetComponentsInChildren<Transform>(true))
                 if (child.name == sourceTextName && child.GetComponent<uGUI_InputField>())
                 {
                     origTextGameObject = child.gameObject;
                     break;
                 }
-            }
 
             if (!origTextGameObject)
             {
-                LogUtils.LogDebug(LogArea.Utilities, $"UiUtils: CreateButton can't find a TextEntry in {sourceUi}");
+                ModDebugLog.LogDebug($"UiUtils: CreateButton can't find a TextEntry in {sourceUi}");
                 return null;
             }
 
             // Clone the button Game Object
-            GameObject newTextGameObject = Object.Instantiate(origTextGameObject);
+            var newTextGameObject = Object.Instantiate(origTextGameObject);
 
             // Set new button properties
             newTextGameObject.name = newTextName;
@@ -110,7 +109,7 @@ namespace DaftAppleGames.SubnauticaPets.Utils
         }
 
         /// <summary>
-        /// Creates a new label game object from the source
+        ///     Creates a new label game object from the source
         /// </summary>
         /// <param name="sourceUi"></param>
         /// <param name="sourceLabelName"></param>
@@ -119,27 +118,26 @@ namespace DaftAppleGames.SubnauticaPets.Utils
         /// <param name="targetUi"></param>
         /// <param name="localPosition"></param>
         /// <returns></returns>
-        public static GameObject CreateLabel(GameObject sourceUi, string sourceLabelName, string newLabelName, string newLabelKey, GameObject targetUi, Vector3 localPosition)
+        public static GameObject CreateLabel(GameObject sourceUi, string sourceLabelName, string newLabelName,
+            string newLabelKey, GameObject targetUi, Vector3 localPosition)
         {
             GameObject origLabelGameObject = null;
 
-            foreach (Transform child in sourceUi.GetComponentsInChildren<Transform>(true))
-            {
+            foreach (var child in sourceUi.GetComponentsInChildren<Transform>(true))
                 if (child.name == sourceLabelName && child.GetComponent<TextMeshProUGUI>())
                 {
                     origLabelGameObject = child.gameObject;
                     break;
                 }
-            }
 
             if (!origLabelGameObject)
             {
-                LogUtils.LogDebug(LogArea.Utilities, $"UiUtils: CreateButton can't find a TextEntry in {sourceUi}");
+                ModDebugLog.LogDebug($"UiUtils: CreateButton can't find a TextEntry in {sourceUi}");
                 return null;
             }
 
             // Clone the button Game Object
-            GameObject newLabelGameObject = Object.Instantiate(origLabelGameObject);
+            var newLabelGameObject = Object.Instantiate(origLabelGameObject);
 
             // Set new button properties
             newLabelGameObject.name = newLabelName;
@@ -150,10 +148,11 @@ namespace DaftAppleGames.SubnauticaPets.Utils
             newLabelGameObject.transform.localScale = new Vector3(1, 1, 1);
 
             // Add translation component on label
-            LogUtils.LogDebug(LogArea.Utilities, $"UiUtils: Adding translation component on {newLabelGameObject.name} using key {newLabelKey}");
+            ModDebugLog.LogDebug(
+                $"UiUtils: Adding translation component on {newLabelGameObject.name} using key {newLabelKey}");
             newLabelGameObject.SetActive(false);
-            TextMeshProUGUI label = newLabelGameObject.GetComponentInChildren<TextMeshProUGUI>(true);
-            TranslationLiveUpdate liveTranslation = label.gameObject.AddComponent<TranslationLiveUpdate>();
+            var label = newLabelGameObject.GetComponentInChildren<TextMeshProUGUI>(true);
+            var liveTranslation = label.gameObject.AddComponent<TranslationLiveUpdate>();
             liveTranslation.textComponent = label;
             liveTranslation.translationKey = newLabelKey;
             newLabelGameObject.SetActive(true);
@@ -162,13 +161,14 @@ namespace DaftAppleGames.SubnauticaPets.Utils
         }
 
         /// <summary>
-        /// Creates a new ScrollView game object
+        ///     Creates a new ScrollView game object
         /// </summary>
         /// <returns></returns>
         public static void CreateScrollView(GameObject sourceUi,
-            GameObject targetUi, string scrollViewName, Vector3 localPosition, Vector2 size, out GameObject scrollViewContent)
+            GameObject targetUi, string scrollViewName, Vector3 localPosition, Vector2 size,
+            out GameObject scrollViewContent)
         {
-            GameObject scrollView = CustomAssetBundleUtils.GetPrefabInstanceFromAssetBundle(ScrollViewObject, true);
+            GameObject scrollView = ModAssetUtils.GetPrefabInstanceFromAssetBundle(ScrollViewObject, true);
             scrollView.name = scrollViewName;
             scrollView.transform.SetParent(targetUi.transform);
             scrollView.transform.localPosition = localPosition;

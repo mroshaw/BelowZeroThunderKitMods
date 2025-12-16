@@ -3,15 +3,14 @@
 namespace DaftAppleGames.SubnauticaPets.Pets
 {
     /// <summary>
-    /// Action to move to given target
+    ///     Action to move to given target
     /// </summary>
     internal class MoveToAction : PetAction
     {
-        [Header("Action Settings")]
-        public Vector3 movePosition;
-        
+        [Header("Action Settings")] public Vector3 movePosition;
+
         private SimpleMovement _simpleMovement;
-        
+
         internal override void Init()
         {
             _simpleMovement = GetComponent<SimpleMovement>();
@@ -29,7 +28,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             _simpleMovement.onArrived.RemoveListener(ArrivedAtTarget);
             _simpleMovement.OnHitObstacle.RemoveListener(HitObstacle);
         }
-        
+
         private void ArrivedAtTarget()
         {
             ActionCompleted();
@@ -39,10 +38,9 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         {
             ActionCompleted();
         }
-        
+
         internal override void UpdateAction()
         {
         }
-        
     }
 }

@@ -1,26 +1,25 @@
-﻿using DaftAppleGames.SubnauticaPets.Pets;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DaftAppleGames.SubnauticaPets.Pets;
 using DaftAppleGames.SubnauticaPets.Utils;
 using TMPro;
 using UnityEngine;
 using Button = UnityEngine.UI.Button;
+using static DaftAppleGames.SubnauticaPets.SubnauticaPetsPlugin;
 
 namespace DaftAppleGames.SubnauticaPets.BaseParts
 {
     /// <summary>
-    /// Component to manage the Pet Console UI functionality
-    /// Events should be subscribed to by PetConsole
+    ///     Component to manage the Pet Console UI functionality
+    ///     Events should be subscribed to by PetConsole
     /// </summary>
     internal class PetConsole : MonoBehaviour
     {
-        [Header("Settings")]
-        [SerializeField] private GameObject activeScreen;
+        [Header("Settings")] [SerializeField] private GameObject activeScreen;
         [SerializeField] private GameObject inactiveScreen;
-        
-        [Header("UI Settings")]
-        [SerializeField] private GameObject petsScrollViewContent;
+
+        [Header("UI Settings")] [SerializeField] private GameObject petsScrollViewContent;
         [SerializeField] private Button killAllButton;
         [SerializeField] private Button killAllConfirmButton;
         [SerializeField] private Button killButton;
@@ -29,21 +28,34 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         [SerializeField] private TMP_InputField petNameTextInput;
         [SerializeField] private TMP_Text versionText;
 
-        [Header("Scroll View Settings")]
-        [SerializeField] private GameObject babySnowStalkerTemplate;
+        [Header("Scroll View Settings")] [SerializeField] private GameObject babySnowStalkerTemplate;
         [SerializeField] private GameObject babyPenlingTemplate;
         [SerializeField] private GameObject adultPengwingTemplate;
         [SerializeField] private GameObject pinnacaridTemplate;
         [SerializeField] private GameObject blueTrivalveTemplate;
         [SerializeField] private GameObject yellowTrivalveTemplate;
-        
+
         [SerializeField] private GameObject catTemplate;
         [SerializeField] private GameObject dogTemplate;
         [SerializeField] private GameObject rabbitTemplate;
         [SerializeField] private GameObject foxTemplate;
         [SerializeField] private GameObject sealTemplate;
         [SerializeField] private GameObject walrusTemplate;
-        
+        private readonly string _confirmButtonText = "";
+
+        private FMOD_CustomEmitter _alertEmitter;
+        private List<ConsoleScrollViewEntry> _allScrollViewEntries;
+        private bool _hasPower = true;
+        private bool _inKillCountdown;
+
+        private bool _isConstructed;
+        private int _numPetsManaged;
+        private string _petNameText = "";
+        private PowerConsumer _powerConsumer;
+        private FMOD_CustomEmitter _renameEmitter;
+
+        private Pet _selectedPet;
+
         // This is the base root of the base n which the console was created
         internal Base Base { get; set; }
 
@@ -51,31 +63,12 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         {
             get
             {
-                if (Base != null)
-                {
-                    return Base.GetComponent<PrefabIdentifier>().Id;
-                }
-                else
-                {
-                    return "NO BASE!";
-                }
+                if (Base != null) return Base.GetComponent<PrefabIdentifier>().Id;
+
+                return "NO BASE!";
             }
         }
 
-        private FMOD_CustomEmitter _alertEmitter;
-        private FMOD_CustomEmitter _renameEmitter;
-        private PowerConsumer _powerConsumer;
-        
-        private Pet _selectedPet;
-        private string _petNameText = "";
-        private string _confirmButtonText = "";
-        private List<ConsoleScrollViewEntry> _allScrollViewEntries;
-        private bool _inKillCountdown;
-        private bool _hasPower = true;
-        private int _numPetsManaged;
-
-        private bool _isConstructed;
-        
         private void Awake()
         {
             _powerConsumer = GetComponent<PowerConsumer>();
@@ -84,14 +77,12 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         private void Start()
         {
             if (transform.parent == null)
-            {
                 // We're probably in the prefab, so return.
                 return;
-            }
-                        
+
             // Set initial screen state
             _hasPower = _powerConsumer.IsPowered();
-            
+
             UpdateVersionText();
             SetPetButtonsInteractable();
             SetEmitters();
@@ -103,7 +94,28 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         }
 
         /// <summary>
-        /// Enable listeners
+        ///     Continue to check for loss of power and set the state appropriately
+        /// </summary>
+        private void Update()
+        {
+            // Check for loss / restoration of power
+            if (_hasPower == _powerConsumer.IsPowered()) return;
+
+            if (_hasPower && !_powerConsumer.IsPowered())
+            {
+                _hasPower = false;
+                ConstructedOrPowerStateChanged();
+            }
+
+            if (!_hasPower && _powerConsumer.IsPowered())
+            {
+                _hasPower = true;
+                ConstructedOrPowerStateChanged();
+            }
+        }
+
+        /// <summary>
+        ///     Enable listeners
         /// </summary>
         private void OnEnable()
         {
@@ -130,51 +142,27 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             petNameTextInput.onValueChanged.RemoveListener(RenameTextChangedHandler);
         }
 
-        /// <summary>
-        /// Continue to check for loss of power and set the state appropriately
-        /// </summary>
-        private void Update()
-        {
-            // Check for loss / restoration of power
-            if (_hasPower == _powerConsumer.IsPowered())
-            {
-                return;
-            }
-            
-            if (_hasPower && !_powerConsumer.IsPowered())
-            {
-                _hasPower = false;
-                ConstructedOrPowerStateChanged();
-            }
-
-            if (!_hasPower && _powerConsumer.IsPowered())
-            {
-                _hasPower = true;
-                ConstructedOrPowerStateChanged();
-            }
-        }
-
         private void CleanUp()
         {
             // Listen for changes to the Pet List
             SubnauticaPetsPlugin.PetSaver.PetListUpdatedEvent.AddListener(PetListUpdatedHandler);
         }
-        
+
         /// <summary>
-        /// Finds the FMOD Emitters created during prefab configuration
+        ///     Finds the FMOD Emitters created during prefab configuration
         /// </summary>
         private void SetEmitters()
         {
-            GameObject alertEmitterGo = gameObject.transform.Find("AlertEmitter").gameObject;
+            var alertEmitterGo = gameObject.transform.Find("AlertEmitter").gameObject;
             _alertEmitter = alertEmitterGo.GetComponent<FMOD_CustomEmitter>();
-            
-            GameObject renameEmitterGo = gameObject.transform.Find("RenameEmitter").gameObject;
+
+            var renameEmitterGo = gameObject.transform.Find("RenameEmitter").gameObject;
             _renameEmitter = renameEmitterGo.GetComponent<FMOD_CustomEmitter>();
         }
-        
+
         private void UpdateVersionText()
         {
-            versionText.text = $"v{SubnauticaPetsPlugin.VersionString}";
+            versionText.text = $"v{VersionString}";
         }
 
         private void ConstructedOrPowerStateChanged()
@@ -188,35 +176,31 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             _isConstructed = newState;
             ConstructedOrPowerStateChanged();
         }
-        
+
         private void SetParentBaseObject()
         {
             // Get the BasePart transform
             if (!transform.parent)
             {
-                LogUtils.LogDebug(LogArea.MonoBaseParts, $"PetConsole has no parent, so isn't in base!");
+                ModDebugLog.LogDebug("PetConsole has no parent, so isn't in base!");
                 return;
             }
 
             if (!transform.parent.parent)
             {
-                LogUtils.LogDebug(LogArea.MonoBaseParts, $"PetConsole parent has no parent, so isn't in base!");
+                ModDebugLog.LogDebug("PetConsole parent has no parent, so isn't in base!");
                 return;
             }
-            
+
             Base = transform.parent.parent.GetComponent<Base>();
             if (Base)
-            {
-                LogUtils.LogDebug(LogArea.MonoBaseParts, $"PetConsole Start in Base: {Base.gameObject.name}");
-            }
+                ModDebugLog.LogDebug($"PetConsole Start in Base: {Base.gameObject.name}");
             else
-            {
-                LogUtils.LogDebug(LogArea.MonoBaseParts, $"PetConsole Start: Base not found in parent!");
-            }
+                ModDebugLog.LogDebug("PetConsole Start: Base not found in parent!");
         }
-        
+
         /// <summary>
-        /// Set the Kill and Rename button interactable state
+        ///     Set the Kill and Rename button interactable state
         /// </summary>
         private void SetPetButtonsInteractable()
         {
@@ -229,9 +213,10 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         {
             if (!_alertEmitter)
             {
-                LogUtils.LogDebug(LogArea.MonoBaseParts, $"PetConsole alert emitter is null!");
+                ModDebugLog.LogDebug("PetConsole alert emitter is null!");
                 return;
             }
+
             _alertEmitter.Play();
         }
 
@@ -239,15 +224,15 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         {
             if (!_renameEmitter)
             {
-                LogUtils.LogDebug(LogArea.MonoBaseParts, $"PetConsole rename emitter is null!");
+                ModDebugLog.LogDebug("PetConsole rename emitter is null!");
                 return;
             }
-            _renameEmitter.Play();
 
+            _renameEmitter.Play();
         }
-        
+
         /// <summary>
-        /// Refresh the PetList UI when pets are added or removed
+        ///     Refresh the PetList UI when pets are added or removed
         /// </summary>
         internal void OnPetsChangedHandler()
         {
@@ -255,7 +240,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         }
 
         /// <summary>
-        /// Proxy to the KillAllClickedEvent
+        ///     Proxy to the KillAllClickedEvent
         /// </summary>
         private void KillAllButtonHandler()
         {
@@ -264,7 +249,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         }
 
         /// <summary>
-        /// Proxy to ConfirmKillAllClickedEvent
+        ///     Proxy to ConfirmKillAllClickedEvent
         /// </summary>
         private void KillAllConfirmButtonHandler()
         {
@@ -274,14 +259,10 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             killAllConfirmButton.GetComponentInChildren<TextMeshProUGUI>().text = _confirmButtonText;
 
             // Iterate over all pets and kill those in this base
-            foreach (Pet currPet in SubnauticaPetsPlugin.PetSaver.PetList.ToArray())
-            {
+            foreach (var currPet in SubnauticaPetsPlugin.PetSaver.PetList.ToArray())
                 // Check to see if the Pet is in the same Base as the Console
                 if (currPet.Base == Base)
-                {
                     currPet.Kill();
-                }
-            }
 
             _selectedPet = null;
             SetPetButtonsInteractable();
@@ -294,18 +275,18 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             killButton.gameObject.SetActive(true);
             killConfirmButton.GetComponentInChildren<TextMeshProUGUI>().text = _confirmButtonText;
 
-            // LogUtils.LogDebug(LogArea.MonoBaseParts, "Kill Button Clicked!");
+            // ModDebugLog.LogDebug("Kill Button Clicked!");
             if (_selectedPet != null)
             {
                 _selectedPet.Kill();
                 _selectedPet = null;
             }
-            
+
             SetPetButtonsInteractable();
         }
 
         /// <summary>
-        /// Proxy to the KillClickedEvent
+        ///     Proxy to the KillClickedEvent
         /// </summary>
         private void KillButtonHandler()
         {
@@ -314,14 +295,14 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         }
 
         /// <summary>
-        /// Proxy to the RenameClickedEvent
+        ///     Proxy to the RenameClickedEvent
         /// </summary>
         private void RenameButtonHandler()
         {
             if (_selectedPet != null)
             {
                 PlayRename();
-                
+
                 _selectedPet.PetName = _petNameText;
 
                 // Tell the Saver to refresh all consoles
@@ -335,7 +316,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         }
 
         /// <summary>
-        /// Proxy to the Name Text changed event
+        ///     Proxy to the Name Text changed event
         /// </summary>
         private void RenameTextChangedHandler(string nameText)
         {
@@ -346,11 +327,11 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         }
 
         /// <summary>
-        /// Proxy to Pet List selection
+        ///     Proxy to Pet List selection
         /// </summary>
         private void PetSelectedProxy(Pet pet)
         {
-            LogUtils.LogDebug(LogArea.MonoBaseParts, $"Selected Pet Changed: {pet.PetName}");
+            ModDebugLog.LogDebug($"Selected Pet Changed: {pet.PetName}");
             _selectedPet = pet;
 
             // Set the Kill and Rename buttons to interactable
@@ -358,14 +339,11 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         }
 
         /// <summary>
-        /// Update PetList once the plugin static has been initialised
+        ///     Update PetList once the plugin static has been initialised
         /// </summary>
         private IEnumerator UpdatePetListAsync()
         {
-            while (SubnauticaPetsPlugin.PetSaver.PetList == null)
-            {
-                yield return null;
-            }
+            while (SubnauticaPetsPlugin.PetSaver.PetList == null) yield return null;
 
             UpdatePetList();
         }
@@ -376,89 +354,81 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         }
 
         /// <summary>
-        /// Create the Pet List controls
+        ///     Create the Pet List controls
         /// </summary>
         internal void UpdatePetList()
         {
             // Get button background
-            Sprite backgroundSprite = CustomAssetBundleUtils.GetObjectFromAssetBundle<Sprite>(UiUtils.CustomButtonTexture) as Sprite;
+            var backgroundSprite =
+                ModAssetUtils.GetObjectFromAssetBundle<Sprite>(UiUtils.CustomButtonTexture) as Sprite;
 
             // Clear the current UI objects
-            LogUtils.LogDebug(LogArea.MonoBaseParts, "CreatePetList: Clearing existing buttons...");
+            ModDebugLog.LogDebug("CreatePetList: Clearing existing buttons...");
             if (_allScrollViewEntries != null)
-            {
-                foreach (ConsoleScrollViewEntry scrollListEntry in _allScrollViewEntries)
-                {
+                foreach (var scrollListEntry in _allScrollViewEntries)
                     Destroy(scrollListEntry.gameObject);
-                }
-            }
 
             // Recreate the list of pet buttons
             _allScrollViewEntries = new List<ConsoleScrollViewEntry>();
-            int currPetIndex = 0;
+            var currPetIndex = 0;
 
             // Check the PetList
             if (SubnauticaPetsPlugin.PetSaver.PetList == null)
             {
-                LogUtils.LogDebug(LogArea.MonoBaseParts, $"PetConsoleUi: The PetList is null, and cannot be sorted.");
+                ModDebugLog.LogDebug("PetConsoleUi: The PetList is null, and cannot be sorted.");
                 return;
             }
 
             // Sort by name
-            List<Pet> sortedPetList = SubnauticaPetsPlugin.PetSaver.PetList.OrderBy(pet => pet.PetName).ToList();
+            var sortedPetList = SubnauticaPetsPlugin.PetSaver.PetList.OrderBy(pet => pet.PetName).ToList();
 
-            LogUtils.LogDebug(LogArea.MonoBaseParts, $"PetConsoleUi: Sorted list into {sortedPetList.Count} pets.");
+            ModDebugLog.LogDebug($"PetConsoleUi: Sorted list into {sortedPetList.Count} pets.");
 
             // Iterate over all pets and add a button
-            foreach (Pet currPet in sortedPetList)
-            {
+            foreach (var currPet in sortedPetList)
                 // Check to see if the Pet is in the same Base as the Console
                 if (currPet.Base == Base)
                 {
                     // Get new instance of button template, based on type of pet
-                    GameObject newButtonGameObject = GetScrollListInstance(currPet.TechType,
+                    var newButtonGameObject = GetScrollListInstance(currPet.TechType,
                         currPet.PetNameString, currPetIndex);
 
-                    if (!newButtonGameObject)
-                    {
-                        continue;
-                    }
-                    
-                    ConsoleScrollViewEntry scrollViewEntry = newButtonGameObject.GetComponent<ConsoleScrollViewEntry>();
+                    if (!newButtonGameObject) continue;
+
+                    var scrollViewEntry = newButtonGameObject.GetComponent<ConsoleScrollViewEntry>();
 
                     // Add button click listeners
                     scrollViewEntry.Button.onClick.AddListener(delegate { PetSelectedProxy(currPet); });
-                    scrollViewEntry.Button.onClick.AddListener(delegate { UpdateSelected(scrollViewEntry); });                    
+                    scrollViewEntry.Button.onClick.AddListener(delegate { UpdateSelected(scrollViewEntry); });
                     newButtonGameObject.SetActive(true);
-                    
+
                     _allScrollViewEntries.Add(scrollViewEntry);
                     currPetIndex++;
                 }
-
-            }
 
             // Enable Kill All if there are any pets
             _numPetsManaged = sortedPetList.Count;
             SetPetButtonsInteractable();
         }
-        
+
         private GameObject GetScrollListInstance(TechType petTechType, string petName, int indexNum)
         {
             return GetScrollListInstance(petTechType.ToString(), petName, indexNum);
         }
+
         private GameObject GetScrollListInstance(string petType, string petName, int indexNum)
         {
-            GameObject templatePrefab = GetScrollListTemplate(petType);
-            
-            GameObject newButtonObject = Instantiate(templatePrefab, petsScrollViewContent.transform);
-            newButtonObject.GetComponentInChildren<TextMeshProUGUI>(true).SetText(petName, true);
+            var templatePrefab = GetScrollListTemplate(petType);
+
+            var newButtonObject = Instantiate(templatePrefab, petsScrollViewContent.transform);
+            newButtonObject.GetComponentInChildren<TextMeshProUGUI>(true).SetText(petName);
             newButtonObject.name = $"ListButton{indexNum.ToString()}-{petName}-{petType}";
 
             return newButtonObject;
         }
-        
+
         /// <summary>
-        /// Retrieve the appropriate template Game Object for the scroll list
+        ///     Retrieve the appropriate template Game Object for the scroll list
         /// </summary>
         private GameObject GetScrollListTemplate(string petType)
         {
@@ -489,22 +459,20 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
                 case "WalrusPet":
                     return walrusTemplate;
                 default:
-                    LogUtils.LogError(LogArea.MonoBaseParts, $"GetScrollListTemplate: Unknown pet type: {petType}");
+                    ModDebugLog.LogError($"GetScrollListTemplate: Unknown pet type: {petType}");
                     return null;
             }
         }
-        
+
         /// <summary>
-        /// Highlights the selected Pet game object button
+        ///     Highlights the selected Pet game object button
         /// </summary>
         private void UpdateSelected(ConsoleScrollViewEntry selected)
         {
             // Reset all backgrounds
-            foreach (ConsoleScrollViewEntry scrollViewEntry in _allScrollViewEntries)
-            {
+            foreach (var scrollViewEntry in _allScrollViewEntries)
                 // scrollViewEntry.SetBackgroundColor(Color.cyan);
                 scrollViewEntry.SetTextColor(Color.white);
-            }
 
             // Set background on selected
             // selected.SetBackgroundColor(Color.blue);
@@ -513,7 +481,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
 
 
         /// <summary>
-        /// Handles the "count down" button, allowing the user to effectively cancel their choice to kill pets
+        ///     Handles the "count down" button, allowing the user to effectively cancel their choice to kill pets
         /// </summary>
         private IEnumerator CountDownButton(GameObject objectToHide, GameObject objectToShow, int delayInSeconds)
         {
@@ -522,10 +490,10 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             objectToHide.SetActive(true);
             objectToShow.SetActive(false);
 
-            TextMeshProUGUI countDownLabel = objectToHide.GetComponentInChildren<TextMeshProUGUI>();
-            string labelText = countDownLabel.text;
+            var countDownLabel = objectToHide.GetComponentInChildren<TextMeshProUGUI>();
+            var labelText = countDownLabel.text;
 
-            int counter = delayInSeconds;
+            var counter = delayInSeconds;
             while (counter > 0)
             {
                 countDownLabel.text = $"{labelText} {counter}";

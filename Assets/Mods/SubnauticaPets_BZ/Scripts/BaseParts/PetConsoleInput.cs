@@ -4,19 +4,19 @@ using UnityEngine.EventSystems;
 namespace DaftAppleGames.SubnauticaPets.BaseParts
 {
     /// <summary>
-    /// Provides functionality to interact with the Pet Console
+    ///     Provides functionality to interact with the Pet Console
     /// </summary>
     internal class PetConsoleInput : uGUI_InputGroup, IEventSystemHandler, uGUI_IButtonReceiver, IPointerHoverHandler
     {
         private const string HoverTextKey = "PetConsole";
-        private Player _player;
-        private float _terminationSqrDistance = 4.0f;
 
         private uGUI_NavigableControlGrid _panel;
+        private Player _player;
         private RectTransform _rt;
+        private float _terminationSqrDistance = 4.0f;
 
         /// <summary>
-        /// Unity Awake method.
+        ///     Unity Awake method.
         /// </summary>
         public override void Awake()
         {
@@ -25,7 +25,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         }
 
         /// <summary>
-        /// Unity Start method
+        ///     Unity Start method
         /// </summary>
         public void Start()
         {
@@ -34,19 +34,44 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         }
 
         /// <summary>
-        /// Unity Update
+        ///     Unity Update
         /// </summary>
         public override void Update()
         {
             base.Update();
-            if (focused && _player != null && (_player.transform.position - _rt.position).sqrMagnitude >= _terminationSqrDistance)
+            if (focused && _player != null &&
+                (_player.transform.position - _rt.position).sqrMagnitude >= _terminationSqrDistance) Deselect();
+        }
+
+        /// <summary>
+        ///     Implementation of OnButtonHover
+        /// </summary>
+        public void OnPointerHover(PointerEventData eventData)
+        {
+            if (enabled && !selected)
             {
-                Deselect();
+                HandReticle.main.SetText(HandReticle.TextType.Hand, HoverTextKey, true, GameInput.Button.LeftHand);
+                HandReticle.main.SetText(HandReticle.TextType.HandSubscript, string.Empty, false);
+                HandReticle.main.SetIcon(HandReticle.IconType.Interact);
             }
         }
 
         /// <summary>
-        /// Implements OnSelect method
+        ///     Implementation of OnButtonDown
+        /// </summary>
+        public bool OnButtonDown(GameInput.Button button)
+        {
+            if (button == GameInput.Button.RightHand)
+            {
+                Deselect();
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     Implements OnSelect method
         /// </summary>
         public override void OnSelect(bool lockMovement)
         {
@@ -56,38 +81,12 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         }
 
         /// <summary>
-        /// Implements OnDeselct method
+        ///     Implements OnDeselct method
         /// </summary>
         public override void OnDeselect()
         {
             base.OnDeselect();
             _player = null;
-        }
-
-        /// <summary>
-        /// Implementation of OnButtonHover
-        /// </summary>
-        public void OnPointerHover(PointerEventData eventData)
-        {
-            if (enabled && !selected)
-            {
-                HandReticle.main.SetText(HandReticle.TextType.Hand, HoverTextKey, true, GameInput.Button.LeftHand);
-                HandReticle.main.SetText(HandReticle.TextType.HandSubscript, string.Empty, false, GameInput.Button.None);
-                HandReticle.main.SetIcon(HandReticle.IconType.Interact, 1f);
-            }
-        }
-
-        /// <summary>
-        /// Implementation of OnButtonDown
-        /// </summary>
-        public bool OnButtonDown(GameInput.Button button)
-        {
-            if (button == GameInput.Button.RightHand)
-            {
-                Deselect();
-                return true;
-            }
-            return false;
         }
     }
 }

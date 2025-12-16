@@ -4,13 +4,12 @@ using HarmonyLib;
 namespace DaftAppleGames.SubnauticaPets.Patches
 {
     /// <summary>
-    /// Patches for the Trivalve pet
+    ///     Patches for the Trivalve pet
     /// </summary>
-    [HarmonyPatch(typeof(TrivalvePlayerInteraction))]
-    internal class TrivalvePlayerInteractionPatches
+    [HarmonyPatch(typeof(TrivalvePlayerInteraction))] internal class TrivalvePlayerInteractionPatches
     {
         /// <summary>
-        /// Always allow the player to interact with a Pet
+        ///     Always allow the player to interact with a Pet
         /// </summary>
         [HarmonyPatch(nameof(TrivalvePlayerInteraction.AllowedToInteract))]
         [HarmonyPrefix]
@@ -22,21 +21,21 @@ namespace DaftAppleGames.SubnauticaPets.Patches
                 __result = true;
                 return false;
             }
+
             return true;
         }
 
         /// <summary>
-        /// Custom text for the Trivalve interaction prompt
+        ///     Custom text for the Trivalve interaction prompt
         /// </summary>
         [HarmonyPatch(nameof(TrivalvePlayerInteraction.OnHandHover))]
         [HarmonyPostfix]
         public static void OnHandHover_Postfix(TrivalvePlayerInteraction __instance, GUIHand hand)
         {
-            Pet pet = __instance.GetComponentInParent<Pet>();
+            var pet = __instance.GetComponentInParent<Pet>();
             if (pet)
-            {
-                HandReticle.main.SetText(HandReticle.TextType.Hand, $"Play with {pet.PetName}", false, GameInput.Button.LeftHand);
-            }
+                HandReticle.main.SetText(HandReticle.TextType.Hand, $"Play with {pet.PetName}", false,
+                    GameInput.Button.LeftHand);
         }
     }
 }

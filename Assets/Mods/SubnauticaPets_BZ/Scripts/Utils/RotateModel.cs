@@ -3,14 +3,14 @@
 namespace DaftAppleGames.SubnauticaPets.Utils
 {
     /// <summary>
-    /// Simple rotation MonoBehaviour
+    ///     Simple rotation MonoBehaviour
     /// </summary>
     internal class RotateModel : MonoBehaviour
     {
         public float RotationSpeed = 0.1f;
 
         /// <summary>
-        /// Rotate the object over time
+        ///     Rotate the object over time
         /// </summary>
         public void Update()
         {

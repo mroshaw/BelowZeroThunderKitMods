@@ -2,22 +2,29 @@
 
 namespace DaftAppleGames.SubnauticaPets.Pets
 {
-    public enum PetState { Idle, Wandering, MovingTo, Sleeping, Dead }
-    
+    public enum PetState
+    {
+        Idle,
+        Wandering,
+        MovingTo,
+        Sleeping,
+        Dead
+    }
+
     /// <summary>
-    /// Simple State Controller for pet actions
+    ///     Simple State Controller for pet actions
     /// </summary>
     internal class PetStateController : MonoBehaviour
     {
         [SerializeField] private PetState currState;
         private PetAction _currentAction;
-        
-        private WanderAction _wanderAction;
         private IdleAction _idleAction;
-        private MoveToAction _moveToAction;
         private KilledAction _killedAction;
+        private MoveToAction _moveToAction;
         private SleepAction _sleepAction;
-        
+
+        private WanderAction _wanderAction;
+
         private void Awake()
         {
             _wanderAction = GetComponent<WanderAction>();
@@ -26,7 +33,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             _killedAction = GetComponent<KilledAction>();
             _sleepAction = GetComponent<SleepAction>();
         }
-        
+
         private void Start()
         {
             _idleAction.Init();
@@ -34,24 +41,29 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             _moveToAction.Init();
             _killedAction.Init();
             _sleepAction.Init();
-            
+
             _wanderAction.OnActionCompleted.AddListener(WanderActionComplete);
             _idleAction.OnActionCompleted.AddListener(IdleActionComplete);
             _moveToAction.OnActionCompleted.AddListener(MoveToActionComplete);
             _killedAction.OnActionCompleted.AddListener(KilledActionComplete);
             _sleepAction.OnActionCompleted.AddListener(SleepActionComplete);
-            
+
             SetNewState(PetState.Idle);
+        }
+
+        private void Update()
+        {
+            CheckForForcedState();
+
+            if (!_currentAction) return;
+            _currentAction.UpdateAction();
         }
 
         internal void SetNewState(PetState newState)
         {
-            if (currState == PetState.Dead)
-            {
-                return;
-            }
-            
-            // LogUtils.LogDebug(LogArea.MonoPets, $"{gameObject.name}: Changing state from: {_currState} to {newState}");
+            if (currState == PetState.Dead) return;
+
+            // ModDebugLog.LogDebug($"{gameObject.name}: Changing state from: {_currState} to {newState}");
             currState = newState;
             switch (newState)
             {
@@ -74,7 +86,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         }
 
         /// <summary>
-        /// Called by Pet to move to player
+        ///     Called by Pet to move to player
         /// </summary>
         internal void MoveToPosition(Vector3 position)
         {
@@ -86,7 +98,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         {
             SetNewState(PetState.Dead);
         }
-        
+
         private void WanderActionComplete()
         {
             SetNewState(PetState.Idle);
@@ -106,37 +118,23 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         {
             _currentAction = null;
         }
-        
+
         private void SleepActionComplete()
         {
             SetNewState(PetState.Idle);
-        }      
-        
+        }
+
         private void SetNewAction(PetAction newAction)
         {
             _currentAction?.EndAction();
             _currentAction = newAction;
             _currentAction.StartAction();
         }
-        
-        private void Update()
-        {
-            CheckForForcedState();
-            
-            if (!_currentAction)
-            {
-                return;
-            }
-            _currentAction.UpdateAction();
-        }
 
         private void CheckForForcedState()
         {
             // Go to sleep
-            if (currState != PetState.Sleeping && _sleepAction.ShouldBeSleeping())
-            {
-                SetNewState(PetState.Sleeping);
-            }
+            if (currState != PetState.Sleeping && _sleepAction.ShouldBeSleeping()) SetNewState(PetState.Sleeping);
         }
     }
 }

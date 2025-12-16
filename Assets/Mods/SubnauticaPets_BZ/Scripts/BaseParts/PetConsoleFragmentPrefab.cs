@@ -1,40 +1,38 @@
-﻿using DaftAppleGames.SubnauticaPets.Extensions;
-using DaftAppleGames.SubnauticaPets.Pets;
-using DaftAppleGames.SubnauticaPets.Utils;
+﻿using DaftAppleGames.SubnauticaPets.Pets;
 using Nautilus.Assets;
 using Nautilus.Assets.Gadgets;
-using Nautilus.Assets.PrefabTemplates;
 using Nautilus.Utility;
 using UnityEngine;
+using static DaftAppleGames.SubnauticaPets.SubnauticaPetsPlugin;
 
 namespace DaftAppleGames.SubnauticaPets.BaseParts
 {
     /// <summary>
-    /// Static class for creating a Pet Console Fragment
+    ///     Static class for creating a Pet Console Fragment
     /// </summary>
     internal static class PetConsoleFragmentPrefab
     {
-        internal static PrefabInfo Info;
         private const string ClassId = "PetConsoleFragment";
         private const string PrefabAssetName = "PetConsoleDamaged.prefab";
         private const string CloneClassId = "7eaf11d3-5b65-4325-a249-d69c7cc838b0";
         private const string EncKey = "PetConsole";
+        internal static PrefabInfo Info;
 
         /// <summary>
-        /// Initialise Pet Console Fragment prefab
+        ///     Initialise Pet Console Fragment prefab
         /// </summary>
         internal static void Register()
         {
             Info = PrefabInfo
                 .WithTechType(ClassId, null, null, unlockAtStart: false);
-            CustomPrefab consoleFragmentPrefab = new CustomPrefab(Info);
+            var consoleFragmentPrefab = new CustomPrefab(Info);
 
-            GameObject damagedConsolePrefab =
-                CustomAssetBundleUtils.GetObjectFromAssetBundle<GameObject>(PrefabAssetName) as GameObject;
+            var damagedConsolePrefab =
+                ModAssetUtils.GetObjectFromAssetBundle<GameObject>(PrefabAssetName) as GameObject;
 
             if (!damagedConsolePrefab)
             {
-                LogUtils.LogError(LogArea.Prefabs, "PetConsole: Could not find prefab asset!");
+                ModDebugLog.LogError("PetConsole: Could not find prefab asset!");
                 return;
             }
 
@@ -52,7 +50,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
 
             consoleFragmentPrefab.SetGameObject(damagedConsolePrefab);
 
-            LogUtils.LogDebug(LogArea.Prefabs, "PetConsoleFragmentPrefab: SetSpawns...");
+            ModDebugLog.LogDebug("PetConsoleFragmentPrefab: SetSpawns...");
 
             SpawnLocation[] spawnLocations =
             {
@@ -77,13 +75,13 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
                 new SpawnLocation(new Vector3(-287.65f, -17.62f, -11.42f),
                     new Vector3(76.07f, 169.37f, 348.79f)), // warp -289.41 -12.63 -15.73
                 new SpawnLocation(new Vector3(-539.43f, -204.23f, -492.26f),
-                    new Vector3(284.61f, 172.16f, 198.84f)), // warp -541.18 -202.38 -495.66
+                    new Vector3(284.61f, 172.16f, 198.84f)) // warp -541.18 -202.38 -495.66
             };
 
             consoleFragmentPrefab.SetSpawns(spawnLocations);
-            LogUtils.LogDebug(LogArea.Prefabs, "PetConsoleFragmentPrefab: CreateFragment...");
-            consoleFragmentPrefab.CreateFragment(PetConsolePrefab.Info.TechType, 5.0f, 3, EncKey, true, true);
-            LogUtils.LogDebug(LogArea.Prefabs, "PetConsoleFragmentPrefab: Register...");
+            ModDebugLog.LogDebug("PetConsoleFragmentPrefab: CreateFragment...");
+            consoleFragmentPrefab.CreateFragment(PetConsolePrefab.Info.TechType, 5.0f, 3, EncKey);
+            ModDebugLog.LogDebug("PetConsoleFragmentPrefab: Register...");
             consoleFragmentPrefab.Register();
         }
     }

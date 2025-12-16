@@ -1,5 +1,6 @@
 ﻿using DaftAppleGames.SubnauticaPets.BaseParts;
 using Story;
+using static DaftAppleGames.SubnauticaPets.SubnauticaPetsPlugin;
 
 namespace DaftAppleGames.SubnauticaPets.Utils
 {
@@ -8,9 +9,9 @@ namespace DaftAppleGames.SubnauticaPets.Utils
         internal static void UnlockAllIfCreativeMode()
         {
             // If Creative Mode is enabled, ensure Builder elements are unlocked
-            if (SubnauticaPetsPlugin.ModConfig.ModMode == ModMode.Creative)
+            if (ConfigFile.ModMode == ModMode.Creative)
             {
-                LogUtils.LogInfo("Creative mode selected. Unlocking Blueprints and PDA entries...");
+                ModDebugLog.LogInfo("Creative mode selected. Unlocking Blueprints and PDA entries...");
 
                 // Unlock Builder entries
                 UnlockTechType(PetFabricatorPrefab.Info.TechType);
@@ -29,11 +30,8 @@ namespace DaftAppleGames.SubnauticaPets.Utils
 
         private static void UnlockTechType(TechType techType)
         {
-            LogUtils.LogInfo($"KnownText UnlockState for '{techType}' is: {KnownTech.GetTechUnlockState(techType)}");
-            if (KnownTech.GetTechUnlockState(techType) != TechUnlockState.Available)
-            {
-                KnownTech.Add(techType, true);
-            }
+            ModDebugLog.LogInfo($"KnownText UnlockState for '{techType}' is: {KnownTech.GetTechUnlockState(techType)}");
+            if (KnownTech.GetTechUnlockState(techType) != TechUnlockState.Available) KnownTech.Add(techType, true);
         }
     }
 }

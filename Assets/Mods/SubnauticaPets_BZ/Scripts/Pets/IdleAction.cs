@@ -4,21 +4,19 @@ using Random = UnityEngine.Random;
 namespace DaftAppleGames.SubnauticaPets.Pets
 {
     /// <summary>
-    /// Idle action
+    ///     Idle action
     /// </summary>
     internal class IdleAction : PetAction
     {
-        [Header("Action Settings")]
-        public float minIdleTime = 3.0f;
+        [Header("Action Settings")] public float minIdleTime = 3.0f;
         public float maxIdleTime = 10.0f;
         public float chanceToPlayAnim = 10.0f;
-        
-        [Header("Debug")]
-        [SerializeField] private float idleCounter;
-        
-        private SimpleMovement _simpleMovement;
+
+        [Header("Debug")] [SerializeField] private float idleCounter;
         private PetAnimator _petAnimator;
-        
+
+        private SimpleMovement _simpleMovement;
+
         internal override void Init()
         {
             _simpleMovement = GetComponent<SimpleMovement>();
@@ -30,24 +28,18 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             idleCounter = Random.Range(minIdleTime, maxIdleTime);
 
             // If random chance, play action anim
-            if (GetRandomBool(chanceToPlayAnim))
-            {
-                _petAnimator.PlayRandomBodyAnim(true);
-            }
+            if (GetRandomBool(chanceToPlayAnim)) _petAnimator.PlayRandomBodyAnim(true);
         }
 
         internal override void EndAction()
         {
         }
-        
+
         internal override void UpdateAction()
         {
             idleCounter -= Time.deltaTime;
 
-            if (idleCounter < 0)
-            {
-                ActionCompleted();
-            }
+            if (idleCounter < 0) ActionCompleted();
         }
     }
 }

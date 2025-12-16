@@ -4,7 +4,7 @@ using UnityEngine;
 namespace DaftAppleGames.SubnauticaPets.UserInterface
 {
     /// <summary>
-    /// Simple class to manage the About dialog from the Mod menu
+    ///     Simple class to manage the About dialog from the Mod menu
     /// </summary>
     public class AboutCanvas : MonoBehaviour
     {
@@ -12,10 +12,10 @@ namespace DaftAppleGames.SubnauticaPets.UserInterface
         [SerializeField] private TMP_Text versionText;
         // Enforce a small delay to prevent immediately closing the dialog
         [SerializeField] private float delayBeforeInput = 0.5f;
-        
+
         private AudioSource _audioSource;
-        private bool _visible;
         private float _counter;
+        private bool _visible;
 
         private void Awake()
         {
@@ -23,6 +23,21 @@ namespace DaftAppleGames.SubnauticaPets.UserInterface
             _counter = 0.0f;
             versionText.text = $"v{SubnauticaPetsPlugin.VersionString}";
             Hide();
+        }
+
+        /// <summary>
+        ///     Close the dialog if a key is pressed
+        /// </summary>
+        private void Update()
+        {
+            if (!_visible) return;
+            if (_counter < delayBeforeInput)
+            {
+                _counter += Time.unscaledDeltaTime;
+                return;
+            }
+
+            if (Input.anyKeyDown) Hide();
         }
 
         internal void Show()
@@ -36,26 +51,6 @@ namespace DaftAppleGames.SubnauticaPets.UserInterface
         {
             aboutPanel.SetActive(false);
             _visible = false;
-        }
-        
-        /// <summary>
-        /// Close the dialog if a key is pressed
-        /// </summary>
-        private void Update()
-        {
-            if (!_visible)
-            {
-                return;
-            }
-            if (_counter < delayBeforeInput)
-            {
-                _counter += Time.unscaledDeltaTime;
-                return;
-            }
-            if (Input.anyKeyDown)
-            {
-                Hide();
-            }
         }
     }
 }

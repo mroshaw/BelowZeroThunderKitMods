@@ -34,6 +34,7 @@ MonoBehaviour:
   - <ManifestPluginStaging>
   definitions:
   - {fileID: 5897886265953266890, guid: 5585ad1faf1e6fd42900f79b4a7f6dc5, type: 3}
+  - {fileID: 5897886265953266890, guid: a8101a7f788ddab4d835833e6de817ac, type: 3}
 --- !u!114 &114211852988908172
 MonoBehaviour:
   m_ObjectHideFlags: 1
