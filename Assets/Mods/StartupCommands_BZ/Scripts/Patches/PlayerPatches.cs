@@ -39,7 +39,12 @@ namespace DaftAppleGames.StartupCommand
         private static IEnumerator RunCommandsAsync()
         {
             string allCommands = StartupCommandPlugin.ScriptConfigFile.StartupScript;
+            
             // Get all console commands to run
+            // Remove UTF-8 BOM from start of command list
+            allCommands = allCommands.TrimStart('\uFEFF');
+            
+            // Split the command list into an array, line by line
             string[] commandArray = allCommands.Split(
                 new[] { "\r\n", "\n" },
                 StringSplitOptions.None
