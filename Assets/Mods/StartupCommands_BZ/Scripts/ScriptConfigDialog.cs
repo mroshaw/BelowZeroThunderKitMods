@@ -14,7 +14,8 @@ namespace DaftAppleGames.StartupCommand
 
         [SerializeField] private TMP_InputField startupScriptInputText;
         
-        private const string OptionsPanelPath = "Panel/Options";
+        private const string MainMenuOptionsPanelPath = "Panel/Options";
+        private const string InGameMenuOptionsPanelPath = "Options";
         
         /// <summary>
         /// Set the version number and hide until ready to show
@@ -109,20 +110,64 @@ namespace DaftAppleGames.StartupCommand
         /// <returns></returns>
         private GameObject GetMainPanel()
         {
-            uGUI_MainMenu mainMenu = FindObjectOfType<uGUI_MainMenu>();
-            if (!mainMenu)
+            // Try Main Menu first
+            GameObject optionsPanel = GetMainMenuOptionsPanel();
+            if (optionsPanel)
             {
-                ModDebugLog.LogDebug($"ScriptConfigCanvas: Could not find uGUI_MainMenu!");
+                return optionsPanel;
+            }
+            
+            // Try InGame Menu next
+            optionsPanel = GetInGameMenuOptionsPanel();
+            if (optionsPanel)
+            {
+                return optionsPanel;
+            }
+            
+            ModDebugLog.LogError("Could not find Options panel!");
+            return null;
+        }
+        
+        /// <summary>
+        /// Try to find the options panel in MainMenu
+        /// </summary>
+        private GameObject GetMainMenuOptionsPanel()
+        {
+            IngameMenu menuUi = FindObjectOfType<IngameMenu>();
+            if (!menuUi)
+            {
                 return null;
             }
             
-            Transform panelTransform = mainMenu.transform.Find(OptionsPanelPath);
+            Transform panelTransform = menuUi.transform.Find(InGameMenuOptionsPanelPath);
+
             if (!panelTransform)
             {
-                ModDebugLog.LogDebug($"ScriptConfigCanvas: Could not find {OptionsPanelPath}!");
                 return null;
             }
+            
+            return panelTransform.gameObject;
+        }
 
+        /// <summary>
+        /// Try to find options panel in InGame menu
+        /// </summary>
+        /// <returns></returns>
+        private GameObject GetInGameMenuOptionsPanel()
+        {
+            uGUI_MainMenu menuUi = FindObjectOfType<uGUI_MainMenu>();
+            if (!menuUi)
+            {
+                return null;
+            }
+            
+            Transform panelTransform = menuUi.transform.Find(MainMenuOptionsPanelPath);
+
+            if (!panelTransform)
+            {
+                return null;
+            }
+            
             return panelTransform.gameObject;
         }
     }

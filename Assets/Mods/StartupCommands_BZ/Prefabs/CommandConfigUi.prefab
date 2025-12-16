@@ -378,9 +378,8 @@ GameObject:
   - component: {fileID: 1062537914332841196}
   - component: {fileID: 1062537914332841195}
   - component: {fileID: 1062537914332841194}
-  - component: {fileID: 1062537915935848048}
-  - component: {fileID: 1062537915935848049}
   - component: {fileID: 1062537915935848051}
+  - component: {fileID: 1619712099287934364}
   m_Layer: 0
   m_Name: StartupConfigPanel
   m_TagString: Untagged
@@ -445,36 +444,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &1062537915935848048
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1062537914332841199}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1413667307, guid: b35933d85230a204b91c2454a36698f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  fontSetMode: 2
---- !u!114 &1062537915935848049
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1062537914332841199}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 287337470, guid: b35933d85230a204b91c2454a36698f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  materialSetMode: 3
-  materialType: 7
-  runAtStart: 1
-  renderer: {fileID: 0}
-  materialIndices: 
 --- !u!114 &1062537915935848051
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -490,6 +459,19 @@ MonoBehaviour:
   mainPanel: {fileID: 1062537914332841199}
   versionText: {fileID: 1441575915}
   startupScriptInputText: {fileID: 1062537915981349717}
+--- !u!114 &1619712099287934364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1062537914332841199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1413667307, guid: e28e9c1a8dd4b6e4b8e394caa04f171a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fontSetMode: 2
 --- !u!1 &1062537914531452317
 GameObject:
   m_ObjectHideFlags: 0
