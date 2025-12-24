@@ -10,7 +10,7 @@ namespace DaftAppleGames.Editor
         [SerializeField] private VisualTreeAsset baseVisualTree;
         [SerializeField] private VisualTreeAsset customEditorVisualTree;
         [SerializeField] private bool detailedLogging;
-        [SerializeField] private bool logToConsole;
+        [SerializeField] private bool logToConsole = true;
 
         // Bound text to display in the Editor
         [SerializeField] private string logText;
