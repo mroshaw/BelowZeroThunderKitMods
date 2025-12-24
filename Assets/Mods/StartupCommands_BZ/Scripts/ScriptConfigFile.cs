@@ -10,6 +10,6 @@ namespace DaftAppleGames.StartupCommand
             "command_config.json");
         
         // Json properties to store
-        public string StartupScript = "";
+        public string StartupScript = "# One command per line\n# Hash character to comment\n#Example:\n# nodamage\n# nocost\n# item titanium 5\n";
     }
 }

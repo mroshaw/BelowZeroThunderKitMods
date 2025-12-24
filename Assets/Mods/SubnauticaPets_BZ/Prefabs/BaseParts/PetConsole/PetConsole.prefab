@@ -605,8 +605,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6289803449202236438}
   - component: {fileID: 6289803449202236439}
-  - component: {fileID: 7946055479775512859}
-  - component: {fileID: 2816410774624466484}
   m_Layer: 0
   m_Name: PetConsole
   m_TagString: Untagged
@@ -642,7 +640,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60df75718c9736b48a9a37da8bb47590, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  petListButtonTemplate: {fileID: 6289803449422214827}
+  activeScreen: {fileID: 0}
+  inactiveScreen: {fileID: 0}
   petsScrollViewContent: {fileID: 7097190431541590434}
   killAllButton: {fileID: 6289803450388022166}
   killAllConfirmButton: {fileID: 6289803449665188735}
@@ -650,32 +649,19 @@ MonoBehaviour:
   killConfirmButton: {fileID: 6289803449665188735}
   renameButton: {fileID: 6289803450851670832}
   petNameTextInput: {fileID: 6289803450232519737}
---- !u!114 &7946055479775512859
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6289803449202236441}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1413667307, guid: b35933d85230a204b91c2454a36698f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  fontSetMode: 0
---- !u!114 &2816410774624466484
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6289803449202236441}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1730975643, guid: b35933d85230a204b91c2454a36698f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  applyTo: {fileID: 6289803449202236441}
+  versionText: {fileID: 0}
+  babySnowStalkerTemplate: {fileID: 0}
+  babyPenlingTemplate: {fileID: 0}
+  adultPengwingTemplate: {fileID: 0}
+  pinnacaridTemplate: {fileID: 0}
+  blueTrivalveTemplate: {fileID: 0}
+  yellowTrivalveTemplate: {fileID: 0}
+  catTemplate: {fileID: 0}
+  dogTemplate: {fileID: 0}
+  rabbitTemplate: {fileID: 0}
+  foxTemplate: {fileID: 0}
+  sealTemplate: {fileID: 0}
+  walrusTemplate: {fileID: 0}
 --- !u!1 &6289803449276473465
 GameObject:
   m_ObjectHideFlags: 0
@@ -3482,3 +3468,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ShowMaskGraphic: 0
+--- !u!114 &2816410774624466484
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1730975643, guid: b35933d85230a204b91c2454a36698f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &7946055479775512859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1413667307, guid: b35933d85230a204b91c2454a36698f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
