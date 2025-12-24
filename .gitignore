@@ -84,6 +84,9 @@ crashlytics-build.properties
 # Packages
 /[Pp]ackages/
 
+# Unity folders
+/UIElementsSchema/
+
 # Third Party Assets
 /[Aa]ssets/ThirdPartyAssets.meta
 /[Aa]ssets/ThirdPartyAssets/

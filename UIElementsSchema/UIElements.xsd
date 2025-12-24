@@ -4,6 +4,7 @@
   <xs:import schemaLocation="UnityEditor.PackageManager.UI.xsd" namespace="UnityEditor.PackageManager.UI" />
   <xs:import schemaLocation="UnityEditor.UIElements.xsd" namespace="UnityEditor.UIElements" />
   <xs:import schemaLocation="UnityEditor.UIElements.Debugger.xsd" namespace="UnityEditor.UIElements.Debugger" />
+  <xs:import schemaLocation="Unity.UI.Builder.xsd" namespace="Unity.UI.Builder" />
   <xs:import schemaLocation="ThunderKit.Core.UIElements.xsd" namespace="ThunderKit.Core.UIElements" />
   <xs:import schemaLocation="ThunderKit.Addressable.Tools.xsd" namespace="ThunderKit.Addressable.Tools" />
   <xs:import schemaLocation="ThunderKit.Markdown.xsd" namespace="ThunderKit.Markdown" />

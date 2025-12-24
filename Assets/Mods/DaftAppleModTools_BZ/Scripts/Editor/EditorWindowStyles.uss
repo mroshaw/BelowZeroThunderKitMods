@@ -1,0 +1,73 @@
+.MainWindow {
+    min-width: 350px;
+    min-height: 10px;
+}
+
+.TitleLabel {
+    font-size: 24px;
+    -unity-text-align: upper-center;
+    -unity-font-style: bold;
+    color: rgb(245, 255, 0);
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.InstructionLabel {
+    color: rgb(97, 113, 255);
+    padding-left: 10px;
+    padding-right: 10px;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    white-space: normal;
+}
+
+.CustomEditorContainer {
+    flex-grow: 1;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.LogScrollView {
+}
+
+.LogText {
+    -unity-font-style: normal;
+    height: 100px;
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-top: 1px;
+    flex-grow: 1;
+}
+
+.LogText #unity-text-input {
+    -unity-text-align: upper-left;
+    -unity-font-style: normal;
+}
+
+.Label {
+    margin-left: 5px;
+}
+
+.Toggle {
+}
+
+.OptionsContainer {
+    flex-direction: row;
+}
+
+.ContainedLabel {
+}
+
+.WideButton {
+    font-size: 18px;
+    -unity-font-style: bold;
+}
+
+.ObjectListView {
+    height: 120px;
+    background-color: rgb(42, 42, 42);
+}
+
+.Spacer {
+    height: 15px;
+}

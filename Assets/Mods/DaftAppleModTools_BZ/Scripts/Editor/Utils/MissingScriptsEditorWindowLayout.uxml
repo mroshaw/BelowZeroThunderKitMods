@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="MainContainer">
+        <Style src="/Assets/Mods/DaftAppleModTools_BZ/Scripts/Editor/EditorWindowStyles.uss" />
+        <ui:Button text="Find Missing Scripts in Scene" name="FindMissingScriptsInSceneButton" class="WideButton" />
+        <ui:Label text="Scene Objects:" name="SceneObjectsLabel" class="ContainedLabel" />
+        <ui:ListView focusable="true" name="SceneObjectsListView" binding-path="sceneObjects" item-height="18" class="ObjectListView" />
+        <ui:Button text="Delete in Scene" name="DeleteInSceneButton" class="WideButton" />
+        <ui:VisualElement name="Spacer" class="Spacer" />
+        <ui:Button text="Find Missing Scripts in Assets" name="FindMissingScriptsInAssetsButton" class="WideButton" />
+        <ui:Label text="Assets:" name="AssetsLabel" class="ContainedLabel" />
+        <ui:ListView focusable="true" name="AssetsListView" binding-path="assets" item-height="18" class="ObjectListView" />
+        <ui:Button text="Delete in Assets" name="DeleteInAssetsButton" class="WideButton" />
+    </ui:VisualElement>
+</ui:UXML>
