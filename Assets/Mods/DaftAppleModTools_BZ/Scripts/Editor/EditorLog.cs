@@ -29,6 +29,9 @@ namespace DaftAppleGames.Editor
         {
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public EditorLog(bool logToConsole, bool includeDetailedLogging)
         {
             DetailedLogging = includeDetailedLogging;
@@ -36,29 +39,51 @@ namespace DaftAppleGames.Editor
             _logEntries = new List<string>();
         }
 
-        public void AddToLog(string logEntry)
+        /// <summary>
+        /// Add an Info log entry
+        /// </summary>
+        public void LogInfo(string logEntry)
         {
             AddToLog(LogLevel.Info, logEntry);
         }
 
         /// <summary>
+        /// Add a Debug log entry
+        /// </summary>
+        public void LogDebug(string logEntry)
+        {
+            AddToLog(LogLevel.Debug, logEntry);
+        }
+
+        /// <summary>
+        /// Add an Error log entry
+        /// </summary>
+        public void LogError(string logEntry)
+        {
+            AddToLog(LogLevel.Error, logEntry, true);
+        }
+
+        /// <summary>
+        /// Add a Warning log entry
+        /// </summary>
+        public void LogWarning(string logEntry)
+        {
+            AddToLog(LogLevel.Warning, logEntry);
+        }
+
+        /// <summary>
         /// Adds to the log without ever mirroring to the console. Useful for things like welcome messages
         /// </summary>
-        public void AddToLogNoConsole(LogLevel logLevel, string logEntry)
+        private void AddToLogNoConsole(LogLevel logLevel, string logEntry)
         {
             _logEntries.Add(logEntry);
             LogChangedEvent?.Invoke(this);
         }
 
-        public void AddToLog(LogLevel logLevel, List<string> logEntries, bool forceLog = false)
-        {
-            foreach (string entry in logEntries)
-            {
-                AddToLog(logLevel, entry, forceLog);
-            }
-        }
-
-        public void AddToLog(LogLevel logLevel, string logEntry, bool forceLog = false)
+        /// <summary>
+        /// Add a new log entry
+        /// </summary>
+        private void AddToLog(LogLevel logLevel, string logEntry, bool forceLog = false)
         {
             string fullLogText;
 
@@ -70,7 +95,6 @@ namespace DaftAppleGames.Editor
                     {
                         Debug.Log(logEntry);
                     }
-
                     break;
                 case LogLevel.Debug:
                     if (!DetailedLogging && !forceLog)
