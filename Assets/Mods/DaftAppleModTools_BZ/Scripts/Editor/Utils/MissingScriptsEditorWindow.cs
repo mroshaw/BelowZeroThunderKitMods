@@ -17,7 +17,10 @@ namespace DaftAppleGames.Editor
         [SerializeField] private List<GameObject> sceneObjects = new List<GameObject>();
         [SerializeField] private List<GameObject> assets = new List<GameObject>();
 
-        [SerializeField] private int numFrames = 60;
+        // Coroutine will yield after this many frames
+        private const int NumFramesBeforeYield = 60;
+        
+        private int _currFrameCount = 0;
         
         private List<string> _assetPaths = new List<string>();
 
@@ -30,6 +33,9 @@ namespace DaftAppleGames.Editor
         private ListView _assetsListView;
 
         private EditorCoroutine _coroutineHandle;
+
+        private int _totalObjectsToProcess;
+        private int _currentObjectProcessing;
         
         protected override string ToolTitle => "Missing Scripts";
         protected override string IntroText =>
@@ -76,8 +82,31 @@ namespace DaftAppleGames.Editor
             _assetsListView = rootVisualElement.Q<ListView>("AssetsListView");
             ConfigureListView(_assetsListView, assets, false);
             _assetsListView.Refresh();
+            
+            SetReadyState();
         }
 
+        /// <summary>
+        /// Cancel the in progress subroutine
+        /// </summary>
+        protected override void CancelProcess()
+        {
+            LogInfo("Process cancelled!");
+            SetReadyState();
+        }
+
+        /// <summary>
+        /// Stops an active coroutine
+        /// </summary>
+        private void CancelInProgressSubroutine()
+        {
+            if (_coroutineHandle != null)
+            {
+                EditorCoroutineUtility.StopCoroutine(_coroutineHandle);
+                ResetProcessProgress();
+            }
+        }
+        
         /// <summary>
         /// Consistently configure a List View control
         /// </summary>
@@ -152,11 +181,7 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private void FindInSceneButtonClicked()
         {
-            SetButonState(false);
-            if (_coroutineHandle != null)
-            {
-                EditorCoroutineUtility.StopCoroutine(_coroutineHandle);
-            }
+            SetInProgressState();
             _coroutineHandle = EditorCoroutineUtility.StartCoroutine(FindInSceneAsync(), this);
         }
 
@@ -165,11 +190,7 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private void FindInAssetsButtonClicked()
         {
-            SetButonState(false);
-            if (_coroutineHandle != null)
-            {
-                EditorCoroutineUtility.StopCoroutine(_coroutineHandle);
-            }
+           SetInProgressState();
             _coroutineHandle = EditorCoroutineUtility.StartCoroutine(FindInAssetsAsync(), this);
         }
 
@@ -178,11 +199,7 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private void DeleteInSceneButtonClicked()
         {
-            SetButonState(false);
-            if (_coroutineHandle != null)
-            {
-                EditorCoroutineUtility.StopCoroutine(_coroutineHandle);
-            }
+            SetInProgressState();
             _coroutineHandle = EditorCoroutineUtility.StartCoroutine(DeleteInScenesAsync(), this);
         }
 
@@ -191,12 +208,48 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private void DeleteInAssetsButtonClicked()
         {
-            SetButonState(false);
-            if (_coroutineHandle != null)
-            {
-                EditorCoroutineUtility.StopCoroutine(_coroutineHandle);
-            }
+            SetInProgressState();
             _coroutineHandle = EditorCoroutineUtility.StartCoroutine(DeleteInAssetsAsync(), this);
+        }
+
+        /// <summary>
+        /// Sets the state when the process is started
+        /// </summary>
+        private void SetInProgressState()
+        {
+            SetButonState(false);
+            CancelInProgressSubroutine();
+            StartProcess();
+        }
+
+        /// <summary>
+        /// Sets the state when the process is not started/ended
+        /// </summary>
+        private void SetReadyState()
+        {
+            SetButonState(true);
+            CancelInProgressSubroutine();
+            EndProcess();
+        }
+        
+        /// <summary>
+        /// Resets the process progress
+        /// </summary>
+        private void ResetProgress()
+        {
+            _totalObjectsToProcess = 0;
+            _currentObjectProcessing = 0;
+            UpdateProgress();
+        }
+        
+        /// <summary>
+        /// Updates the current process progress
+        /// </summary>
+        private void UpdateProgress()
+        {
+            float processPercentage = _totalObjectsToProcess > 0 ? (float)_currentObjectProcessing / _totalObjectsToProcess * 100 : 0;
+            LogDebug($"Progressing: {_currentObjectProcessing} of {_totalObjectsToProcess}. Percentage: {processPercentage}%");
+            SetProcessProgress(_totalObjectsToProcess > 0 ? processPercentage : 0);
         }
         
         /// <summary>
@@ -205,6 +258,17 @@ namespace DaftAppleGames.Editor
         private IEnumerator FindMissingScriptsInGameObjectAndChildrenAsync(GameObject parentGameObject, GameObject rootGameObject,
             string assetPath, bool delete)
         {
+
+            _currFrameCount++;
+            
+            // Pause a frame
+            if (_currFrameCount % NumFramesBeforeYield == 0)
+            {
+                UpdateProgress();
+                _currFrameCount = 0;
+                yield return null;
+            }
+            
             LogDebug($"Processing: {parentGameObject} on parent: {parentGameObject.name}");
             Component[] components = parentGameObject.GetComponents<Component>();
             bool hasMissingScript = components.Any(c => c == null);
@@ -251,16 +315,19 @@ namespace DaftAppleGames.Editor
         {
             LogInfo("Looking for missing scripts in open scenes...");
             sceneObjects.Clear();
+            ResetProgress();
+            
             GameObject[] allObjects = FindObjectsOfType<GameObject>();
+            _totalObjectsToProcess = allObjects.Length;
+            
             foreach (GameObject parentGameObject in allObjects)
             {
+                _currentObjectProcessing++;
                 if (parentGameObject.transform.parent == null) // Only start with root objects
                 {
                     yield return
                         FindMissingScriptsInGameObjectAndChildrenAsync(parentGameObject, parentGameObject, null, false);
                 }
-                // Pause a frame
-                yield return null;
             }
             OnSceneProcessingComplete();
         }
@@ -270,17 +337,16 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private IEnumerator DeleteInScenesAsync()
         {
-            LogInfo("Deleting missing scripts...");
+            LogInfo("Deleting missing scripts in open scenes...");
+            ResetProgress();
+            _totalObjectsToProcess = sceneObjects.Count;
+            
             foreach (GameObject parentGameObject in sceneObjects.ToArray())
             {
+                _currentObjectProcessing++;
                 Undo.RecordObject(parentGameObject, $"Delete Missing Script from {parentGameObject.name}");
                 yield return
                     FindMissingScriptsInGameObjectAndChildrenAsync(parentGameObject, parentGameObject, null, false);
-                // Yield every numFrames
-                if (Time.frameCount % numFrames == 0)
-                {
-                    yield return null;
-                }
             }
             OnSceneProcessingComplete();
         }
@@ -290,12 +356,17 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private IEnumerator FindInAssetsAsync()
         {
+            LogInfo("Looking for missing scripts in assets...");
             assets.Clear();
             _assetPaths.Clear();
-
+            ResetProgress();
             string[] allAssets = AssetDatabase.GetAllAssetPaths();
+            _totalObjectsToProcess = allAssets.Length;
+            
             foreach (string assetPath in allAssets)
             {
+                _currentObjectProcessing++;
+                
                 if (assetPath.StartsWith("Packages/"))
                 {
                     continue;
@@ -313,8 +384,6 @@ namespace DaftAppleGames.Editor
                 }
 
                 yield return FindMissingScriptsInGameObjectAndChildrenAsync(assetRoot, assetRoot, assetPath, false);
-                // Pause a frame
-                yield return null;
             }
 
             OnAssetProcessingComplete();
@@ -325,16 +394,19 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private IEnumerator DeleteInAssetsAsync()
         {
+            LogInfo("Deleting missing scripts in assets...");
+            ResetProgress();
+            _totalObjectsToProcess = _assetPaths.Count;
+            
             foreach (string assetPath in _assetPaths)
             {
+                _currentObjectProcessing++;
                 GameObject assetRoot = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
 
                 Undo.RecordObject(assetRoot, $"Delete Missing Script from {assetRoot}");
                 LogInfo($"Deleting missing scripts from asset: {assetPath}");
                 yield return FindMissingScriptsInGameObjectAndChildrenAsync(assetRoot, assetRoot, assetPath, true);
                 SaveAsset(assetRoot);
-                // Pause a frame
-                yield return null;
             }
 
             OnAssetProcessingComplete();
@@ -348,7 +420,7 @@ namespace DaftAppleGames.Editor
             LogInfo($"Processed {sceneObjects.Count} missing script(s) in open scenes.");
             _objectsListView.Refresh();
             EditorSceneManager.SaveOpenScenes();
-            SetButonState(true);
+            SetReadyState();
         }
 
         /// <summary>
@@ -359,7 +431,7 @@ namespace DaftAppleGames.Editor
             LogInfo($"Processed {assets.Count} missing script(s) in assets.");
             _assetsListView.Refresh();
             EditorSceneManager.SaveOpenScenes();
-            SetButonState(true);
+            SetReadyState();
         }
 
         /// <summary>

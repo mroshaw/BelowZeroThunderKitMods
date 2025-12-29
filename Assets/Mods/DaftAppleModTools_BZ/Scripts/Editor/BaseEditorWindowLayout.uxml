@@ -2,18 +2,25 @@
     <ui:VisualElement name="MainWindow" class="MainWindow" style="min-height: 450px;">
         <Style src="EditorWindowStyles.uss" />
         <ui:Label text="Title Label" name="TitleLabel" binding-path="titleText" class="TitleLabel" />
-        <ui:Label text="Instructions for use. ill go here and should even wrap around if it gets too big." name="InstructionLabel" binding-path="instructionText" class="InstructionLabel" />
+        <ui:Label text="Instructions for use. ill go here and should even wrap around if it gets too big." name="InstructionLabel" binding-path="instructionText" class="InstructionLabel" style="flex-grow: 0;" />
         <ui:VisualElement name="CustomEditorContainer" class="CustomEditorContainer" />
-        <ui:VisualElement name="LoggingContainer" style="margin-left: 5px; margin-right: 5px;">
-            <ui:Label text="Log:" name="LogLabel" class="ContainedLabel" />
-            <ui:ScrollView name="LogScrollView" show-vertical-scroller="true" class="LogScrollView">
-                <ui:TextField picking-mode="Ignore" name="LogText" readonly="true" multiline="true" binding-path="logText" class="LogText" />
-            </ui:ScrollView>
-            <ui:VisualElement name="LogOptions" class="OptionsContainer">
-                <ui:Toggle label="Detailed Logging:" name="DetailedLoggingToggle" class="Toggle" />
-                <ui:Toggle label="Log to Console:" name="LogToConsoleToggle" value="true" class="Toggle" />
+        <ui:VisualElement name="FooterContainer" class="FooterContainer">
+            <ui:VisualElement name="LoggingContainer" style="margin-left: 5px; margin-right: 5px;">
+                <ui:Label text="Log:" name="LogLabel" class="ContainedLabel" />
+                <ui:ScrollView name="LogScrollView" class="LogScrollView">
+                    <ui:TextField picking-mode="Ignore" name="LogText" multiline="true" class="LogText" />
+                </ui:ScrollView>
+                <ui:VisualElement name="LogOptions" class="OptionsContainer">
+                    <ui:Toggle label="Detailed Logging:" name="DetailedLoggingToggle" class="Toggle" />
+                    <ui:Toggle label="Log to Console:" name="LogToConsoleToggle" value="true" class="Toggle" />
+                </ui:VisualElement>
+                <ui:Button text="Clear Log" name="ClearLogButton" class="WideButton" />
             </ui:VisualElement>
-            <ui:Button text="Clear Log" name="ClearLogButton" class="WideButton" />
+            <ui:VisualElement name="ProgressContainer" class="ProgressContainer">
+                <ui:Slider picking-mode="Ignore" label="Progress" value="0" high-value="100" binding-path="processProgress" name="ProgressSlider" class="ProgressSlider" style="flex-grow: 1;" />
+                <ui:Label text="0%" name="ProgressLabel" class="Label" />
+                <ui:Button text="Cancel" name="CancelProcessButton" class="ProgressSlider" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

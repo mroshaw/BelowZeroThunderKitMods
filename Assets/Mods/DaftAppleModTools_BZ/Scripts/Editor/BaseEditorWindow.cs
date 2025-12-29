@@ -1,3 +1,4 @@
+using System.Globalization;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -10,24 +11,35 @@ namespace DaftAppleGames.Editor
         [SerializeField] private VisualTreeAsset baseVisualTree;
         [SerializeField] private VisualTreeAsset customEditorVisualTree;
         [SerializeField] private bool detailedLogging;
-        [SerializeField] private bool logToConsole = true;
+        [SerializeField] private bool logToConsole;
 
+        private const int MaxLogCharacters = 10000;
+        
         // Bound text to display in the Editor
         [SerializeField] private string logText;
         [SerializeField] private string titleText;
         [SerializeField] private string instructionText;
+        [SerializeField] private float processProgress;
+
+        protected VisualElement CustomEditorRootVisualElement;
         
         // Logging instance
         private EditorLog _log;
-        protected VisualElement CustomEditorRootVisualElement;
-
-        private Button _clearLogButton;
-        private VisualElement _customEditorContainer;
+        private bool _hasInternalLogging;
         private TextField _logTextField;
         private ScrollView _logTextScrollView;
+        private Button _clearLogButton;
+
+        // Process management
+        private Button _cancelProcessButton;
+        private Slider _progressSlider;
+        private Label _progressLabel;
+        
+        private VisualElement _customEditorContainer;
+
+        // Bound Serialized data
         private SerializedObject _serializedObject;
 
-        private bool _hasInternalLogging;
 
         protected virtual string ToolTitle => "Title";
         protected virtual string IntroText => "Instructions.";
@@ -60,7 +72,6 @@ namespace DaftAppleGames.Editor
             // Set window titles
             titleText = ToolTitle;
             instructionText = IntroText;
-            CreateCustomGUI();
 
             // Configure logging
             _log.LogChangedEvent.RemoveListener(LogChangedHandler);
@@ -81,19 +92,50 @@ namespace DaftAppleGames.Editor
             ClearLog();
             LogInfo(WelcomeLogText);
             
+            // Setup the Progress functions
+            _cancelProcessButton =  rootVisualElement.Q<Button>("CancelProcessButton");
+            _cancelProcessButton.clicked -= CancelProcessClicked;
+            _cancelProcessButton.clicked += CancelProcessClicked;
+
+            _progressSlider =  rootVisualElement.Q<Slider>("ProgressSlider");
+            _progressSlider.SetEnabled(false);
+            _progressLabel =  rootVisualElement.Q<Label>("ProgressLabel");
+            
+            ResetProcessProgress();
+            
+            // Create the embedded custom UI
+            CreateCustomGUI();
+            
             // Bind the UI to serialized properties
             BindUI();
         }
 
         protected abstract void CreateCustomGUI();
 
+        protected abstract void CancelProcess();
+
+        /// <summary>
+        /// Call before starting a process to enable the cancel button and reset the progress
+        /// </summary>
+        protected void StartProcess()
+        {
+            _cancelProcessButton.SetEnabled(true);
+        }
+
+        /// <summary>
+        /// Call after processing has finished, to disable cancel button
+        /// </summary>
+        protected void EndProcess()
+        {
+            _cancelProcessButton.SetEnabled(false);
+        }
+        
         private void BindUI()
         {
             // Bind to UI
             _serializedObject = new SerializedObject(this);
             rootVisualElement.Bind(_serializedObject);
         }
-
 
         /// <summary>
         /// Handle change to the Log To Console checkbox
@@ -103,6 +145,34 @@ namespace DaftAppleGames.Editor
             _log.LogToConsole = value;
         }
 
+        /// <summary>
+        /// Used to set the process progress
+        /// </summary>
+        protected void SetProcessProgress(float newValue)
+        {
+            processProgress = newValue;
+            _progressLabel.text = $"{ Mathf.RoundToInt(newValue).ToString()}%";
+            _progressSlider.value = newValue;
+        }
+
+        /// <summary>
+        /// Resets progress to zero
+        /// </summary>
+        protected void ResetProcessProgress()
+        {
+            SetProcessProgress(0);
+            _cancelProcessButton.SetEnabled(false);
+        }
+
+        /// <summary>
+        /// Handle the Cancel Progress button click
+        /// </summary>
+        private void CancelProcessClicked()
+        {
+            CancelProcess();
+            EndProcess();
+        }
+        
         /// <summary>
         /// Handle change to the Detailed Logging checkbox
         /// </summary>
@@ -114,6 +184,16 @@ namespace DaftAppleGames.Editor
         private void LogChangedHandler(EditorLog changedLog)
         {
             logText = changedLog.GetLogAsString();
+            
+            // Truncate the log text is it's too big for the control
+            if (logText.Length > MaxLogCharacters)
+            {
+                logText = logText.Substring(logText.Length - MaxLogCharacters);
+            }
+
+            // Update the log text control
+            _logTextField.value = logText;
+            
             // Force the scrollview to scroll
             _logTextScrollView.schedule.Execute(ScrollLogToBottom).StartingIn(60);
         }

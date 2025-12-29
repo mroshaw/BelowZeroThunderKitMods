@@ -968,12 +968,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 286e0dcabf7d9a44e8229da699ba0faf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  storageHeight: 0
+  storageWidth: 0
+  recipe: {fileID: 0}
+  useCustomMovement: 0
+  allowConstructionOnConstructables: 0
+  waveScale: 0
+  replaceExistingModel: 0
+  addBubbleAudio: 0
   aquariumMesh: {fileID: 3490975698016455672}
   aquariumGlassMesh: {fileID: 2692511837652075410}
+  newAquariumModel: {fileID: 0}
   bubbles1Transform: {fileID: 4551565069477221087}
   bubbles2Transform: {fileID: 8957034317035316094}
   coral1Transform: {fileID: 6851176415972300588}
   coral2Transform: {fileID: 2671303378095192077}
+  existingCoralTransforms: []
   newCoralTransforms:
   - {fileID: 7316752044928616244}
   - {fileID: 7522772218378213985}
@@ -988,12 +998,15 @@ MonoBehaviour:
   - {fileID: 1707353702099036317}
   rocksObject: {fileID: 2459706319992848181}
   colliderObject: {fileID: 4250118606385934639}
+  constructableBoundsObject: {fileID: 0}
   animator1: {fileID: 0}
   animator2: {fileID: 0}
   existingTrackObjects: []
   existingAttachObjects: []
   newTrackObjects: []
   newAttachObjects: []
+  fishSettings: {fileID: 0}
+  movementColliderObjects: []
 --- !u!1 &2371874503439466195
 GameObject:
   m_ObjectHideFlags: 0
@@ -1034,7 +1047,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6895625355557736000}
-  - component: {fileID: 7445105173154853095}
   m_Layer: 0
   m_Name: Rocks
   m_TagString: Untagged
@@ -1065,19 +1077,6 @@ Transform:
   m_Father: {fileID: 4965567800316433459}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7445105173154853095
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2459706319992848181}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1730975643, guid: b35933d85230a204b91c2454a36698f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  applyTo: {fileID: 2459706319992848181}
 --- !u!1 &2626378538512142134
 GameObject:
   m_ObjectHideFlags: 0
@@ -3532,3 +3531,15 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 8193255539299300383}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7445105173154853095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1730975643, guid: b35933d85230a204b91c2454a36698f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

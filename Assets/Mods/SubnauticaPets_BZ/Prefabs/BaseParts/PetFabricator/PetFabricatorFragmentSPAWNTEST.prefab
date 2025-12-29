@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 8854866149902878868}
   - component: {fileID: 2181277349045189759}
   - component: {fileID: 9026609679130561016}
-  - component: {fileID: 595736763581092480}
   m_Layer: 0
   m_Name: PetFabricatorFragmentSPAWNTEST
   m_TagString: Untagged
@@ -100,19 +99,6 @@ MonoBehaviour:
   hasStoppedMoving: 0
   hasStartedMoving: 0
   isCheckStarted: 0
---- !u!114 &595736763581092480
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 539784682817334755}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1730975643, guid: 9ad05b5b6a42de043bc6b2e5a11e3506, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  applyTo: {fileID: 4566932138563822771}
 --- !u!1 &4566932138563822771
 GameObject:
   m_ObjectHideFlags: 0
@@ -207,3 +193,15 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.01, y: 0.006, z: 0.01}
   m_Center: {x: 0, y: -0.001, z: 0.005}
+--- !u!114 &595736763581092480
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1730975643, guid: 9ad05b5b6a42de043bc6b2e5a11e3506, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

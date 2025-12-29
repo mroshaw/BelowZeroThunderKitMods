@@ -1612,7 +1612,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2611976962211357152}
-  - component: {fileID: 2080634686253555527}
   m_Layer: 0
   m_Name: Rocks
   m_TagString: Untagged
@@ -1643,19 +1642,6 @@ Transform:
   m_Father: {fileID: 4567925557409627027}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2080634686253555527
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6462406328741154965}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1730975643, guid: b35933d85230a204b91c2454a36698f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  applyTo: {fileID: 6462406328741154965}
 --- !u!1 &6586271222198047091
 GameObject:
   m_ObjectHideFlags: 0
@@ -2051,12 +2037,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 286e0dcabf7d9a44e8229da699ba0faf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  storageHeight: 0
+  storageWidth: 0
+  recipe: {fileID: 0}
+  useCustomMovement: 0
+  allowConstructionOnConstructables: 0
+  waveScale: 0
+  replaceExistingModel: 0
+  addBubbleAudio: 0
   aquariumMesh: {fileID: 5476335820772500568}
   aquariumGlassMesh: {fileID: 6831974707330804786}
+  newAquariumModel: {fileID: 0}
   bubbles1Transform: {fileID: 4947166654773247359}
   bubbles2Transform: {fileID: 558572582881791198}
   coral1Transform: {fileID: 2637404219690104972}
   coral2Transform: {fileID: 6818403417283925933}
+  existingCoralTransforms: []
   newCoralTransforms:
   - {fileID: 2163951809691642004}
   - {fileID: 1435510239732626881}
@@ -2071,12 +2067,15 @@ MonoBehaviour:
   - {fileID: 7799118180326115133}
   rocksObject: {fileID: 6462406328741154965}
   colliderObject: {fileID: 4717170784698097295}
+  constructableBoundsObject: {fileID: 0}
   animator1: {fileID: 0}
   animator2: {fileID: 0}
   existingTrackObjects: []
   existingAttachObjects: []
   newTrackObjects: []
   newAttachObjects: []
+  fishSettings: {fileID: 0}
+  movementColliderObjects: []
 --- !u!1 &7255614674852612380
 GameObject:
   m_ObjectHideFlags: 0
@@ -3534,3 +3533,15 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 8874235056532786259}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2080634686253555527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1730975643, guid: b35933d85230a204b91c2454a36698f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

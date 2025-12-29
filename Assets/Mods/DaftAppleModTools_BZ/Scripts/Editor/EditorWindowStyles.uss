@@ -75,3 +75,16 @@
 .Spacer {
     height: 15px;
 }
+
+.FooterContainer {
+}
+
+.ProgressContainer {
+    flex-direction: row;
+}
+
+.ProgressSlider {
+}
+
+.MiniButton {
+}
