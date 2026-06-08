@@ -42,7 +42,6 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             ConfigureDataBank();
         }
 
-
         private static PrefabInfo RegisterDnaPrefab(string classId, string displayName, string description,
             string textureName,
             Color color, LootDistributionData.BiomeData[] lootBiome, GameObject dnaModelPrefab)
@@ -121,7 +120,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         internal static class CatDnaPrefab
         {
             private const string ClassId = "CatPetDna";
-            private const string TextureAssetName = "CatTexture.png";
+            private const string TextureAssetName = "CatDnaStrandTexture.png";
             private const int FindCount = 1;
             private const float FindProbability = 0.3f;
             internal static PrefabInfo Info;

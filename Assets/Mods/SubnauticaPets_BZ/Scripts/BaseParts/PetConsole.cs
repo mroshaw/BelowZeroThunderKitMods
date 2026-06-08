@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DaftAppleGames.ModTools.Extensions;
 using DaftAppleGames.SubnauticaPets.Pets;
-using DaftAppleGames.SubnauticaPets.Utils;
 using TMPro;
 using UnityEngine;
 using Button = UnityEngine.UI.Button;
@@ -25,6 +25,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         [SerializeField] private Button killButton;
         [SerializeField] private Button killConfirmButton;
         [SerializeField] private Button renameButton;
+        [SerializeField] private Button syncButton;
         [SerializeField] private TMP_InputField petNameTextInput;
         [SerializeField] private TMP_Text versionText;
 
@@ -87,10 +88,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             SetPetButtonsInteractable();
             SetEmitters();
             SetParentBaseObject();
-            StartCoroutine(UpdatePetListAsync());
-
-            // Clean up, as the UWE serializer has a habit of adding stuff back in when loading a save
-            Invoke(nameof(CleanUp), 5.0f);
+            // StartCoroutine(CleanupAsync(2.0f));
         }
 
         /// <summary>
@@ -114,9 +112,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             }
         }
 
-        /// <summary>
-        ///     Enable listeners
-        /// </summary>
+        // Enable listeners
         private void OnEnable()
         {
             // Add listeners to controls
@@ -125,29 +121,33 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             killAllButton.onClick.AddListener(KillAllButtonHandler);
             killConfirmButton.onClick.AddListener(KillConfirmButtonHandler);
             killAllConfirmButton.onClick.AddListener(KillAllConfirmButtonHandler);
+            syncButton.onClick.AddListener(UpdatePetList);
+            
             petNameTextInput.onValueChanged.AddListener(RenameTextChangedHandler);
+
+            // Refresh the pet list
+            StartCoroutine(UpdatePetListAsync());
+            
+            // Listen for any changes to Pets list
+            SubnauticaPetsPlugin.PetSaver.PetListUpdatedEvent.AddListener(UpdatePetList);
         }
 
         // Remove listeners
         private void OnDisable()
         {
-            // Remove Pet Saver listeners
-            SubnauticaPetsPlugin.PetSaver.PetListUpdatedEvent.RemoveListener(PetListUpdatedHandler);
-
             // Remove listeners to controls
             renameButton.onClick.RemoveListener(RenameButtonHandler);
             killButton.onClick.RemoveListener(KillButtonHandler);
             killAllButton.onClick.RemoveListener(KillAllButtonHandler);
             killAllConfirmButton.onClick.RemoveListener(KillAllConfirmButtonHandler);
+            syncButton.onClick.RemoveListener(UpdatePetList);
+            
             petNameTextInput.onValueChanged.RemoveListener(RenameTextChangedHandler);
+            
+            // Remove Pet Saver listeners
+            SubnauticaPetsPlugin.PetSaver.PetListUpdatedEvent.RemoveListener(UpdatePetList);
         }
-
-        private void CleanUp()
-        {
-            // Listen for changes to the Pet List
-            SubnauticaPetsPlugin.PetSaver.PetListUpdatedEvent.AddListener(PetListUpdatedHandler);
-        }
-
+        
         /// <summary>
         ///     Finds the FMOD Emitters created during prefab configuration
         /// </summary>
@@ -295,6 +295,15 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         }
 
         /// <summary>
+        /// Cleans up the PictureFrame component, that can be re-added by the UWE Serializer
+        /// </summary>
+        private IEnumerator CleanupAsync(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            gameObject.transform.parent.gameObject.DestroyComponentsInChildren<PictureFrame>();
+        }
+        
+        /// <summary>
         ///     Proxy to the RenameClickedEvent
         /// </summary>
         private void RenameButtonHandler()
@@ -348,20 +357,11 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             UpdatePetList();
         }
 
-        private void PetListUpdatedHandler()
-        {
-            UpdatePetList();
-        }
-
         /// <summary>
         ///     Create the Pet List controls
         /// </summary>
         internal void UpdatePetList()
         {
-            // Get button background
-            var backgroundSprite =
-                ModAssetUtils.GetObjectFromAssetBundle<Sprite>(UiUtils.CustomButtonTexture) as Sprite;
-
             // Clear the current UI objects
             ModDebugLog.LogDebug("CreatePetList: Clearing existing buttons...");
             if (_allScrollViewEntries != null)

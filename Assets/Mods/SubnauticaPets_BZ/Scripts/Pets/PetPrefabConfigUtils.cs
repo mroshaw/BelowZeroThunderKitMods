@@ -46,7 +46,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
             ModDebugLog.LogDebug("Setting up FMOD Emitter");
             FMOD_CustomEmitter customEmitter = targetGameObject.EnsureComponent<FMOD_CustomEmitter>();
-            ModAudioUtils.RegisterSound(audioClipName, busPath, ModAssetUtils, ModDebugLog, 0.1f, 8.0f, 0, true);
+            ModAudioUtils.RegisterSound(audioClipName, busPath, ModAssetUtils, ModDebugLog, 0.1f, 8.0f, 0, false);
             FMODAsset petFmodAsset = AudioUtils.GetFmodAsset(audioClipName);
             ModAudioUtils.ConfigureEmitter(customEmitter,  petFmodAsset, ModDebugLog);
 
