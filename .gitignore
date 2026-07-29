@@ -103,3 +103,6 @@ crashlytics-build.properties
 # Ignore TEST mods
 /[Aa]ssets/Mods/SeaTruckDockTest_BZ.meta
 /[Aa]ssets/Mods/SeaTruckDockTest_BZ/
+
+# Game File Rip
+/GameFiles~/
