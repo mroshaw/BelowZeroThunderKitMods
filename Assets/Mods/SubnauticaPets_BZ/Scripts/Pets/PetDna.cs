@@ -9,9 +9,17 @@ namespace DaftAppleGames.SubnauticaPets.Pets
     {
         private void Start()
         {
-            // Set random rotation
-            // Quaternion newRotation = Quaternion.Euler(Random.Range(0, 180), 0, Random.Range(0, 180));
-            // transform.localRotation = newRotation;
+            KeepUpright();
+        }
+
+        /// <summary>
+        ///     Preserve the spawn slot's yaw while removing pitch and roll that could rotate
+        ///     the model below terrain around its bottom-centre pivot.
+        /// </summary>
+        private void KeepUpright()
+        {
+            float yaw = transform.eulerAngles.y;
+            transform.rotation = Quaternion.Euler(0.0f, yaw, 0.0f);
         }
     }
 }

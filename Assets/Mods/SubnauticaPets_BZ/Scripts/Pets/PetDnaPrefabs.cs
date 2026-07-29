@@ -68,7 +68,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                     // Add new model
                     newModel.transform.SetParent(obj.transform);
                     newModel.transform.localPosition = new Vector3(0, 0, 0);
-                    newModel.transform.localRotation = new Quaternion(0, 0, 0, 0);
+                    newModel.transform.localRotation = Quaternion.identity;
 
                     // obj.FindChild("Quartz_small").SetActive(false);
 
