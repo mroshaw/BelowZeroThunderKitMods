@@ -1,124 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-8853567456705665462
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b40885578be10f4785f1fa347e9fefa, type: 3}
-  m_Name: Import Project Settings
-  m_EditorClassIdentifier: 
-  enabled: 1
-  IncludedSettings: 0
---- !u!114 &-7190405607563512405
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52610fcf3c7c01e43ad95185897e1eb5, type: 3}
-  m_Name: Prompt Restart
-  m_EditorClassIdentifier: 
-  enabled: 1
---- !u!114 &-6330980887980817305
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8840720793112784295b7c9b06af7493, type: 3}
-  m_Name: Get Bitness
-  m_EditorClassIdentifier: 
-  enabled: 1
---- !u!114 &-6002459393346764569
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 596b128cb3c6dd84da4b09a20d68dcab, type: 3}
-  m_Name: Unity GUI Uninstaller
-  m_EditorClassIdentifier: 
-  enabled: 0
---- !u!114 &-5533198987329097764
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0cf0398e0ff60b641a1c9a78c649cbae, type: 3}
-  m_Name: Beep
-  m_EditorClassIdentifier: 
-  enabled: 1
---- !u!114 &-4525622588536267058
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c37efc65505c0b84fae0add0366706b6, type: 3}
-  m_Name: Install BepInEx
-  m_EditorClassIdentifier: 
-  enabled: 1
---- !u!114 &-3055235099102422427
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 787b4254ce33ccd42b78ce45443af2ff, type: 3}
-  m_Name: TextMeshPro Uninstaller
-  m_EditorClassIdentifier: 
-  enabled: 0
---- !u!114 &-619449111174465005
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8dcb1359c6da7c049b1063e3561a1ecf, type: 3}
-  m_Name: Check Unity Version
-  m_EditorClassIdentifier: 
-  enabled: 1
---- !u!114 &-112169593135052002
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a4e66fd1b2f0a6b4e951af502eba5a2b, type: 3}
-  m_Name: Create Game Package
-  m_EditorClassIdentifier: 
-  enabled: 1
---- !u!114 &-60484474195826864
+--- !u!114 &-7876532845772113561
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -135,6 +17,85 @@ MonoBehaviour:
   - Assembly-CSharp.dll
   - Assembly-CSharp-firstpass.dll
   NStripExecutable: {fileID: 102900000, guid: f3ca93c42be8f2847a9854a1a49f5d2b, type: 3}
+--- !u!114 &-7432633529874437284
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52610fcf3c7c01e43ad95185897e1eb5, type: 3}
+  m_Name: Prompt Restart
+  m_EditorClassIdentifier: 
+  enabled: 1
+--- !u!114 &-6196083184357900178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8dcb1359c6da7c049b1063e3561a1ecf, type: 3}
+  m_Name: Check Unity Version
+  m_EditorClassIdentifier: 
+  enabled: 1
+--- !u!114 &-5202418003408736031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7f32e9d1a0c584763d21af8c5b9e049, type: 3}
+  m_Name: Ensure Assembly Definitions
+  m_EditorClassIdentifier: 
+  enabled: 1
+--- !u!114 &-4938716320372668253
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c37efc65505c0b84fae0add0366706b6, type: 3}
+  m_Name: Install BepInEx
+  m_EditorClassIdentifier: 
+  enabled: 1
+--- !u!114 &-2154956127303499282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b40885578be10f4785f1fa347e9fefa, type: 3}
+  m_Name: Import Project Settings
+  m_EditorClassIdentifier: 
+  enabled: 1
+  IncludedSettings: 0
+--- !u!114 &-447578952820547874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a87a9f1780c348d4080afaf9971d3a7e, type: 3}
+  m_Name: Import Assemblies
+  m_EditorClassIdentifier: 
+  enabled: 1
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -148,22 +109,36 @@ MonoBehaviour:
   m_Name: ImportConfiguration
   m_EditorClassIdentifier: 
   ConfigurationExecutors:
-  - {fileID: -619449111174465005}
-  - {fileID: 8377364428158850919}
-  - {fileID: -3055235099102422427}
-  - {fileID: -6002459393346764569}
-  - {fileID: -60484474195826864}
-  - {fileID: 9000730196766088525}
-  - {fileID: -8853567456705665462}
-  - {fileID: -112169593135052002}
-  - {fileID: 162826732869550917}
-  - {fileID: -4525622588536267058}
-  - {fileID: -6330980887980817305}
-  - {fileID: -5533198987329097764}
-  - {fileID: -7190405607563512405}
-  configurationIndex: 13
-  totalImportExtensionCount: 13
---- !u!114 &162826732869550917
+  - {fileID: -6196083184357900178}
+  - {fileID: 2799188640170533055}
+  - {fileID: -5202418003408736031}
+  - {fileID: 2660928619463885336}
+  - {fileID: 6402138738310635844}
+  - {fileID: -7876532845772113561}
+  - {fileID: -447578952820547874}
+  - {fileID: -2154956127303499282}
+  - {fileID: 5513010716454831064}
+  - {fileID: 1194542152135959768}
+  - {fileID: -4938716320372668253}
+  - {fileID: 7182319803360600}
+  - {fileID: 2372037484364534737}
+  - {fileID: -7432633529874437284}
+  configurationIndex: -1
+  totalImportExtensionCount: 14
+--- !u!114 &7182319803360600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8840720793112784295b7c9b06af7493, type: 3}
+  m_Name: Get Bitness
+  m_EditorClassIdentifier: 
+  enabled: 1
+--- !u!114 &1194542152135959768
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -176,7 +151,33 @@ MonoBehaviour:
   m_Name: Import Addressable Catalog
   m_EditorClassIdentifier: 
   enabled: 1
---- !u!114 &8377364428158850919
+--- !u!114 &2372037484364534737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cf0398e0ff60b641a1c9a78c649cbae, type: 3}
+  m_Name: Beep
+  m_EditorClassIdentifier: 
+  enabled: 1
+--- !u!114 &2660928619463885336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 787b4254ce33ccd42b78ce45443af2ff, type: 3}
+  m_Name: TextMeshPro Uninstaller
+  m_EditorClassIdentifier: 
+  enabled: 0
+--- !u!114 &2799188640170533055
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -189,7 +190,7 @@ MonoBehaviour:
   m_Name: Disable Assembly Updater
   m_EditorClassIdentifier: 
   enabled: 1
---- !u!114 &9000730196766088525
+--- !u!114 &5513010716454831064
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -198,7 +199,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a87a9f1780c348d4080afaf9971d3a7e, type: 3}
-  m_Name: Import Assemblies
+  m_Script: {fileID: 11500000, guid: a4e66fd1b2f0a6b4e951af502eba5a2b, type: 3}
+  m_Name: Create Game Package
   m_EditorClassIdentifier: 
   enabled: 1
+--- !u!114 &6402138738310635844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 596b128cb3c6dd84da4b09a20d68dcab, type: 3}
+  m_Name: Unity GUI Uninstaller
+  m_EditorClassIdentifier: 
+  enabled: 0

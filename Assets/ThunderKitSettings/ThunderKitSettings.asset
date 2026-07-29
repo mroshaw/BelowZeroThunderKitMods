@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9057f7f601990a4883b2cb295c4f43e, type: 3}
   m_Name: ThunderKitSettings
   m_EditorClassIdentifier: 
-  FirstLoad: 1
+  FirstLoad: 0
   ShowOnStartup: 1
   GameExecutable: SubnauticaZero.exe
   GamePath: E:\Games\Steam\steamapps\common\SubnauticaZero
@@ -27,7 +27,7 @@ MonoBehaviour:
   CachedImageCount: 0
   CacheSize: 0
   MarkdownOpenMode: 1
-  SelectedPipeline: {fileID: 11400000, guid: a05485124c9bcc8499390566dff3c258, type: 2}
+  SelectedPipeline: {fileID: 11400000, guid: baa304199acd2bb459c22d83e77ff9a1, type: 2}
   SelectedManifest: {fileID: 11400000, guid: 1046126c490d7384799f2de26323218c, type: 2}
   QuickAccessPipelines:
   - {fileID: 11400000, guid: a05485124c9bcc8499390566dff3c258, type: 2}
