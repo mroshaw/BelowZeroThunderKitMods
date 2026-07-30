@@ -89,6 +89,7 @@ namespace DaftAppleGames.SubnauticaPets
 
             // Register our new prefabs
             PetDnaPrefabs.RegisterAll();
+            PetDnaDebugCommand.Register();
             PetPrefabs.RegisterAll();
             CustomPetPrefabs.RegisterAll();
             PetFabricatorPrefab.Register();
