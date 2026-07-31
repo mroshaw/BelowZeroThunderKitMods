@@ -43,7 +43,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         internal static class DogPetPrefab
         {
             private const string ClassId = "DogPet";
-            private const string PrefabAssetName = "PetDog.prefab";
+            private const string PrefabAssetName = "PetPug.prefab";
             private const string IconTextureAssetName = "DogIcon_Small.png";
             private const string AudioAssetName = "DogBark.wav";
             // Init PrefabInfo

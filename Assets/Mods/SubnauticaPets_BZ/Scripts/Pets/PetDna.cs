@@ -1,4 +1,5 @@
 using System.Collections;
+using ProtoBuf;
 using UnityEngine;
 
 namespace DaftAppleGames.SubnauticaPets.Pets
@@ -6,8 +7,10 @@ namespace DaftAppleGames.SubnauticaPets.Pets
     /// <summary>
     ///     Simple MonoBehaviour class to manage Pet DNA collectible behaviour
     /// </summary>
+    [ProtoContract]
     internal class PetDna : MonoBehaviour, IProtoEventListener
     {
+        private const int CurrentPlacementVersion = 1;
         private const float NestDetectionRange = 3.0f;
         private const int NestDetectionFrameCount = 30;
         private const float GroundProbeOffset = 0.25f;
@@ -33,9 +36,12 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
         private bool wasDeserialized;
 
+        [ProtoMember(1)]
+        private int placementVersion;
+
         private IEnumerator Start()
         {
-            if (wasDeserialized)
+            if (wasDeserialized && placementVersion >= CurrentPlacementVersion)
             {
                 yield break;
             }
@@ -49,6 +55,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 {
                     nest.AddItem(gameObject);
                     KeepUpright();
+                    placementVersion = CurrentPlacementVersion;
                     yield break;
                 }
 
@@ -66,6 +73,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             {
                 if (TrySettleOnGround())
                 {
+                    placementVersion = CurrentPlacementVersion;
                     yield break;
                 }
 
