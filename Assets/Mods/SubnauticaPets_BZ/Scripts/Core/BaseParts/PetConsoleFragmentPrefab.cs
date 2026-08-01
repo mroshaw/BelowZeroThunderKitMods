@@ -44,7 +44,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
                 LargeWorldEntity.CellLevel.Medium);
             PrefabUtils.AddResourceTracker(damagedConsolePrefab, TechType.Fragment);
             PetPrefabConfigUtils.ConfigureSkyApplier(damagedConsolePrefab);
-            PetPrefabConfigUtils.UpdatePickupable(damagedConsolePrefab, false);
+            PetPrefabConfigUtils.ConfigurePickupable(damagedConsolePrefab, false);
             PetPrefabConfigUtils.SetRigidBodyKinematic(damagedConsolePrefab, true);
             damagedConsolePrefab.AddComponent<PetFabricatorFragment>();
 

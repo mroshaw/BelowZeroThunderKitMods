@@ -6,6 +6,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
     /// <summary>
     ///     Simple movement using Unity CharacterController
     /// </summary>
+    [RequireComponent(typeof(PetAnimator), typeof(Pet), typeof(PetStateController))]
     internal class SimpleMovement : MonoBehaviour
     {
         private const float BoundaryEventCooldown = 0.25f;
@@ -13,7 +14,6 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         private const float GroundProbeDistance = 0.6f;
         private const float GroundProbeRadiusScale = 0.45f;
         private const float LookAheadDistance = 0.2f;
-        private const float RejectedSurfaceLogInterval = 1.0f;
         private const float SafePositionInterval = 0.2f;
         private const float SpawnSettlementMinimumDistance = 0.75f;
         private const float SpawnSettlementMinimumDrop = 0.35f;
@@ -50,7 +50,6 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         private float stuckCheckTimer;
         private float ungroundedTimer;
         private Vector3 lastStuckCheckPosition;
-        private float rejectedSurfaceLogTimer;
         private Vector3 spawnSettlementDirection;
         private Vector3 spawnSettlementStartPosition;
         private float spawnSettlementStartHeight;
@@ -83,7 +82,6 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         private void Update()
         {
             boundaryEventTimer -= Time.deltaTime;
-            rejectedSurfaceLogTimer -= Time.deltaTime;
 
             Vector3 velocity = Vector3.zero;
             if (isSettlingAfterSpawn)
@@ -236,22 +234,10 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 GroundProbeHeight + GroundProbeDistance, ~0, QueryTriggerInteraction.Ignore);
 
             float closestDistance = float.MaxValue;
-            Collider rejectedMoonpoolCollider = null;
-            float rejectedMoonpoolDistance = float.MaxValue;
             for (int hitIndex = 0; hitIndex < hitCount; hitIndex++)
             {
                 RaycastHit hit = groundHits[hitIndex];
                 if (!hit.collider || hit.collider.transform.IsChildOf(transform)) continue;
-                if (hit.collider.GetComponentInParent<MoonpoolPetSurface>())
-                {
-                    if (hit.distance < rejectedMoonpoolDistance)
-                    {
-                        rejectedMoonpoolCollider = hit.collider;
-                        rejectedMoonpoolDistance = hit.distance;
-                    }
-
-                    continue;
-                }
                 if (Vector3.Angle(hit.normal, Vector3.up) > _charController.slopeLimit) continue;
                 if (!BelongsToPetBase(hit.collider)) continue;
                 if (hit.distance >= closestDistance) continue;
@@ -259,18 +245,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 closestDistance = hit.distance;
             }
 
-            bool hasValidFloor = closestDistance < rejectedMoonpoolDistance;
-            if (!hasValidFloor && rejectedMoonpoolCollider && rejectedSurfaceLogTimer <= 0.0f)
-            {
-                rejectedSurfaceLogTimer = RejectedSurfaceLogInterval;
-                Debug.Log($"[SubnauticaPets] {gameObject.name} rejected Moonpool surface " +
-                          $"'{rejectedMoonpoolCollider.name}' at probe position {position}; " +
-                          $"moonpoolDistance={rejectedMoonpoolDistance:F3}; " +
-                          $"validFloorDistance={closestDistance:F3}; petPosition={transform.position}; " +
-                          $"moveTarget={moveTarget}.");
-            }
-
-            return hasValidFloor;
+            return closestDistance < float.MaxValue;
         }
 
         private bool BelongsToPetBase(Collider floorCollider)

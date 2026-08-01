@@ -30,14 +30,14 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         private static void ConfigureTrivalve(GameObject obj, PrefabInfo Info, string objName, string classId)
         {
             obj.SetActive(false);
-            PetPrefabConfigUtils.AddTechTag(obj, Info.TechType);
+            PetPrefabConfigUtils.ConfigureTechTag(obj, Info.TechType);
             var modelGameObject = obj.GetComponentInChildren<Animator>(true).gameObject;
-            PetPrefabConfigUtils.AddVFXFabricating(obj, null, -0.2f, 0.8f, new Vector3(0.0f, 0.0f, 0.0f), 1.0f,
+            PetPrefabConfigUtils.ConfigureVFXFabricating(obj, null, -0.2f, 0.8f, new Vector3(0.0f, 0.0f, 0.0f), 1.0f,
                 new Vector3(0.0f, 0.0f, 0.0f));
             PrefabUtils.AddConstructable(obj, Info.TechType, ConstructableFlags.Inside, modelGameObject);
             obj.DestroyComponentsInChildren<Pickupable>();
             // obj.DisableComponentsInChildren<LargeWorldEntity>();
-            PetPrefabConfigUtils.AddPetHandTarget(obj);
+            PetPrefabConfigUtils.ConfigurePetHandTarget(obj);
             PetPrefabConfigUtils.ConfigureSwimming(obj);
             PetPrefabConfigUtils.ConfigureSkyApplier(obj);
             PetPrefabConfigUtils.ConfigureAnimator(obj, false);
@@ -74,13 +74,13 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 cloneTemplate.ModifyPrefab += obj =>
                 {
                     obj.SetActive(false);
-                    PetPrefabConfigUtils.AddTechTag(obj, Info.TechType);
+                    PetPrefabConfigUtils.ConfigureTechTag(obj, Info.TechType);
                     var modelGameObject = obj.GetComponentInChildren<Animator>(true).gameObject;
-                    PetPrefabConfigUtils.AddVFXFabricating(obj, null, -0.2f, 0.8f, new Vector3(0.0f, 0.0f, 0.0f), 1.0f,
+                    PetPrefabConfigUtils.ConfigureVFXFabricating(obj, null, -0.2f, 0.8f, new Vector3(0.0f, 0.0f, 0.0f), 1.0f,
                         new Vector3(0.0f, 0.0f, 0.0f));
                     PrefabUtils.AddConstructable(obj, Info.TechType, ConstructableFlags.Inside, modelGameObject);
                     obj.DestroyComponentsInChildren<Pickupable>();
-                    PetPrefabConfigUtils.AddPetHandTarget(obj);
+                    PetPrefabConfigUtils.ConfigurePetHandTarget(obj);
                     PetPrefabConfigUtils.ConfigureSwimming(obj);
                     PetPrefabConfigUtils.ConfigureSkyApplier(obj);
                     PetPrefabConfigUtils.ConfigureAnimator(obj, false);
@@ -134,13 +134,13 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 cloneTemplate.ModifyPrefab += obj =>
                 {
                     obj.SetActive(false);
-                    PetPrefabConfigUtils.AddTechTag(obj, Info.TechType);
+                    PetPrefabConfigUtils.ConfigureTechTag(obj, Info.TechType);
                     var modelGameObject = obj.GetComponentInChildren<Animator>(true).gameObject;
-                    PetPrefabConfigUtils.AddVFXFabricating(obj, null, -0.2f, 1.2f, new Vector3(0.0f, 0.0f, 0.0f), 1.0f,
+                    PetPrefabConfigUtils.ConfigureVFXFabricating(obj, null, -0.2f, 1.2f, new Vector3(0.0f, 0.0f, 0.0f), 1.0f,
                         new Vector3(0.0f, 0.0f, 0.0f));
                     PrefabUtils.AddConstructable(obj, Info.TechType, ConstructableFlags.Inside, modelGameObject);
-                    PetPrefabConfigUtils.UpdatePickupable(obj, false);
-                    PetPrefabConfigUtils.AddPetHandTarget(obj);
+                    PetPrefabConfigUtils.ConfigurePickupable(obj, false);
+                    PetPrefabConfigUtils.ConfigurePetHandTarget(obj);
                     PetPrefabConfigUtils.ConfigureSwimming(obj);
                     PetPrefabConfigUtils.ConfigureSkyApplier(obj);
                     PetPrefabConfigUtils.ConfigureAnimator(obj, false);
@@ -194,13 +194,13 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 cloneTemplate.ModifyPrefab += obj =>
                 {
                     obj.SetActive(false);
-                    PetPrefabConfigUtils.AddTechTag(obj, Info.TechType);
+                    PetPrefabConfigUtils.ConfigureTechTag(obj, Info.TechType);
                     var modelGameObject = obj.GetComponentInChildren<Animator>(true).gameObject;
-                    PetPrefabConfigUtils.AddVFXFabricating(obj, null, -0.2f, 0.6f, new Vector3(0.0f, 0.0f, 0.0f), 1.0f,
+                    PetPrefabConfigUtils.ConfigureVFXFabricating(obj, null, -0.2f, 0.6f, new Vector3(0.0f, 0.0f, 0.0f), 1.0f,
                         new Vector3(0.0f, 0.0f, 0.0f));
                     PrefabUtils.AddConstructable(obj, Info.TechType, ConstructableFlags.Inside, modelGameObject);
                     obj.DestroyComponentsInChildren<Pickupable>();
-                    PetPrefabConfigUtils.AddPetHandTarget(obj);
+                    PetPrefabConfigUtils.ConfigurePetHandTarget(obj);
                     PetPrefabConfigUtils.ConfigureSwimming(obj);
                     PetPrefabConfigUtils.ConfigureSkyApplier(obj);
                     PetPrefabConfigUtils.ConfigureAnimator(obj, false);
@@ -254,13 +254,13 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 cloneTemplate.ModifyPrefab += obj =>
                 {
                     obj.SetActive(false);
-                    PetPrefabConfigUtils.AddTechTag(obj, Info.TechType);
+                    PetPrefabConfigUtils.ConfigureTechTag(obj, Info.TechType);
                     var modelGameObject = obj.GetComponentInChildren<Animator>(true).gameObject;
-                    PetPrefabConfigUtils.AddVFXFabricating(obj, null, -0.2f, 1.0f, new Vector3(0.0f, 0.0f, 0.0f), 1.0f,
+                    PetPrefabConfigUtils.ConfigureVFXFabricating(obj, null, -0.2f, 1.0f, new Vector3(0.0f, 0.0f, 0.0f), 1.0f,
                         new Vector3(0.0f, 0.0f, 0.0f));
                     PrefabUtils.AddConstructable(obj, Info.TechType, ConstructableFlags.Inside, modelGameObject);
                     obj.DestroyComponentsInChildren<Pickupable>();
-                    PetPrefabConfigUtils.AddPetHandTarget(obj);
+                    PetPrefabConfigUtils.ConfigurePetHandTarget(obj);
                     PetPrefabConfigUtils.ConfigureSwimming(obj);
                     PetPrefabConfigUtils.ConfigureSkyApplier(obj);
                     PetPrefabConfigUtils.ConfigureAnimator(obj, false);

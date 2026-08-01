@@ -138,8 +138,8 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                         LargeWorldEntity.CellLevel.VeryFar);
                     PrefabUtils.AddResourceTracker(prefab, TechType.None);
                     PetPrefabConfigUtils.SetMeshRenderersColor(newModel, "Ends", color);
-                    PetPrefabConfigUtils.AddRotateModel(newModel, "DNA");
-                    PetPrefabConfigUtils.AddScaleOnStart(prefab, 0.4f);
+                    PetPrefabConfigUtils.ConfigureRotateModel(newModel, "DNA");
+                    PetPrefabConfigUtils.ConfigureScaleOnStart(prefab, 0.4f);
                     prefab.AddComponent<PetDna>();
                 }
             };

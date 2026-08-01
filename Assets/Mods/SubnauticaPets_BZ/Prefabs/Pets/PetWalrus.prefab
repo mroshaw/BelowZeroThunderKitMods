@@ -551,6 +551,102 @@ SkinnedMeshRenderer:
     m_Center: {x: 2.3283064e-10, y: -0.0007488711, z: 0.005092746}
     m_Extent: {x: 0.0073016053, y: 0.006925893, z: 0.007675869}
   m_DirtyAABB: 0
+--- !u!114 &2479435328481603200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7778273656137686284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 548206027, guid: 06dd3d5416bf43ea368cc39ff96e6d5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  health: 0
+  data: {fileID: 11400000, guid: 18e69d47ef18c1d4cb36e7135d0de56b, type: 2}
+  damageSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  damageClip: {fileID: 0}
+  deathClip: {fileID: 0}
+  player: {fileID: 0}
+  startHealthPercent: 1
+--- !u!114 &2820524829549959536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7778273656137686284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2755b52a24aad1a45ba9ee74c3c1e5ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  traitsAnimator: {fileID: 0}
+  creatureFriend: {fileID: 0}
+  liveMixin: {fileID: 0}
+  initialCuriosity:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  initialFriendliness:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  initialHunger:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  Curiosity:
+    value: 0
+    falloff: 0
+  Friendliness:
+    value: 0
+    falloff: 0
+  Hunger:
+    value: 0
+    falloff: 0
+  Aggression:
+    value: 0
+    falloff: 0
+  Scared:
+    value: 0
+    falloff: 0
+  Tired:
+    value: 0
+    falloff: 0
+  Happy:
+    value: 0
+    falloff: 0
+  activity:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  hasEyes: 1
+  eyeFOV: 0.25
+  eyesOnTop: 0
+  hearingSensitivity: 1
+  detectsMotion: 1
+  babyScaleSize: 1
+  sizeDistribution:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  seaLevelOffset: 0
+  cyclopsSonarDetectable: 0
+  debug: 0
+  debugActionsString: 
 --- !u!1 &7817662407723741654
 GameObject:
   m_ObjectHideFlags: 0
@@ -715,17 +811,17 @@ PrefabInstance:
     - target: {fileID: 4683715473745279826, guid: 8c66e9eeed324b34ba8a3635e942faf4,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -14.67
+      value: -12.414897
       objectReference: {fileID: 0}
     - target: {fileID: 4683715473745279826, guid: 8c66e9eeed324b34ba8a3635e942faf4,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0
+      value: -4.7786965
       objectReference: {fileID: 0}
     - target: {fileID: 4683715473745279826, guid: 8c66e9eeed324b34ba8a3635e942faf4,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 5.78
+      value: 8.892515
       objectReference: {fileID: 0}
     - target: {fileID: 4683715473745279826, guid: 8c66e9eeed324b34ba8a3635e942faf4,
         type: 3}
@@ -735,17 +831,17 @@ PrefabInstance:
     - target: {fileID: 4683715473745279826, guid: 8c66e9eeed324b34ba8a3635e942faf4,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4683715473745279826, guid: 8c66e9eeed324b34ba8a3635e942faf4,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4683715473745279826, guid: 8c66e9eeed324b34ba8a3635e942faf4,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4683715473745279826, guid: 8c66e9eeed324b34ba8a3635e942faf4,
         type: 3}
@@ -777,6 +873,36 @@ PrefabInstance:
       propertyPath: m_Name
       value: PetWalrus
       objectReference: {fileID: 0}
+    - target: {fileID: 4683715473745279828, guid: 8c66e9eeed324b34ba8a3635e942faf4,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6619851277584046108, guid: 8c66e9eeed324b34ba8a3635e942faf4,
+        type: 3}
+      propertyPath: renderers.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6619851277584046108, guid: 8c66e9eeed324b34ba8a3635e942faf4,
+        type: 3}
+      propertyPath: renderers.Array.data[0]
+      value: 
+      objectReference: {fileID: 7738728620575056598}
+    - target: {fileID: 6619851277584046108, guid: 8c66e9eeed324b34ba8a3635e942faf4,
+        type: 3}
+      propertyPath: renderers.Array.data[1]
+      value: 
+      objectReference: {fileID: 8814190525807502989}
+    - target: {fileID: 6619851277584046108, guid: 8c66e9eeed324b34ba8a3635e942faf4,
+        type: 3}
+      propertyPath: renderers.Array.data[2]
+      value: 
+      objectReference: {fileID: 4012808723509846343}
+    - target: {fileID: 6619851277584046108, guid: 8c66e9eeed324b34ba8a3635e942faf4,
+        type: 3}
+      propertyPath: renderers.Array.data[3]
+      value: 
+      objectReference: {fileID: 1463390631162355262}
     - target: {fileID: 6982869091910408036, guid: 8c66e9eeed324b34ba8a3635e942faf4,
         type: 3}
       propertyPath: m_Radius
@@ -827,6 +953,12 @@ PrefabInstance:
 --- !u!4 &7778273656137686282 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4683715473745279826, guid: 8c66e9eeed324b34ba8a3635e942faf4,
+    type: 3}
+  m_PrefabInstance: {fileID: 3102448828663195224}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &7778273656137686284 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4683715473745279828, guid: 8c66e9eeed324b34ba8a3635e942faf4,
     type: 3}
   m_PrefabInstance: {fileID: 3102448828663195224}
   m_PrefabAsset: {fileID: 0}

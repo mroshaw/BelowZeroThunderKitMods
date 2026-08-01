@@ -7,10 +7,14 @@ namespace DaftAppleGames.SubnauticaPets.Patches
 {
     [HarmonyPatch(typeof(BaseFoundationPiece))] internal class BaseFoundationPiecePatches
     {
-        private const float MoonpoolTriggerHorizontalInset = 1.5f;
+        private const float MoonpoolWaterWidth = 10.35f;
+        private const float MoonpoolWaterDepth = 6.9f;
+        private const float MoonpoolBlockerHeight = 3.0f;
+        private const float CollisionFilterHorizontalMargin = 2.0f;
+        private const float CollisionFilterVerticalMargin = 2.0f;
 
         /// <summary>
-        ///     Patches the Start method, adding a trigger that redirects pets away from the Moonpool opening.
+        ///     Adds a physical Pet blocker and a surrounding filter that lets every non-Pet collider pass through it.
         /// </summary>
         [HarmonyPatch(nameof(BaseFoundationPiece.Start))]
         [HarmonyPostfix]
@@ -33,31 +37,34 @@ namespace DaftAppleGames.SubnauticaPets.Patches
                 return;
             }
 
-            if (!poolColliderTransform.GetComponent<MoonpoolPetSurface>())
-                poolColliderTransform.gameObject.AddComponent<MoonpoolPetSurface>();
+            Vector3 originalFishColliderSize = fishCollider.size;
+            Vector3 blockerSize = new Vector3(MoonpoolWaterWidth, MoonpoolBlockerHeight, MoonpoolWaterDepth);
 
-            GameObject petTriggerGameObject = new GameObject("PetMoonpoolTrigger");
-            petTriggerGameObject.layer = poolColliderTransform.gameObject.layer;
-            petTriggerGameObject.transform.SetParent(poolColliderTransform, false);
+            GameObject collisionFilterGameObject = new GameObject("PetMoonpoolCollisionFilter");
+            collisionFilterGameObject.layer = LayerMask.NameToLayer("Default");
+            collisionFilterGameObject.transform.SetParent(poolColliderTransform, false);
 
-            BoxCollider petTriggerCollider = petTriggerGameObject.AddComponent<BoxCollider>();
-            petTriggerCollider.center = fishCollider.center;
-            petTriggerCollider.size = new Vector3(
-                Mathf.Max(0.1f, fishCollider.size.x - MoonpoolTriggerHorizontalInset * 2.0f),
-                Mathf.Max(fishCollider.size.y, 3.0f),
-                Mathf.Max(0.1f, fishCollider.size.z - MoonpoolTriggerHorizontalInset * 2.0f));
-            petTriggerCollider.isTrigger = true;
+            BoxCollider collisionFilterTrigger = collisionFilterGameObject.AddComponent<BoxCollider>();
+            collisionFilterTrigger.center = fishCollider.center;
+            collisionFilterTrigger.size = new Vector3(
+                blockerSize.x + CollisionFilterHorizontalMargin * 2.0f,
+                blockerSize.y + CollisionFilterVerticalMargin * 2.0f,
+                blockerSize.z + CollisionFilterHorizontalMargin * 2.0f);
+            collisionFilterTrigger.isTrigger = true;
 
-            MoonpoolPetTrigger petTrigger = petTriggerGameObject.AddComponent<MoonpoolPetTrigger>();
-            petTrigger.Init(petTriggerCollider);
-            MoonpoolTriggerVisualizer triggerVisualizer =
-                petTriggerGameObject.AddComponent<MoonpoolTriggerVisualizer>();
-            triggerVisualizer.Init(petTriggerCollider);
+            MoonpoolPetCollisionFilter collisionFilter =
+                collisionFilterGameObject.AddComponent<MoonpoolPetCollisionFilter>();
+            collisionFilter.Init(fishCollider, collisionFilterTrigger);
+            collisionFilter.PrimeExistingOverlaps();
+
+            // Expand the physical collider only after existing non-Pet collision pairs have been ignored.
+            fishCollider.size = blockerSize;
+            Physics.SyncTransforms();
 
             Debug.Log($"[SubnauticaPets] Moonpool pet protection initialized on {__instance.gameObject.name}; " +
-                      $"surface={poolColliderTransform.name}; triggerCenter={petTriggerCollider.center}; " +
-                      $"sourceSize={fishCollider.size}; triggerSize={petTriggerCollider.size}; " +
-                      $"horizontalInset={MoonpoolTriggerHorizontalInset:F2}m; visualization=magenta wireframe.");
+                      $"surface={poolColliderTransform.name}; originalSurfaceSize={originalFishColliderSize}; " +
+                      $"petBlockerSize={fishCollider.size}; collisionFilterSize={collisionFilterTrigger.size}; " +
+                      "non-Pet colliders selectively ignored.");
         }
     }
 }

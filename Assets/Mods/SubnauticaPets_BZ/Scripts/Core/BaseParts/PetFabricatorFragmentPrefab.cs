@@ -39,7 +39,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             PrefabUtils.AddBasicComponents(damagedFabPrefab, ClassId, Info.TechType, LargeWorldEntity.CellLevel.Medium);
             PrefabUtils.AddResourceTracker(damagedFabPrefab, TechType.Fragment);
             PetPrefabConfigUtils.ConfigureSkyApplier(damagedFabPrefab);
-            PetPrefabConfigUtils.UpdatePickupable(damagedFabPrefab, false);
+            PetPrefabConfigUtils.ConfigurePickupable(damagedFabPrefab, false);
             PetPrefabConfigUtils.SetRigidBodyKinematic(damagedFabPrefab, true);
             damagedFabPrefab.AddComponent<PetFabricatorFragment>();
 

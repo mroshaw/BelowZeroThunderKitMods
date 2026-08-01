@@ -259,7 +259,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             // Iterate over all pets and kill those in this base
             foreach (var currPet in SubnauticaPetsPlugin.PetSaver.PetList.ToArray())
                 // Check to see if the Pet is in the same Base as the Console
-                if (currPet.Base == Base)
+                if (IsPetInConsoleBase(currPet))
                     currPet.Kill();
 
             _selectedPet = null;
@@ -391,7 +391,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             // Iterate over all pets and add a button
             foreach (var currPet in sortedPetList)
                 // Check to see if the Pet is in the same Base as the Console
-                if (currPet.Base == Base)
+                if (IsPetInConsoleBase(currPet))
                 {
                     // Get new instance of button template, based on type of pet
                     var newButtonGameObject = GetScrollListInstance(currPet.TechType,
@@ -410,9 +410,28 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
                     currPetIndex++;
                 }
 
+            if (currPetIndex == 0 && sortedPetList.Count > 0)
+            {
+                ModDebugLog.LogDebug($"PetConsoleUi: No pets matched Console base '{BaseId}'.");
+                for (int petIndex = 0; petIndex < sortedPetList.Count; petIndex++)
+                {
+                    Pet pet = sortedPetList[petIndex];
+                    ModDebugLog.LogDebug($"PetConsoleUi: Pet '{pet.PetName}' has base '{pet.BaseId}'.");
+                }
+            }
+
             // Enable Kill All if there are any pets
             _numPetsManaged = currPetIndex;
             SetPetButtonsInteractable();
+        }
+
+        private bool IsPetInConsoleBase(Pet pet)
+        {
+            if (!pet || !pet.Base || !Base) return false;
+            if (pet.Base == Base) return true;
+
+            string consoleBaseId = BaseId;
+            return consoleBaseId != "NO BASE!" && consoleBaseId == pet.BaseId;
         }
 
         private GameObject GetScrollListInstance(TechType petTechType, string petName, int indexNum)
@@ -423,6 +442,11 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         private GameObject GetScrollListInstance(string petType, string petName, int indexNum)
         {
             var templatePrefab = GetScrollListTemplate(petType);
+            if (!templatePrefab)
+            {
+                ModDebugLog.LogError($"GetScrollListInstance: No template is configured for pet type '{petType}'.");
+                return null;
+            }
 
             var newButtonObject = Instantiate(templatePrefab, petsScrollViewContent.transform);
             newButtonObject.GetComponentInChildren<TextMeshProUGUI>(true).SetText(petName);

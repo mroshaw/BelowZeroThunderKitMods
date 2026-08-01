@@ -75,14 +75,6 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             _simpleMovement.MoveToNewTarget(newTarget);
         }
 
-        /// <summary>
-        ///     Replaces the current wander target with a known safe position.
-        /// </summary>
-        internal void MoveToSafePosition(Vector3 safePosition)
-        {
-            _simpleMovement.MoveToNewTarget(safePosition);
-        }
-
         internal override void UpdateAction()
         {
         }
