@@ -94,6 +94,17 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             SetNewState(PetState.MovingTo);
         }
 
+        /// <summary>
+        ///     Interrupts the current action and redirects the pet away from a Moonpool opening.
+        /// </summary>
+        internal void AvoidMoonpool(Vector3 safePosition)
+        {
+            if (currState == PetState.Dead) return;
+
+            SetNewState(PetState.Wandering);
+            _wanderAction.MoveToSafePosition(safePosition);
+        }
+
         internal void Kill()
         {
             SetNewState(PetState.Dead);
