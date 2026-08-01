@@ -2383,7 +2383,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5717327696877727587}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2da0c512f12947e489f739169773d7ca, type: 3}
+  m_Script: {fileID: 11500000, guid: 657fad5fe5902fa46b4874031ca0326d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -3367,7 +3367,6 @@ GameObject:
   - component: {fileID: 2899012414799072587}
   - component: {fileID: 2632078614429701076}
   - component: {fileID: 4867658251780915404}
-  - component: {fileID: 426003938}
   - component: {fileID: 1070243987887418388}
   m_Layer: 5
   m_Name: PetConsoleUI
@@ -3516,22 +3515,6 @@ MonoBehaviour:
   foxTemplate: {fileID: 8894150783336057139}
   sealTemplate: {fileID: 5102467473046954392}
   walrusTemplate: {fileID: 342079818255728259}
---- !u!114 &426003938
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8757261331439839752}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 657fad5fe5902fa46b4874031ca0326d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  acceptedMouseButtonsForActivation: 010101
-  petNameInput: {fileID: 7520750656821345678}
-  rt: {fileID: 6551882723044753544}
-  terminationSqrDistance: 4
 --- !u!114 &1070243987887418388
 MonoBehaviour:
   m_ObjectHideFlags: 0

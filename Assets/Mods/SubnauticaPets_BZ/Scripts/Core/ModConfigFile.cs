@@ -30,14 +30,6 @@ namespace DaftAppleGames.SubnauticaPets
         public bool DetailedLogging = false;
 
         /// <summary>
-        ///     Used to toggle the trigger that prevents pets from falling in the Moonpool.
-        /// </summary>
-        [Toggle("Disable Moonpool Pet Protection (Restart Required)",
-            Tooltip =
-                "Check this to disable the trigger that redirects Pets away from the Moonpool opening.")]
-        public bool DisableMoonpoolCollider = false;
-
-        /// <summary>
         ///     Used to enable the "bonus pets" (cat, dog, seal, etc)
         /// </summary>
         [Toggle("Enable Bonus Pets (Restart Required)",

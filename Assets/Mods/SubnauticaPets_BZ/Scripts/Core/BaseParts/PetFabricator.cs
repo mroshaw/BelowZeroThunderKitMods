@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using DaftAppleGames.SubnauticaPets.Pets;
+using HarmonyLib;
 using UnityEngine;
 using static DaftAppleGames.SubnauticaPets.SubnauticaPetsPlugin;
 
@@ -11,6 +12,14 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
     /// </summary>
     internal class PetFabricator : MonoBehaviour
     {
+        private const float PowerInitializationTimeout = 5.0f;
+
+        private static readonly AccessTools.FieldRef<GhostCrafter, PowerRelay> PowerRelayField =
+            AccessTools.FieldRefAccess<GhostCrafter, PowerRelay>("powerRelay");
+
+        private static readonly AccessTools.FieldRef<GhostCrafter, Base> BaseField =
+            AccessTools.FieldRefAccess<GhostCrafter, Base>("baseComp");
+
         private GameObject _baseParentGameObject;
 
         private Vector3 _spawnPoint;
@@ -41,16 +50,51 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
 
             SetParentBaseObject();
             _baseParentGameObject = gameObject.transform.parent.gameObject;
+            StartCoroutine(InitializeCrafterPowerAsync());
         }
 
         private void SetParentBaseObject()
         {
-            // Get the BasePart transform
-            Base = transform.parent.GetComponent<Base>();
+            Base = GetComponentInParent<Base>();
             if (Base)
                 ModDebugLog.LogDebug($"PetFabriactor Start in Base: {Base.gameObject.name}");
             else
                 ModDebugLog.LogDebug("PetFabriactor Start: Base not found in parent!");
+        }
+
+        private IEnumerator InitializeCrafterPowerAsync()
+        {
+            GhostCrafter ghostCrafter = GetComponent<GhostCrafter>();
+            if (!ghostCrafter)
+            {
+                ModDebugLog.LogError("PetFabricator has no GhostCrafter component!");
+                yield break;
+            }
+
+            float elapsedTime = 0.0f;
+            PowerRelay powerRelay = null;
+            while (!powerRelay && elapsedTime < PowerInitializationTimeout)
+            {
+                powerRelay = GetComponentInParent<PowerRelay>();
+                if (powerRelay) break;
+
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+
+            if (!powerRelay)
+            {
+                ModDebugLog.LogError("PetFabricator could not find its base PowerRelay after 5 seconds!");
+                yield break;
+            }
+
+            if (!Base) Base = GetComponentInParent<Base>();
+            PowerRelayField(ghostCrafter) = powerRelay;
+            BaseField(ghostCrafter) = Base;
+
+            bool baseCellPowered = !Base || Base.IsPowered(transform.position);
+            ModDebugLog.LogDebug($"PetFabricator power initialized: relayPower={powerRelay.GetPower():F2}, " +
+                                 $"baseCellPowered={baseCellPowered}, base={BaseId}");
         }
 
         /// <summary>

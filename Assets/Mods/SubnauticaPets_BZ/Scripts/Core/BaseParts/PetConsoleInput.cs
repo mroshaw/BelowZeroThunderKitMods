@@ -75,7 +75,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         /// </summary>
         public override void OnSelect(bool lockMovement)
         {
-            base.OnSelect(true);
+            base.OnSelect(lockMovement);
             _player = Player.main;
             GamepadInputModule.current.SetCurrentGrid(_panel);
         }

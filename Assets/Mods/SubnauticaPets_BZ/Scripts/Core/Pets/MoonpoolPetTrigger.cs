@@ -33,16 +33,28 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             Pet pet = other.GetComponentInParent<Pet>();
             if (!pet || !petsInside.Add(pet.GetInstanceID())) return;
 
-            PetStateController stateController = pet.GetComponent<PetStateController>();
-            if (!stateController) return;
+            MoonpoolPetEvader evader = pet.gameObject.GetComponent<MoonpoolPetEvader>();
+            if (!evader) evader = pet.gameObject.AddComponent<MoonpoolPetEvader>();
 
-            stateController.AvoidMoonpool(GetNearestSafePosition(pet.transform.position));
+            Vector3 safePosition = GetNearestSafePosition(pet.transform.position);
+            if (!evader.Redirect(safePosition))
+            {
+                Debug.LogWarning($"[SubnauticaPets] Moonpool trigger detected {pet.gameObject.name}, but no " +
+                                 "supported custom or vanilla movement component was found.");
+                return;
+            }
+
+            Debug.Log($"[SubnauticaPets] Moonpool trigger redirecting {pet.gameObject.name} from " +
+                      $"{pet.transform.position} to {safePosition}.");
         }
 
         private void OnTriggerExit(Collider other)
         {
             Pet pet = other.GetComponentInParent<Pet>();
-            if (pet) petsInside.Remove(pet.GetInstanceID());
+            if (!pet || !petsInside.Remove(pet.GetInstanceID())) return;
+
+            MoonpoolPetEvader evader = pet.GetComponent<MoonpoolPetEvader>();
+            if (evader) evader.StopRedirecting();
         }
 
         private Vector3 GetNearestSafePosition(Vector3 petPosition)

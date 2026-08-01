@@ -25482,6 +25482,9 @@ MonoBehaviour:
   moveTarget: {x: 0, y: 0, z: 0}
   distanceToTarget: 0
   isMoving: 0
+  lastSafePosition: {x: 0, y: 0, z: 0}
+  hasSafePosition: 0
+  isSettlingAfterSpawn: 0
   onArrived:
     m_PersistentCalls:
       m_Calls: []
@@ -28638,22 +28641,22 @@ PrefabInstance:
     - target: {fileID: 4088335130458398877, guid: b9a62b7718e8fef49acfcfa3ade55a47,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.98004633
       objectReference: {fileID: 0}
     - target: {fileID: 4088335130458398877, guid: b9a62b7718e8fef49acfcfa3ade55a47,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4088335130458398877, guid: b9a62b7718e8fef49acfcfa3ade55a47,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: -0.1987692
       objectReference: {fileID: 0}
     - target: {fileID: 4088335130458398877, guid: b9a62b7718e8fef49acfcfa3ade55a47,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4088335130458398877, guid: b9a62b7718e8fef49acfcfa3ade55a47,
         type: 3}
@@ -28663,7 +28666,7 @@ PrefabInstance:
     - target: {fileID: 4088335130458398877, guid: b9a62b7718e8fef49acfcfa3ade55a47,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: -22.93
       objectReference: {fileID: 0}
     - target: {fileID: 4088335130458398877, guid: b9a62b7718e8fef49acfcfa3ade55a47,
         type: 3}

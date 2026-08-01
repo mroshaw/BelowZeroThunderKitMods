@@ -8,12 +8,17 @@ namespace DaftAppleGames.SubnauticaPets.Pets
     /// </summary>
     internal class WanderAction : PetAction
     {
+        private const float CornerDetectionWindow = 0.75f;
+        private const float DistinctWallNormalDot = 0.75f;
+
         [Header("Action Settings")] [SerializeField] private float minTravelDistance = 2.0f;
         [SerializeField] private float maxTravelDistance = 10.0f;
         [SerializeField] private float minTravelAngle = 30.0f;
         [SerializeField] private float maxTravelAngle = 140.0f;
 
         private float avoidanceTurnSign;
+        private Vector3 lastWallNormal;
+        private float lastWallHitTime;
         private SimpleMovement _simpleMovement;
 
         internal override void Init()
@@ -24,6 +29,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         internal override void StartAction()
         {
             avoidanceTurnSign = Random.value < 0.5f ? -1.0f : 1.0f;
+            lastWallNormal = Vector3.zero;
 
             // Pick a random target and move
             var newTarget = GetNewTargetPosition(transform.forward);
@@ -48,12 +54,23 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
         private void HitObstacle(Vector3 direction)
         {
-            Vector3 newTarget = GetWallAvoidanceTargetPosition(direction);
+            Vector3 horizontalNormal = Vector3.ProjectOnPlane(direction, Vector3.up).normalized;
+            bool hitCorner = lastWallNormal != Vector3.zero &&
+                             Time.time - lastWallHitTime <= CornerDetectionWindow &&
+                             Vector3.Dot(lastWallNormal, horizontalNormal) < DistinctWallNormalDot;
+
+            Vector3 newTarget = hitCorner
+                ? GetCornerAvoidanceTargetPosition(lastWallNormal, horizontalNormal)
+                : GetWallAvoidanceTargetPosition(horizontalNormal);
+
+            lastWallNormal = hitCorner ? Vector3.zero : horizontalNormal;
+            lastWallHitTime = Time.time;
             _simpleMovement.MoveToNewTarget(newTarget);
         }
 
         private void HitBoundary(Vector3 safeDirection)
         {
+            lastWallNormal = Vector3.zero;
             Vector3 newTarget = GetBoundaryAvoidanceTargetPosition(safeDirection);
             _simpleMovement.MoveToNewTarget(newTarget);
         }
@@ -113,6 +130,14 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             Vector3 targetDirection = (sideDirection + horizontalSafeDirection * SafeDirectionBias).normalized;
             float distance = GetAvoidanceDistance();
             return transform.position + targetDirection * distance;
+        }
+
+        private Vector3 GetCornerAvoidanceTargetPosition(Vector3 firstNormal, Vector3 secondNormal)
+        {
+            Vector3 targetDirection = (firstNormal + secondNormal).normalized;
+            if (targetDirection == Vector3.zero) targetDirection = -transform.forward;
+
+            return transform.position + targetDirection * GetAvoidanceDistance();
         }
 
         private float GetAvoidanceDistance()

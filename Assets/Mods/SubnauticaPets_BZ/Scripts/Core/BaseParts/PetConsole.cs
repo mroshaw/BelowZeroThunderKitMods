@@ -53,6 +53,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         private int _numPetsManaged;
         private string _petNameText = "";
         private PowerConsumer _powerConsumer;
+        private bool _powerStateReady;
         private FMOD_CustomEmitter _renameEmitter;
 
         private Pet _selectedPet;
@@ -81,13 +82,11 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
                 // We're probably in the prefab, so return.
                 return;
 
-            // Set initial screen state
-            _hasPower = _powerConsumer.IsPowered();
-
             UpdateVersionText();
             SetPetButtonsInteractable();
             SetEmitters();
             SetParentBaseObject();
+            StartCoroutine(InitializePowerStateAsync());
             // StartCoroutine(CleanupAsync(2.0f));
         }
 
@@ -96,20 +95,32 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         /// </summary>
         private void Update()
         {
+            if (!_powerStateReady) return;
+
             // Check for loss / restoration of power
-            if (_hasPower == _powerConsumer.IsPowered()) return;
-
-            if (_hasPower && !_powerConsumer.IsPowered())
+            bool isPowered = _powerConsumer.IsPowered();
+            if (_hasPower != isPowered)
             {
-                _hasPower = false;
+                _hasPower = isPowered;
                 ConstructedOrPowerStateChanged();
             }
+        }
 
-            if (!_hasPower && _powerConsumer.IsPowered())
+        private IEnumerator InitializePowerStateAsync()
+        {
+            if (!_powerConsumer)
             {
-                _hasPower = true;
-                ConstructedOrPowerStateChanged();
+                ModDebugLog.LogError("PetConsole has no PowerConsumer component!");
+                yield break;
             }
+
+            while (isActiveAndEnabled && !_powerConsumer.GetBaseComp()) yield return null;
+            if (!isActiveAndEnabled) yield break;
+
+            _hasPower = _powerConsumer.IsPowered();
+            _powerStateReady = true;
+            ConstructedOrPowerStateChanged();
+            ModDebugLog.LogDebug($"PetConsole initial power state: {_hasPower}");
         }
 
         // Enable listeners
@@ -179,20 +190,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
 
         private void SetParentBaseObject()
         {
-            // Get the BasePart transform
-            if (!transform.parent)
-            {
-                ModDebugLog.LogDebug("PetConsole has no parent, so isn't in base!");
-                return;
-            }
-
-            if (!transform.parent.parent)
-            {
-                ModDebugLog.LogDebug("PetConsole parent has no parent, so isn't in base!");
-                return;
-            }
-
-            Base = transform.parent.parent.GetComponent<Base>();
+            Base = GetComponentInParent<Base>();
             if (Base)
                 ModDebugLog.LogDebug($"PetConsole Start in Base: {Base.gameObject.name}");
             else
