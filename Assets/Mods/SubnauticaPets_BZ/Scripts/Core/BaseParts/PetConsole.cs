@@ -352,7 +352,13 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         /// </summary>
         private IEnumerator UpdatePetListAsync()
         {
-            while (SubnauticaPetsPlugin.PetSaver.PetList == null) yield return null;
+            while (isActiveAndEnabled &&
+                   (SubnauticaPetsPlugin.PetSaver == null ||
+                    SubnauticaPetsPlugin.PetSaver.PetList == null ||
+                    !Base))
+                yield return null;
+
+            if (!isActiveAndEnabled) yield break;
 
             UpdatePetList();
         }
@@ -407,7 +413,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
                 }
 
             // Enable Kill All if there are any pets
-            _numPetsManaged = sortedPetList.Count;
+            _numPetsManaged = currPetIndex;
             SetPetButtonsInteractable();
         }
 

@@ -14,7 +14,7 @@
 
         internal override void StartAction()
         {
-            _simpleMovement.Stop();
+            _simpleMovement.DisableForDeath();
         }
 
         internal override void EndAction()

@@ -95,6 +95,10 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             // Rotate to face the player
             newPetGameObject.transform.LookAt(Player.main.transform.position);
             newPetGameObject.SetActive(true);
+            SimpleMovement simpleMovement = newPetGameObject.GetComponent<SimpleMovement>();
+            if (simpleMovement)
+                simpleMovement.BeginSpawnSettlement(
+                    Player.main.transform.position - newPetGameObject.transform.position);
             newPet.LoadPetData();
 
             callback?.Invoke(newPetGameObject);

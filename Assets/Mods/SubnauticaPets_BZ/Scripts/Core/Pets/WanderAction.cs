@@ -13,6 +13,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         [SerializeField] private float minTravelAngle = 30.0f;
         [SerializeField] private float maxTravelAngle = 140.0f;
 
+        private float avoidanceTurnSign;
         private SimpleMovement _simpleMovement;
 
         internal override void Init()
@@ -22,10 +23,13 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
         internal override void StartAction()
         {
+            avoidanceTurnSign = Random.value < 0.5f ? -1.0f : 1.0f;
+
             // Pick a random target and move
             var newTarget = GetNewTargetPosition(transform.forward);
             _simpleMovement.onArrived.AddListener(ArrivedAtTarget);
             _simpleMovement.OnHitObstacle.AddListener(HitObstacle);
+            _simpleMovement.OnUnsafeBoundary.AddListener(HitBoundary);
             _simpleMovement.MoveToNewTarget(newTarget);
         }
 
@@ -33,6 +37,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         {
             _simpleMovement.onArrived.RemoveListener(ArrivedAtTarget);
             _simpleMovement.OnHitObstacle.RemoveListener(HitObstacle);
+            _simpleMovement.OnUnsafeBoundary.RemoveListener(HitBoundary);
             _simpleMovement.Stop();
         }
 
@@ -43,7 +48,13 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
         private void HitObstacle(Vector3 direction)
         {
-            var newTarget = GetNewTargetPosition(direction);
+            Vector3 newTarget = GetWallAvoidanceTargetPosition(direction);
+            _simpleMovement.MoveToNewTarget(newTarget);
+        }
+
+        private void HitBoundary(Vector3 safeDirection)
+        {
+            Vector3 newTarget = GetBoundaryAvoidanceTargetPosition(safeDirection);
             _simpleMovement.MoveToNewTarget(newTarget);
         }
 
@@ -61,23 +72,54 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
         private Vector3 GetNewTargetPosition(Vector3 direction)
         {
-            // Get a random distance within the defined range
-            var distance = Random.Range(minTravelDistance, maxTravelDistance);
+            float distance = Random.Range(minTravelDistance, maxTravelDistance);
+            float angle = Random.Range(minTravelAngle, maxTravelAngle);
+            float sign = Random.value < 0.5f ? -1.0f : 1.0f;
+            Vector3 horizontalDirection = Vector3.ProjectOnPlane(direction, Vector3.up).normalized;
+            if (horizontalDirection == Vector3.zero) horizontalDirection = transform.forward;
 
-            // Get a random angle within the defined range
-            var angle = Random.Range(minTravelAngle, maxTravelAngle) * Mathf.Deg2Rad;
+            Vector3 targetDirection = Quaternion.AngleAxis(angle * sign, Vector3.up) * horizontalDirection;
+            return transform.position + targetDirection * distance;
+        }
 
-            // Randomly decide left or right deviation
-            var sign = Random.value < 0.5f ? -1f : 1f;
+        private Vector3 GetWallAvoidanceTargetPosition(Vector3 wallNormal)
+        {
+            const float OutwardBias = 0.35f;
 
-            // Calculate direction relative to the transform
-            var lateralOffset = Mathf.Sin(angle) * sign * transform.right;
-            var targetDirection = (direction + lateralOffset).normalized;
+            Vector3 horizontalNormal = Vector3.ProjectOnPlane(wallNormal, Vector3.up).normalized;
+            if (horizontalNormal == Vector3.zero) horizontalNormal = -transform.forward;
 
-            // Compute final position
-            var newTargetPosition = transform.position + targetDirection * distance;
+            Vector3 firstTangent = Vector3.Cross(Vector3.up, horizontalNormal).normalized;
+            Vector3 secondTangent = -firstTangent;
+            Vector3 tangent = Vector3.Dot(firstTangent, transform.forward) >=
+                              Vector3.Dot(secondTangent, transform.forward)
+                ? firstTangent
+                : secondTangent;
 
-            return newTargetPosition;
+            Vector3 targetDirection = (tangent + horizontalNormal * OutwardBias).normalized;
+            float distance = GetAvoidanceDistance();
+            return transform.position + targetDirection * distance;
+        }
+
+        private Vector3 GetBoundaryAvoidanceTargetPosition(Vector3 safeDirection)
+        {
+            const float SafeDirectionBias = 0.5f;
+
+            Vector3 horizontalSafeDirection = Vector3.ProjectOnPlane(safeDirection, Vector3.up).normalized;
+            if (horizontalSafeDirection == Vector3.zero) horizontalSafeDirection = -transform.forward;
+
+            Vector3 approachDirection = -horizontalSafeDirection;
+            Vector3 sideDirection = Quaternion.AngleAxis(90.0f * avoidanceTurnSign, Vector3.up) * approachDirection;
+            Vector3 targetDirection = (sideDirection + horizontalSafeDirection * SafeDirectionBias).normalized;
+            float distance = GetAvoidanceDistance();
+            return transform.position + targetDirection * distance;
+        }
+
+        private float GetAvoidanceDistance()
+        {
+            const float MaxAvoidanceDistance = 4.0f;
+
+            return Random.Range(minTravelDistance, Mathf.Min(maxTravelDistance, MaxAvoidanceDistance));
         }
     }
 }

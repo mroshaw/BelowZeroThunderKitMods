@@ -50,8 +50,13 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             FMODAsset petFmodAsset = AudioUtils.GetFmodAsset(audioClipName);
             ModAudioUtils.ConfigureEmitter(customEmitter,  petFmodAsset, ModDebugLog);
 
-            // Configure the CharacterController collider to interact with the MoonPool blocker
-            var characterController = targetGameObject.GetComponent<CharacterController>();
+            CharacterController characterController = targetGameObject.GetComponent<CharacterController>();
+            if (characterController)
+            {
+                characterController.stepOffset = Mathf.Min(characterController.height * 0.8f,
+                    characterController.radius * 1.25f);
+                characterController.skinWidth = Mathf.Max(0.01f, characterController.radius * 0.1f);
+            }
         }
 
         /// <summary>

@@ -25,6 +25,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
         internal override void StartAction()
         {
+            _simpleMovement.Stop();
             idleCounter = Random.Range(minIdleTime, maxIdleTime);
 
             // If random chance, play action anim

@@ -20,6 +20,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         {
             _simpleMovement.onArrived.AddListener(ArrivedAtTarget);
             _simpleMovement.OnHitObstacle.AddListener(HitObstacle);
+            _simpleMovement.OnUnsafeBoundary.AddListener(HitObstacle);
             _simpleMovement.MoveToNewTarget(movePosition);
         }
 
@@ -27,6 +28,8 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         {
             _simpleMovement.onArrived.RemoveListener(ArrivedAtTarget);
             _simpleMovement.OnHitObstacle.RemoveListener(HitObstacle);
+            _simpleMovement.OnUnsafeBoundary.RemoveListener(HitObstacle);
+            _simpleMovement.Stop();
         }
 
         private void ArrivedAtTarget()
