@@ -36,6 +36,9 @@ namespace DaftAppleGames.Editor
             @"^guid:\s*([0-9a-fA-F]{32})\s*$", RegexOptions.Compiled | RegexOptions.Multiline);
         private static readonly Regex NamespaceRegex = new Regex(
             @"\bnamespace\s+([A-Za-z_][A-Za-z0-9_.]*)", RegexOptions.Compiled);
+        private static readonly Regex MonoScriptReferenceRegex = new Regex(
+            @"m_Script:\s*\{\s*fileID:\s*(-?\d+)\s*,\s*guid:\s*([0-9a-fA-F]{32})\s*,\s*type:\s*3\s*\}",
+            RegexOptions.Compiled);
         private static readonly Regex ShaderExponentRegex = new Regex(
             @"(?<![A-Za-z0-9_.])[+-]?(?:\d+(?:\.\d*)?|\.\d+)[eE][+-]?\d+(?![A-Za-z0-9_.])",
             RegexOptions.Compiled);
@@ -238,6 +241,7 @@ namespace DaftAppleGames.Editor
                 Dictionary<string, string> exportedAssetsByGuid = indexResult.AssetsByGuid;
                 HashSet<string> sourceAssets = indexResult.SourceAssets;
                 HashSet<string> scriptGuids = indexResult.ScriptGuids;
+                HashSet<ManagedScriptReference> managedScriptReferences = indexResult.ManagedScriptReferences;
                 reportBuilder.Append(indexResult.Report);
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -248,9 +252,12 @@ namespace DaftAppleGames.Editor
                 SetImportProgress(0.65f, "Resolving game script references...");
                 Dictionary<string, string> scriptReferences = BuildScriptReferences(
                     scriptGuids, exportedAssetsByGuid, gameScriptsByType, reportBuilder);
+                Dictionary<ManagedScriptReference, string> managedAssemblyScriptReferences =
+                    BuildManagedAssemblyScriptReferences(
+                        managedScriptReferences, exportedAssetsByGuid, reportBuilder);
                 int copiedCount = await CopyAssetsAsync(absoluteExportRoot, absoluteSourcePath,
                     normalizedDestination, normalizedSelectedObjectDestination, sourceAssets, scriptReferences,
-                    reportBuilder, progress, cancellationToken);
+                    managedAssemblyScriptReferences, reportBuilder, progress, cancellationToken);
 
                 if (!reportOnly)
                 {
@@ -268,7 +275,8 @@ namespace DaftAppleGames.Editor
                 reportBuilder.Insert(0,
                     $"{(reportOnly ? "Report only" : "Import")} complete. Discovered {sourceAssets.Count} assets, " +
                     $"{(reportOnly ? "would copy or update" : "copied or updated")} {copiedCount}, " +
-                    $"and resolved {scriptReferences.Count} game script references.\n\n");
+                    $"and resolved {scriptReferences.Count + managedAssemblyScriptReferences.Count} " +
+                    "script references.\n\n");
                 report = reportBuilder.ToString();
                 SetImportProgress(1.0f, "Import complete");
             }
@@ -316,8 +324,11 @@ namespace DaftAppleGames.Editor
 
             HashSet<string> sourceAssets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             HashSet<string> scriptGuids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            DiscoverDependencies(sourcePath, assetsByGuid, sourceAssets, scriptGuids, progress, cancellationToken);
-            return new IndexResult(assetsByGuid, sourceAssets, scriptGuids, indexReport.ToString());
+            HashSet<ManagedScriptReference> managedScriptReferences = new HashSet<ManagedScriptReference>();
+            DiscoverDependencies(sourcePath, assetsByGuid, sourceAssets, scriptGuids, managedScriptReferences,
+                progress, cancellationToken);
+            return new IndexResult(assetsByGuid, sourceAssets, scriptGuids, managedScriptReferences,
+                indexReport.ToString());
         }
 
         private static Dictionary<string, string> BuildExportedGuidIndex(string exportRoot,
@@ -469,7 +480,8 @@ namespace DaftAppleGames.Editor
         }
 
         private static void DiscoverDependencies(string rootAssetPath, Dictionary<string, string> assetsByGuid,
-            HashSet<string> discoveredAssets, HashSet<string> scriptGuids, IProgress<ImportProgress> progress,
+            HashSet<string> discoveredAssets, HashSet<string> scriptGuids,
+            HashSet<ManagedScriptReference> managedScriptReferences, IProgress<ImportProgress> progress,
             CancellationToken cancellationToken)
         {
             Queue<string> pendingAssets = new Queue<string>();
@@ -485,18 +497,23 @@ namespace DaftAppleGames.Editor
                     progress.Report(new ImportProgress(
                         0.47f, $"Discovering dependencies ({discoveredAssets.Count} found)..."));
 
-                FindReferencedAssets(assetPath, assetsByGuid, pendingAssets, scriptGuids);
+                FindReferencedAssets(
+                    assetPath, assetsByGuid, pendingAssets, scriptGuids, managedScriptReferences);
                 string metaPath = assetPath + ".meta";
-                if (FileExists(metaPath)) FindReferencedAssets(metaPath, assetsByGuid, pendingAssets, scriptGuids);
+                if (FileExists(metaPath))
+                    FindReferencedAssets(
+                        metaPath, assetsByGuid, pendingAssets, scriptGuids, managedScriptReferences);
             }
         }
 
         private static void FindReferencedAssets(string sourcePath, Dictionary<string, string> assetsByGuid,
-            Queue<string> pendingAssets, HashSet<string> scriptGuids)
+            Queue<string> pendingAssets, HashSet<string> scriptGuids,
+            HashSet<ManagedScriptReference> managedScriptReferences)
         {
             if (!IsTextSerializedAsset(sourcePath)) return;
 
             string contents = ReadAllText(sourcePath);
+            FindManagedScriptReferences(contents, assetsByGuid, managedScriptReferences);
             MatchCollection matches = GuidRegex.Matches(contents);
             for (int matchIndex = 0; matchIndex < matches.Count; matchIndex++)
             {
@@ -510,6 +527,25 @@ namespace DaftAppleGames.Editor
                     continue;
                 else
                     pendingAssets.Enqueue(referencedPath);
+            }
+        }
+
+        private static void FindManagedScriptReferences(string contents, Dictionary<string, string> assetsByGuid,
+            HashSet<ManagedScriptReference> managedScriptReferences)
+        {
+            MatchCollection matches = MonoScriptReferenceRegex.Matches(contents);
+            for (int matchIndex = 0; matchIndex < matches.Count; matchIndex++)
+            {
+                long localId;
+                if (!long.TryParse(
+                        matches[matchIndex].Groups[1].Value, NumberStyles.Integer,
+                        CultureInfo.InvariantCulture, out localId)) continue;
+
+                string guid = matches[matchIndex].Groups[2].Value;
+                string referencedPath;
+                if (assetsByGuid.TryGetValue(guid, out referencedPath) &&
+                    IsManagedAssemblyArtifact(referencedPath))
+                    managedScriptReferences.Add(new ManagedScriptReference(guid, localId));
             }
         }
 
@@ -555,9 +591,97 @@ namespace DaftAppleGames.Editor
             return references;
         }
 
+        private static Dictionary<ManagedScriptReference, string> BuildManagedAssemblyScriptReferences(
+            HashSet<ManagedScriptReference> sourceReferences, Dictionary<string, string> assetsByGuid,
+            StringBuilder reportBuilder)
+        {
+            Dictionary<ManagedScriptReference, string> references =
+                new Dictionary<ManagedScriptReference, string>();
+            if (sourceReferences.Count == 0) return references;
+
+            Dictionary<string, MonoScript> projectScriptsByAssemblyAndLocalId =
+                BuildProjectScriptLocalIdIndex(reportBuilder);
+            foreach (ManagedScriptReference sourceReference in sourceReferences)
+            {
+                string sourceAssemblyPath;
+                if (!assetsByGuid.TryGetValue(sourceReference.Guid, out sourceAssemblyPath)) continue;
+
+                string assemblyName = Path.GetFileNameWithoutExtension(sourceAssemblyPath);
+                string lookupKey = GetManagedScriptLookupKey(assemblyName, sourceReference.LocalId);
+                MonoScript targetScript;
+                if (!projectScriptsByAssemblyAndLocalId.TryGetValue(lookupKey, out targetScript))
+                {
+                    reportBuilder.AppendLine(
+                        $"UNRESOLVED MANAGED SCRIPT: {assemblyName}:{sourceReference.LocalId}");
+                    continue;
+                }
+
+                string targetGuid;
+                long targetLocalId;
+                if (!AssetDatabase.TryGetGUIDAndLocalFileIdentifier(
+                        targetScript, out targetGuid, out targetLocalId))
+                {
+                    reportBuilder.AppendLine(
+                        $"UNRESOLVED MANAGED SCRIPT ID: {targetScript.GetClass()?.FullName}");
+                    continue;
+                }
+
+                references[sourceReference] =
+                    $"fileID: {targetLocalId}, guid: {targetGuid}, type: 3";
+                Type targetType = targetScript.GetClass();
+                reportBuilder.AppendLine(
+                    $"MANAGED SCRIPT: {assemblyName}:{sourceReference.LocalId} -> " +
+                    $"{targetType?.FullName} ({AssetDatabase.GetAssetPath(targetScript)})");
+            }
+
+            return references;
+        }
+
+        private static Dictionary<string, MonoScript> BuildProjectScriptLocalIdIndex(StringBuilder reportBuilder)
+        {
+            Dictionary<string, MonoScript> scriptsByAssemblyAndLocalId =
+                new Dictionary<string, MonoScript>(StringComparer.Ordinal);
+            string[] scriptGuids = AssetDatabase.FindAssets("t:MonoScript");
+            int indexedCount = 0;
+            for (int scriptIndex = 0; scriptIndex < scriptGuids.Length; scriptIndex++)
+            {
+                string assetPath = AssetDatabase.GUIDToAssetPath(scriptGuids[scriptIndex]);
+                MonoScript monoScript = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
+                if (!monoScript) continue;
+
+                Type scriptType = monoScript.GetClass();
+                if (scriptType is null) continue;
+
+                long dllLocalId = ComputeManagedScriptLocalId(scriptType);
+                string assemblyName = scriptType.Assembly.GetName().Name;
+                string lookupKey = GetManagedScriptLookupKey(assemblyName, dllLocalId);
+                if (!scriptsByAssemblyAndLocalId.ContainsKey(lookupKey))
+                    scriptsByAssemblyAndLocalId.Add(lookupKey, monoScript);
+                indexedCount++;
+            }
+
+            reportBuilder.AppendLine(
+                $"Indexed {indexedCount} project scripts for managed assembly reference remapping.");
+            return scriptsByAssemblyAndLocalId;
+        }
+
+        private static string GetManagedScriptLookupKey(string assemblyName, long localId)
+        {
+            return assemblyName + ":" + localId.ToString(CultureInfo.InvariantCulture);
+        }
+
+        private static long ComputeManagedScriptLocalId(Type scriptType)
+        {
+            string hashInput = "s\0\0\0" + (scriptType.Namespace ?? string.Empty) + scriptType.Name;
+            byte[] hash = Md4.ComputeHash(Encoding.UTF8.GetBytes(hashInput));
+            uint unsignedValue = (uint)(hash[0] | hash[1] << 8 | hash[2] << 16 | hash[3] << 24);
+            return unchecked((int)unsignedValue);
+        }
+
         private async Task<int> CopyAssetsAsync(string exportRoot, string selectedSourcePath, string projectDestination,
             string selectedObjectDestination, HashSet<string> sourceAssets,
-            Dictionary<string, string> scriptReferences, StringBuilder reportBuilder,
+            Dictionary<string, string> scriptReferences,
+            Dictionary<ManagedScriptReference, string> managedAssemblyScriptReferences, StringBuilder reportBuilder,
             IProgress<ImportProgress> progress, CancellationToken cancellationToken)
         {
             int copiedCount = 0;
@@ -636,6 +760,8 @@ namespace DaftAppleGames.Editor
                         {
                             string contents = ReadAllText(sourcePath);
                             contents = RemapScriptReferences(contents, scriptReferences);
+                            contents = RemapManagedAssemblyScriptReferences(
+                                contents, managedAssemblyScriptReferences);
                             if (fixShaderExponentNotation && IsShaderAsset(sourcePath))
                             {
                                 int replacementCount;
@@ -712,6 +838,23 @@ namespace DaftAppleGames.Editor
                 string pattern = @"m_Script:\s*\{\s*fileID:\s*-?\d+\s*,\s*guid:\s*" +
                                  Regex.Escape(scriptReference.Key) + @"\s*,\s*type:\s*3\s*\}";
                 contents = Regex.Replace(contents, pattern, "m_Script: {" + scriptReference.Value + "}");
+            }
+
+            return contents;
+        }
+
+        private static string RemapManagedAssemblyScriptReferences(string contents,
+            Dictionary<ManagedScriptReference, string> scriptReferences)
+        {
+            foreach (KeyValuePair<ManagedScriptReference, string> scriptReference in scriptReferences)
+            {
+                ManagedScriptReference sourceReference = scriptReference.Key;
+                string pattern = @"m_Script:\s*\{\s*fileID:\s*" +
+                                 sourceReference.LocalId.ToString(CultureInfo.InvariantCulture) +
+                                 @"\s*,\s*guid:\s*" + Regex.Escape(sourceReference.Guid) +
+                                 @"\s*,\s*type:\s*3\s*\}";
+                contents = Regex.Replace(
+                    contents, pattern, "m_Script: {" + scriptReference.Value + "}");
             }
 
             return contents;
@@ -911,17 +1054,52 @@ namespace DaftAppleGames.Editor
         private sealed class IndexResult
         {
             public readonly Dictionary<string, string> AssetsByGuid;
+            public readonly HashSet<ManagedScriptReference> ManagedScriptReferences;
             public readonly string Report;
             public readonly HashSet<string> ScriptGuids;
             public readonly HashSet<string> SourceAssets;
 
             public IndexResult(Dictionary<string, string> assetsByGuid, HashSet<string> sourceAssets,
-                HashSet<string> scriptGuids, string report)
+                HashSet<string> scriptGuids, HashSet<ManagedScriptReference> managedScriptReferences,
+                string report)
             {
                 AssetsByGuid = assetsByGuid;
                 SourceAssets = sourceAssets;
                 ScriptGuids = scriptGuids;
+                ManagedScriptReferences = managedScriptReferences;
                 Report = report;
+            }
+        }
+
+        private struct ManagedScriptReference : IEquatable<ManagedScriptReference>
+        {
+            public readonly string Guid;
+            public readonly long LocalId;
+
+            public ManagedScriptReference(string guid, long localId)
+            {
+                Guid = guid;
+                LocalId = localId;
+            }
+
+            public bool Equals(ManagedScriptReference other)
+            {
+                return LocalId == other.LocalId &&
+                       string.Equals(Guid, other.Guid, StringComparison.OrdinalIgnoreCase);
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is ManagedScriptReference && Equals((ManagedScriptReference)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    return ((Guid != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Guid) : 0) * 397) ^
+                           LocalId.GetHashCode();
+                }
             }
         }
 
@@ -934,6 +1112,138 @@ namespace DaftAppleGames.Editor
             {
                 Value = value;
                 Status = status;
+            }
+        }
+
+        private static class Md4
+        {
+            public static byte[] ComputeHash(byte[] input)
+            {
+                int paddedLength = ((input.Length + 8) / 64 + 1) * 64;
+                byte[] paddedInput = new byte[paddedLength];
+                Buffer.BlockCopy(input, 0, paddedInput, 0, input.Length);
+                paddedInput[input.Length] = 0x80;
+                ulong bitLength = (ulong)input.Length * 8;
+                for (int byteIndex = 0; byteIndex < 8; byteIndex++)
+                    paddedInput[paddedLength - 8 + byteIndex] = (byte)(bitLength >> byteIndex * 8);
+
+                uint a = 0x67452301;
+                uint b = 0xefcdab89;
+                uint c = 0x98badcfe;
+                uint d = 0x10325476;
+                uint[] words = new uint[16];
+
+                for (int blockOffset = 0; blockOffset < paddedInput.Length; blockOffset += 64)
+                {
+                    for (int wordIndex = 0; wordIndex < words.Length; wordIndex++)
+                    {
+                        int offset = blockOffset + wordIndex * 4;
+                        words[wordIndex] = (uint)(paddedInput[offset] |
+                                                  paddedInput[offset + 1] << 8 |
+                                                  paddedInput[offset + 2] << 16 |
+                                                  paddedInput[offset + 3] << 24);
+                    }
+
+                    uint originalA = a;
+                    uint originalB = b;
+                    uint originalC = c;
+                    uint originalD = d;
+
+                    Round1(ref a, b, c, d, words[0], 3);
+                    Round1(ref d, a, b, c, words[1], 7);
+                    Round1(ref c, d, a, b, words[2], 11);
+                    Round1(ref b, c, d, a, words[3], 19);
+                    Round1(ref a, b, c, d, words[4], 3);
+                    Round1(ref d, a, b, c, words[5], 7);
+                    Round1(ref c, d, a, b, words[6], 11);
+                    Round1(ref b, c, d, a, words[7], 19);
+                    Round1(ref a, b, c, d, words[8], 3);
+                    Round1(ref d, a, b, c, words[9], 7);
+                    Round1(ref c, d, a, b, words[10], 11);
+                    Round1(ref b, c, d, a, words[11], 19);
+                    Round1(ref a, b, c, d, words[12], 3);
+                    Round1(ref d, a, b, c, words[13], 7);
+                    Round1(ref c, d, a, b, words[14], 11);
+                    Round1(ref b, c, d, a, words[15], 19);
+
+                    Round2(ref a, b, c, d, words[0], 3);
+                    Round2(ref d, a, b, c, words[4], 5);
+                    Round2(ref c, d, a, b, words[8], 9);
+                    Round2(ref b, c, d, a, words[12], 13);
+                    Round2(ref a, b, c, d, words[1], 3);
+                    Round2(ref d, a, b, c, words[5], 5);
+                    Round2(ref c, d, a, b, words[9], 9);
+                    Round2(ref b, c, d, a, words[13], 13);
+                    Round2(ref a, b, c, d, words[2], 3);
+                    Round2(ref d, a, b, c, words[6], 5);
+                    Round2(ref c, d, a, b, words[10], 9);
+                    Round2(ref b, c, d, a, words[14], 13);
+                    Round2(ref a, b, c, d, words[3], 3);
+                    Round2(ref d, a, b, c, words[7], 5);
+                    Round2(ref c, d, a, b, words[11], 9);
+                    Round2(ref b, c, d, a, words[15], 13);
+
+                    Round3(ref a, b, c, d, words[0], 3);
+                    Round3(ref d, a, b, c, words[8], 9);
+                    Round3(ref c, d, a, b, words[4], 11);
+                    Round3(ref b, c, d, a, words[12], 15);
+                    Round3(ref a, b, c, d, words[2], 3);
+                    Round3(ref d, a, b, c, words[10], 9);
+                    Round3(ref c, d, a, b, words[6], 11);
+                    Round3(ref b, c, d, a, words[14], 15);
+                    Round3(ref a, b, c, d, words[1], 3);
+                    Round3(ref d, a, b, c, words[9], 9);
+                    Round3(ref c, d, a, b, words[5], 11);
+                    Round3(ref b, c, d, a, words[13], 15);
+                    Round3(ref a, b, c, d, words[3], 3);
+                    Round3(ref d, a, b, c, words[11], 9);
+                    Round3(ref c, d, a, b, words[7], 11);
+                    Round3(ref b, c, d, a, words[15], 15);
+
+                    unchecked
+                    {
+                        a += originalA;
+                        b += originalB;
+                        c += originalC;
+                        d += originalD;
+                    }
+                }
+
+                byte[] hash = new byte[16];
+                WriteUInt32(hash, 0, a);
+                WriteUInt32(hash, 4, b);
+                WriteUInt32(hash, 8, c);
+                WriteUInt32(hash, 12, d);
+                return hash;
+            }
+
+            private static void Round1(ref uint value, uint b, uint c, uint d, uint word, int shift)
+            {
+                value = RotateLeft(unchecked(value + ((b & c) | (~b & d)) + word), shift);
+            }
+
+            private static void Round2(ref uint value, uint b, uint c, uint d, uint word, int shift)
+            {
+                value = RotateLeft(
+                    unchecked(value + ((b & c) | (b & d) | (c & d)) + word + 0x5a827999), shift);
+            }
+
+            private static void Round3(ref uint value, uint b, uint c, uint d, uint word, int shift)
+            {
+                value = RotateLeft(unchecked(value + (b ^ c ^ d) + word + 0x6ed9eba1), shift);
+            }
+
+            private static uint RotateLeft(uint value, int shift)
+            {
+                return value << shift | value >> 32 - shift;
+            }
+
+            private static void WriteUInt32(byte[] destination, int offset, uint value)
+            {
+                destination[offset] = (byte)value;
+                destination[offset + 1] = (byte)(value >> 8);
+                destination[offset + 2] = (byte)(value >> 16);
+                destination[offset + 3] = (byte)(value >> 24);
             }
         }
     }
