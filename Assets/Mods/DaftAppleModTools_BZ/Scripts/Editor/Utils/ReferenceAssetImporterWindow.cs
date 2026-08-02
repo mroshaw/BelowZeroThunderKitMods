@@ -4,6 +4,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -20,6 +22,8 @@ namespace DaftAppleGames.Editor
         private const string DefaultExportAssetsPath = "GameFiles~/ExportedProject/Assets";
         private const string DefaultDestinationPath = "Assets/SubnauticaRefAssets";
         private const string GameAssemblyPackagePath = "Packages/SubnauticaZero";
+        private const string GuidIndexCachePath = "Library/DaftAppleModTools/ReferenceAssetImporterGuidIndex.cache";
+        private const string GuidIndexCacheVersion = "REFERENCE_ASSET_GUID_INDEX_V1";
         private const float LabelWidth = 205.0f;
         private const int LegacyMaxDirectoryPath = 247;
         private const int LegacyMaxFilePath = 259;
@@ -31,6 +35,7 @@ namespace DaftAppleGames.Editor
             @"^guid:\s*([0-9a-fA-F]{32})\s*$", RegexOptions.Compiled | RegexOptions.Multiline);
         private static readonly Regex NamespaceRegex = new Regex(
             @"\bnamespace\s+([A-Za-z_][A-Za-z0-9_.]*)", RegexOptions.Compiled);
+        private static readonly bool IsWindowsEditor = Application.platform == RuntimePlatform.WindowsEditor;
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         private static extern bool CreateDirectoryW(string path, IntPtr securityAttributes);
@@ -40,10 +45,16 @@ namespace DaftAppleGames.Editor
         [SerializeField] private string destinationPath = DefaultDestinationPath;
         [SerializeField] private bool overrideSelectedObjectDestination;
         [SerializeField] private string selectedObjectDestinationPath = DefaultDestinationPath;
+        [SerializeField] private bool forceAssetRipperReindex;
         [SerializeField] private bool dryRun = true;
         [SerializeField] private bool overwriteExisting = true;
         [SerializeField] private Vector2 reportScrollPosition;
         [SerializeField] private string report = "Select an AssetRipper asset to begin.";
+
+        private CancellationTokenSource importCancellation;
+        private bool isImporting;
+        private float importProgress;
+        private string importStatus = string.Empty;
 
         [MenuItem("Tools/Import Reference Asset")]
         public static void ShowWindow()
@@ -75,27 +86,41 @@ namespace DaftAppleGames.Editor
                 MessageType.Info);
 #endif
 
-            DrawPathField("Export Assets Root", ref exportAssetsPath, true);
-            DrawSourceAssetField();
-            DrawPathField("Dependencies Destination", ref destinationPath, false);
-            overrideSelectedObjectDestination = EditorGUILayout.Toggle(
-                "Override Object Destination", overrideSelectedObjectDestination);
-            if (overrideSelectedObjectDestination)
-                DrawPathField("Selected Object Destination", ref selectedObjectDestinationPath, false);
+            using (new EditorGUI.DisabledScope(isImporting))
+            {
+                DrawPathField("Export Assets Root", ref exportAssetsPath, true);
+                DrawSourceAssetField();
+                DrawPathField("Dependencies Destination", ref destinationPath, false);
+                overrideSelectedObjectDestination = EditorGUILayout.Toggle(
+                    "Override Object Destination", overrideSelectedObjectDestination);
+                if (overrideSelectedObjectDestination)
+                    DrawPathField("Selected Object Destination", ref selectedObjectDestinationPath, false);
 
 #if ODIN_INSPECTOR
-            SirenixEditorGUI.Title("Import Options", null, TextAlignment.Left, true);
+                SirenixEditorGUI.Title("Import Options", null, TextAlignment.Left, true);
 #else
-            EditorGUILayout.Space();
+                EditorGUILayout.Space();
 #endif
-            dryRun = EditorGUILayout.Toggle("Report only", dryRun);
-            overwriteExisting = EditorGUILayout.Toggle("Overwrite Existing", overwriteExisting);
+                forceAssetRipperReindex = EditorGUILayout.Toggle(
+                    "Force AssetRipper Re-index", forceAssetRipperReindex);
+                dryRun = EditorGUILayout.Toggle("Report only", dryRun);
+                overwriteExisting = EditorGUILayout.Toggle("Overwrite Existing", overwriteExisting);
+            }
 
             EditorGUILayout.Space();
-            using (new EditorGUI.DisabledScope(string.IsNullOrWhiteSpace(sourceAssetPath)))
+            if (isImporting)
             {
-                if (GUILayout.Button("Import Asset and Dependencies", GUILayout.Height(32.0f)))
-                    ImportSelectedAsset();
+                Rect progressRect = EditorGUILayout.GetControlRect(false, 22.0f);
+                EditorGUI.ProgressBar(progressRect, importProgress, importStatus);
+                if (GUILayout.Button("Cancel Import", GUILayout.Height(28.0f))) importCancellation.Cancel();
+            }
+            else
+            {
+                using (new EditorGUI.DisabledScope(string.IsNullOrWhiteSpace(sourceAssetPath)))
+                {
+                    if (GUILayout.Button("Import Asset and Dependencies", GUILayout.Height(32.0f)))
+                        ImportSelectedAssetAsync();
+                }
             }
 
             EditorGUILayout.Space();
@@ -143,14 +168,17 @@ namespace DaftAppleGames.Editor
             EditorGUILayout.EndHorizontal();
         }
 
-        private void ImportSelectedAsset()
+        private async void ImportSelectedAssetAsync()
         {
+            if (isImporting) return;
+
             StringBuilder reportBuilder = new StringBuilder();
             string absoluteExportRoot = NormalizeFullPath(GetAbsolutePath(exportAssetsPath));
             string absoluteSourcePath = NormalizeFullPath(sourceAssetPath);
             string normalizedDestination = destinationPath.Replace('\\', '/').TrimEnd('/');
             string normalizedSelectedObjectDestination =
                 selectedObjectDestinationPath.Replace('\\', '/').TrimEnd('/');
+            string absoluteGuidIndexCachePath = GetAbsolutePath(GuidIndexCachePath);
 
             if (!Directory.Exists(absoluteExportRoot))
             {
@@ -183,22 +211,38 @@ namespace DaftAppleGames.Editor
                 return;
             }
 
+            importCancellation = new CancellationTokenSource();
+            CancellationToken cancellationToken = importCancellation.Token;
+            isImporting = true;
+            SetImportProgress(0.0f, "Starting import...");
+
             try
             {
-                Dictionary<string, string> exportedAssetsByGuid =
-                    BuildExportedGuidIndex(absoluteExportRoot, reportBuilder);
-                Dictionary<string, MonoScript> gameScriptsByType = BuildGameScriptIndex(reportBuilder);
-                HashSet<string> sourceAssets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                HashSet<string> scriptGuids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                DiscoverDependencies(absoluteSourcePath, exportedAssetsByGuid, sourceAssets, scriptGuids);
+                Progress<ImportProgress> progress = new Progress<ImportProgress>(UpdateImportProgress);
+                IndexResult indexResult = await Task.Run(() => BuildExportAndDependencyIndex(
+                    absoluteExportRoot, absoluteSourcePath, absoluteGuidIndexCachePath, forceAssetRipperReindex,
+                    progress, cancellationToken), cancellationToken);
+                Dictionary<string, string> exportedAssetsByGuid = indexResult.AssetsByGuid;
+                HashSet<string> sourceAssets = indexResult.SourceAssets;
+                HashSet<string> scriptGuids = indexResult.ScriptGuids;
+                reportBuilder.Append(indexResult.Report);
 
+                cancellationToken.ThrowIfCancellationRequested();
+                SetImportProgress(0.55f, "Indexing ThunderKit game scripts...");
+                Dictionary<string, MonoScript> gameScriptsByType = BuildGameScriptIndex(reportBuilder);
+
+                cancellationToken.ThrowIfCancellationRequested();
+                SetImportProgress(0.65f, "Resolving game script references...");
                 Dictionary<string, string> scriptReferences = BuildScriptReferences(
                     scriptGuids, exportedAssetsByGuid, gameScriptsByType, reportBuilder);
-                int copiedCount = CopyAssets(absoluteExportRoot, absoluteSourcePath, normalizedDestination,
-                    normalizedSelectedObjectDestination, sourceAssets, scriptReferences, reportBuilder);
+                int copiedCount = await CopyAssetsAsync(absoluteExportRoot, absoluteSourcePath,
+                    normalizedDestination, normalizedSelectedObjectDestination, sourceAssets, scriptReferences,
+                    reportBuilder, progress, cancellationToken);
 
                 if (!dryRun)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    SetImportProgress(0.96f, "Refreshing the Unity Asset Database...");
                     AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
                     string rootRelativePath = GetRelativePath(absoluteExportRoot, absoluteSourcePath);
                     string importedRootPath = overrideSelectedObjectDestination
@@ -213,6 +257,12 @@ namespace DaftAppleGames.Editor
                     $"{(dryRun ? "would copy or update" : "copied or updated")} {copiedCount}, " +
                     $"and resolved {scriptReferences.Count} game script references.\n\n");
                 report = reportBuilder.ToString();
+                SetImportProgress(1.0f, "Import complete");
+            }
+            catch (OperationCanceledException)
+            {
+                reportBuilder.Insert(0, "Import cancelled. Files already copied during this run were not removed.\n\n");
+                report = reportBuilder.ToString();
             }
             catch (Exception exception)
             {
@@ -222,10 +272,43 @@ namespace DaftAppleGames.Editor
                 report = reportBuilder.ToString();
                 Debug.LogException(exception);
             }
+            finally
+            {
+                isImporting = false;
+                forceAssetRipperReindex = false;
+                importCancellation.Dispose();
+                importCancellation = null;
+                Repaint();
+            }
+        }
+
+        private static IndexResult BuildExportAndDependencyIndex(string exportRoot, string sourcePath,
+            string cachePath, bool forceReindex, IProgress<ImportProgress> progress,
+            CancellationToken cancellationToken)
+        {
+            StringBuilder indexReport = new StringBuilder();
+            Dictionary<string, string> assetsByGuid;
+            if (!forceReindex && TryLoadExportedGuidIndex(
+                    exportRoot, cachePath, cancellationToken, out assetsByGuid))
+            {
+                indexReport.AppendLine($"Loaded {assetsByGuid.Count} AssetRipper GUIDs from the cached index.");
+                progress.Report(new ImportProgress(0.42f, $"Loaded {assetsByGuid.Count} cached AssetRipper GUIDs."));
+            }
+            else
+            {
+                assetsByGuid = BuildExportedGuidIndex(exportRoot, indexReport, progress, cancellationToken);
+                SaveExportedGuidIndex(exportRoot, cachePath, assetsByGuid, cancellationToken);
+                indexReport.AppendLine($"Cached {assetsByGuid.Count} AssetRipper GUIDs for future imports.");
+            }
+
+            HashSet<string> sourceAssets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> scriptGuids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            DiscoverDependencies(sourcePath, assetsByGuid, sourceAssets, scriptGuids, progress, cancellationToken);
+            return new IndexResult(assetsByGuid, sourceAssets, scriptGuids, indexReport.ToString());
         }
 
         private static Dictionary<string, string> BuildExportedGuidIndex(string exportRoot,
-            StringBuilder reportBuilder)
+            StringBuilder reportBuilder, IProgress<ImportProgress> progress, CancellationToken cancellationToken)
         {
             Dictionary<string, string> assetsByGuid =
                 new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -233,6 +316,15 @@ namespace DaftAppleGames.Editor
 
             for (int metaIndex = 0; metaIndex < metaPaths.Length; metaIndex++)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (metaIndex % 100 == 0)
+                {
+                    float phaseProgress = metaPaths.Length == 0 ? 1.0f : (float)metaIndex / metaPaths.Length;
+                    progress.Report(new ImportProgress(
+                        0.02f + 0.40f * phaseProgress,
+                        $"Indexing AssetRipper metadata ({metaIndex}/{metaPaths.Length})..."));
+                }
+
                 string metaPath = metaPaths[metaIndex];
                 string guid;
                 try
@@ -257,6 +349,75 @@ namespace DaftAppleGames.Editor
             }
 
             return assetsByGuid;
+        }
+
+        private static bool TryLoadExportedGuidIndex(string exportRoot, string cachePath,
+            CancellationToken cancellationToken, out Dictionary<string, string> assetsByGuid)
+        {
+            assetsByGuid = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (!FileExists(cachePath)) return false;
+
+            try
+            {
+                using (StreamReader reader = new StreamReader(ToExtendedLengthPath(cachePath)))
+                {
+                    string version = reader.ReadLine();
+                    string cachedExportRoot = reader.ReadLine();
+                    if (!string.Equals(version, GuidIndexCacheVersion, StringComparison.Ordinal) ||
+                        !string.Equals(cachedExportRoot, exportRoot, StringComparison.OrdinalIgnoreCase)) return false;
+
+                    while (!reader.EndOfStream)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        string line = reader.ReadLine();
+                        int separatorIndex = string.IsNullOrEmpty(line) ? -1 : line.IndexOf('\t');
+                        if (separatorIndex <= 0 || separatorIndex >= line.Length - 1) return false;
+
+                        string guid = line.Substring(0, separatorIndex);
+                        string encodedRelativePath = line.Substring(separatorIndex + 1);
+                        string relativePath = Encoding.UTF8.GetString(Convert.FromBase64String(encodedRelativePath));
+                        assetsByGuid[guid] = NormalizeFullPath(Path.Combine(exportRoot, relativePath));
+                    }
+                }
+
+                return assetsByGuid.Count > 0;
+            }
+            catch (FormatException)
+            {
+                assetsByGuid.Clear();
+                return false;
+            }
+            catch (IOException)
+            {
+                assetsByGuid.Clear();
+                return false;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                assetsByGuid.Clear();
+                return false;
+            }
+        }
+
+        private static void SaveExportedGuidIndex(string exportRoot, string cachePath,
+            Dictionary<string, string> assetsByGuid, CancellationToken cancellationToken)
+        {
+            string cacheDirectory = Path.GetDirectoryName(cachePath);
+            if (!string.IsNullOrEmpty(cacheDirectory)) CreateDirectory(cacheDirectory);
+
+            using (StreamWriter writer = new StreamWriter(
+                       ToExtendedLengthPath(cachePath), false, new UTF8Encoding(false)))
+            {
+                writer.WriteLine(GuidIndexCacheVersion);
+                writer.WriteLine(exportRoot);
+                foreach (KeyValuePair<string, string> assetByGuid in assetsByGuid)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    string relativePath = GetRelativePath(exportRoot, assetByGuid.Value);
+                    string encodedRelativePath = Convert.ToBase64String(Encoding.UTF8.GetBytes(relativePath));
+                    writer.WriteLine(assetByGuid.Key + "\t" + encodedRelativePath);
+                }
+            }
         }
 
         private static Dictionary<string, MonoScript> BuildGameScriptIndex(StringBuilder reportBuilder)
@@ -295,15 +456,21 @@ namespace DaftAppleGames.Editor
         }
 
         private static void DiscoverDependencies(string rootAssetPath, Dictionary<string, string> assetsByGuid,
-            HashSet<string> discoveredAssets, HashSet<string> scriptGuids)
+            HashSet<string> discoveredAssets, HashSet<string> scriptGuids, IProgress<ImportProgress> progress,
+            CancellationToken cancellationToken)
         {
             Queue<string> pendingAssets = new Queue<string>();
             pendingAssets.Enqueue(rootAssetPath);
 
             while (pendingAssets.Count > 0)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 string assetPath = pendingAssets.Dequeue();
                 if (!discoveredAssets.Add(assetPath)) continue;
+
+                if (discoveredAssets.Count % 25 == 0)
+                    progress.Report(new ImportProgress(
+                        0.47f, $"Discovering dependencies ({discoveredAssets.Count} found)..."));
 
                 FindReferencedAssets(assetPath, assetsByGuid, pendingAssets, scriptGuids);
                 string metaPath = assetPath + ".meta";
@@ -373,71 +540,87 @@ namespace DaftAppleGames.Editor
             return references;
         }
 
-        private int CopyAssets(string exportRoot, string selectedSourcePath, string projectDestination,
+        private async Task<int> CopyAssetsAsync(string exportRoot, string selectedSourcePath, string projectDestination,
             string selectedObjectDestination, HashSet<string> sourceAssets,
-            Dictionary<string, string> scriptReferences, StringBuilder reportBuilder)
+            Dictionary<string, string> scriptReferences, StringBuilder reportBuilder,
+            IProgress<ImportProgress> progress, CancellationToken cancellationToken)
         {
             int copiedCount = 0;
-            AssetDatabase.StartAssetEditing();
-            try
+            int processedCount = 0;
+            foreach (string sourcePath in sourceAssets)
             {
-                foreach (string sourcePath in sourceAssets)
+                cancellationToken.ThrowIfCancellationRequested();
+                string sourceMetaPath = sourcePath + ".meta";
+                string sourceGuid = GetMetaGuid(sourceMetaPath);
+                string existingAssetPath = string.IsNullOrEmpty(sourceGuid)
+                    ? string.Empty
+                    : AssetDatabase.GUIDToAssetPath(sourceGuid);
+                string relativePath = GetRelativePath(exportRoot, sourcePath).Replace('\\', '/');
+                bool isSelectedAsset = string.Equals(
+                    sourcePath, selectedSourcePath, StringComparison.OrdinalIgnoreCase);
+                string destinationAssetPath = overrideSelectedObjectDestination && isSelectedAsset
+                    ? CombineAssetPath(selectedObjectDestination, Path.GetFileName(sourcePath))
+                    : CombineAssetPath(projectDestination, relativePath);
+                bool guidExistsAtAnotherPath = !string.IsNullOrEmpty(existingAssetPath) &&
+                    !string.Equals(existingAssetPath, destinationAssetPath, StringComparison.OrdinalIgnoreCase);
+                bool copySelectedAssetWithNewGuid = guidExistsAtAnotherPath &&
+                    overrideSelectedObjectDestination && isSelectedAsset;
+
+                if (guidExistsAtAnotherPath && !copySelectedAssetWithNewGuid)
                 {
-                    string sourceMetaPath = sourcePath + ".meta";
-                    string sourceGuid = GetMetaGuid(sourceMetaPath);
-                    string existingAssetPath = string.IsNullOrEmpty(sourceGuid)
-                        ? string.Empty
-                        : AssetDatabase.GUIDToAssetPath(sourceGuid);
-                    string relativePath = GetRelativePath(exportRoot, sourcePath).Replace('\\', '/');
-                    bool isSelectedAsset = string.Equals(
-                        sourcePath, selectedSourcePath, StringComparison.OrdinalIgnoreCase);
-                    string destinationAssetPath = overrideSelectedObjectDestination && isSelectedAsset
-                        ? CombineAssetPath(selectedObjectDestination, Path.GetFileName(sourcePath))
-                        : CombineAssetPath(projectDestination, relativePath);
-
-                    if (!string.IsNullOrEmpty(existingAssetPath) &&
-                        !string.Equals(existingAssetPath, destinationAssetPath, StringComparison.OrdinalIgnoreCase))
-                    {
-                        reportBuilder.AppendLine($"REUSED: {relativePath} -> {existingAssetPath}");
-                        continue;
-                    }
-
+                    reportBuilder.AppendLine($"REUSED: {relativePath} -> {existingAssetPath}");
+                }
+                else
+                {
                     string absoluteDestinationPath = GetAbsolutePath(destinationAssetPath);
                     if (FileExists(absoluteDestinationPath) && !overwriteExisting)
                     {
                         reportBuilder.AppendLine($"SKIPPED EXISTING: {destinationAssetPath}");
-                        continue;
                     }
-
-                    if (dryRun)
+                    else if (dryRun)
                     {
                         copiedCount++;
-                        reportBuilder.AppendLine($"WOULD COPY: {destinationAssetPath}");
-                        continue;
-                    }
-
-                    string destinationDirectory = Path.GetDirectoryName(absoluteDestinationPath);
-                    if (!string.IsNullOrEmpty(destinationDirectory)) CreateDirectory(destinationDirectory);
-
-                    if (IsTextSerializedAsset(sourcePath))
-                    {
-                        string contents = ReadAllText(sourcePath);
-                        contents = RemapScriptReferences(contents, scriptReferences);
-                        WriteAllText(absoluteDestinationPath, contents);
+                        string copyDescription = copySelectedAssetWithNewGuid
+                            ? "WOULD COPY WITH NEW GUID"
+                            : "WOULD COPY";
+                        reportBuilder.AppendLine($"{copyDescription}: {destinationAssetPath}");
                     }
                     else
                     {
-                        CopyFile(sourcePath, absoluteDestinationPath);
-                    }
+                        string destinationDirectory = Path.GetDirectoryName(absoluteDestinationPath);
+                        if (!string.IsNullOrEmpty(destinationDirectory)) CreateDirectory(destinationDirectory);
 
-                    if (FileExists(sourceMetaPath)) CopyFile(sourceMetaPath, absoluteDestinationPath + ".meta");
-                    copiedCount++;
-                    reportBuilder.AppendLine($"COPIED: {destinationAssetPath}");
+                        if (IsTextSerializedAsset(sourcePath))
+                        {
+                            string contents = ReadAllText(sourcePath);
+                            contents = RemapScriptReferences(contents, scriptReferences);
+                            WriteAllText(absoluteDestinationPath, contents);
+                        }
+                        else
+                        {
+                            CopyFile(sourcePath, absoluteDestinationPath);
+                        }
+
+                        if (!copySelectedAssetWithNewGuid && FileExists(sourceMetaPath))
+                            CopyFile(sourceMetaPath, absoluteDestinationPath + ".meta");
+
+                        copiedCount++;
+                        string copyDescription = copySelectedAssetWithNewGuid
+                            ? "COPIED WITH NEW GUID"
+                            : "COPIED";
+                        reportBuilder.AppendLine($"{copyDescription}: {destinationAssetPath}");
+                    }
                 }
-            }
-            finally
-            {
-                AssetDatabase.StopAssetEditing();
+
+                processedCount++;
+                progress.Report(new ImportProgress(
+                    0.70f + 0.24f * processedCount / sourceAssets.Count,
+                    $"{(dryRun ? "Planning" : "Copying")} assets ({processedCount}/{sourceAssets.Count})..."));
+                if (processedCount % 10 == 0)
+                {
+                    Repaint();
+                    await Task.Yield();
+                }
             }
 
             return copiedCount;
@@ -452,6 +635,18 @@ namespace DaftAppleGames.Editor
         private static string CombineAssetPath(string directory, string relativePath)
         {
             return directory + "/" + relativePath.TrimStart('/');
+        }
+
+        private void UpdateImportProgress(ImportProgress progress)
+        {
+            SetImportProgress(progress.Value, progress.Status);
+        }
+
+        private void SetImportProgress(float value, string status)
+        {
+            importProgress = value;
+            importStatus = status;
+            Repaint();
         }
 
         private static string RemapScriptReferences(string contents, Dictionary<string, string> scriptReferences)
@@ -571,7 +766,7 @@ namespace DaftAppleGames.Editor
 
         private static void CreateDirectory(string path)
         {
-            if (Application.platform != RuntimePlatform.WindowsEditor || path.Length <= LegacyMaxDirectoryPath)
+            if (!IsWindowsEditor || path.Length <= LegacyMaxDirectoryPath)
             {
                 Directory.CreateDirectory(path);
                 return;
@@ -601,13 +796,42 @@ namespace DaftAppleGames.Editor
         /// </summary>
         private static string ToExtendedLengthPath(string path, int legacyMaxPath = LegacyMaxFilePath)
         {
-            if (Application.platform != RuntimePlatform.WindowsEditor || !Path.IsPathRooted(path) ||
+            if (!IsWindowsEditor || !Path.IsPathRooted(path) ||
                 path.Length <= legacyMaxPath || path.StartsWith(@"\\?\", StringComparison.Ordinal)) return path;
 
             if (path.StartsWith(@"\\", StringComparison.Ordinal))
                 return @"\\?\UNC\" + path.Substring(2);
 
             return @"\\?\" + path;
+        }
+
+        private sealed class IndexResult
+        {
+            public readonly Dictionary<string, string> AssetsByGuid;
+            public readonly string Report;
+            public readonly HashSet<string> ScriptGuids;
+            public readonly HashSet<string> SourceAssets;
+
+            public IndexResult(Dictionary<string, string> assetsByGuid, HashSet<string> sourceAssets,
+                HashSet<string> scriptGuids, string report)
+            {
+                AssetsByGuid = assetsByGuid;
+                SourceAssets = sourceAssets;
+                ScriptGuids = scriptGuids;
+                Report = report;
+            }
+        }
+
+        private struct ImportProgress
+        {
+            public readonly string Status;
+            public readonly float Value;
+
+            public ImportProgress(float value, string status)
+            {
+                Value = value;
+                Status = status;
+            }
         }
     }
 }

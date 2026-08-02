@@ -29,11 +29,13 @@ The window uses enhanced headings and information styling when Odin Inspector is
 3. Use **Source Asset** to select the asset to import. Select the asset itself, not its `.meta` file.
 4. Set **Dependencies Destination** to a project-relative folder beneath `Assets`. Dependencies are copied beneath this folder while retaining their paths relative to the export root.
 5. If the selected asset should be stored separately, enable **Override Object Destination** and choose **Selected Object Destination**. The selected asset is written directly into that folder using its original filename.
-6. Leave **Dry Run** enabled for an initial pass. The tool discovers dependencies and reports the operations it would perform without writing files.
-7. Choose whether **Overwrite Existing** should replace files already present at their calculated destinations.
-8. Click **Import Asset and Dependencies**.
-9. Review **Import Report** for copied, reused, skipped, or unresolved assets and scripts.
-10. When the dry-run report looks correct, disable **Dry Run** and run the import again. Unity refreshes the Asset Database and highlights the imported selected asset when the operation completes.
+6. Leave **Force AssetRipper Re-index** disabled for normal use. Enable it only when the AssetRipper export has changed or the cached index needs to be rebuilt.
+7. Leave **Report only** enabled for an initial pass. The tool discovers dependencies and reports the operations it would perform without writing files.
+8. Choose whether **Overwrite Existing** should replace files already present at their calculated destinations.
+9. Click **Import Asset and Dependencies**.
+10. Follow the progress bar while the export is indexed, dependencies are discovered, scripts are resolved, and assets are copied. The import can be cancelled between processing operations; files already copied are retained.
+11. Review **Import Report** for copied, reused, skipped, or unresolved assets and scripts.
+12. When the report looks correct, disable **Report only** and run the import again. Unity refreshes the Asset Database and highlights the imported selected asset when the operation completes.
 
 ## What Happens During an Import
 
@@ -49,6 +51,10 @@ The tool verifies that:
 ### 2. Index the AssetRipper export
 
 Every `.meta` file beneath the export root is scanned to build a map from AssetRipper GUID to exported asset path. This allows serialized GUID references to be resolved without importing the entire export.
+
+The completed map is cached at `Library/DaftAppleModTools/ReferenceAssetImporterGuidIndex.cache`. Subsequent imports load this cache when it matches the configured export root, avoiding another full metadata scan. Because the cache is beneath `Library`, it is local to the Unity project and is not intended for source control. Enable **Force AssetRipper Re-index** to rebuild and replace it.
+
+Filesystem indexing and dependency discovery run on a background thread so the Unity Editor remains responsive. Unity APIs continue to run on the editor thread, and the copy phase yields regularly between batches.
 
 ### 3. Index game scripts
 
@@ -72,13 +78,15 @@ Dependencies are assigned a destination made from **Dependencies Destination** p
 
 The selected asset normally follows the same rule. When **Override Object Destination** is enabled, only that asset is assigned to **Selected Object Destination** plus its filename.
 
-If Unity already knows an asset with the same GUID at another project path, the existing asset is reused rather than creating a duplicate GUID. This is reported as `REUSED`.
+If Unity already knows a dependency with the same GUID at another project path, the existing dependency is reused rather than creating a duplicate GUID. This is reported as `REUSED`.
+
+The selected asset is treated differently when **Override Object Destination** is enabled. If its AssetRipper GUID is already present elsewhere in the project, the asset is still copied to the requested destination but its source `.meta` file is not copied. Unity therefore assigns the new copy its own GUID. This is reported as `COPIED WITH NEW GUID` and prevents the selected asset from being silently reused at its previous location.
 
 ### 7. Copy or report
 
 In a dry run, no directories or files are created; the planned destinations are reported as `WOULD COPY`.
 
-During a real import, destination directories are created, assets and `.meta` files are copied, and script references in text-serialized assets are rewritten. Existing destination files are skipped when **Overwrite Existing** is disabled.
+During a real import, destination directories are created, assets and applicable `.meta` files are copied, and script references in text-serialized assets are rewritten. Existing destination files are skipped when **Overwrite Existing** is disabled.
 
 ### 8. Refresh Unity
 
