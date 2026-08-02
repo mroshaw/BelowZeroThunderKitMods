@@ -106,5 +106,7 @@ crashlytics-build.properties
 
 # Game File Rip
 /GameFiles~/
-/[Aa]ssets/ImportedRefAssets.meta
-/[Aa]ssets/ImportedRefAssets/
+**/GameRefAssets/
+**/GameRefAssets.meta
+**/ImportedRefAssets/
+**/ImportedRefAssets.meta

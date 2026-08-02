@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -35,6 +36,9 @@ namespace DaftAppleGames.Editor
             @"^guid:\s*([0-9a-fA-F]{32})\s*$", RegexOptions.Compiled | RegexOptions.Multiline);
         private static readonly Regex NamespaceRegex = new Regex(
             @"\bnamespace\s+([A-Za-z_][A-Za-z0-9_.]*)", RegexOptions.Compiled);
+        private static readonly Regex ShaderExponentRegex = new Regex(
+            @"(?<![A-Za-z0-9_.])[+-]?(?:\d+(?:\.\d*)?|\.\d+)[eE][+-]?\d+(?![A-Za-z0-9_.])",
+            RegexOptions.Compiled);
         private static readonly bool IsWindowsEditor = Application.platform == RuntimePlatform.WindowsEditor;
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
@@ -46,7 +50,8 @@ namespace DaftAppleGames.Editor
         [SerializeField] private bool overrideSelectedObjectDestination;
         [SerializeField] private string selectedObjectDestinationPath = DefaultDestinationPath;
         [SerializeField] private bool forceAssetRipperReindex;
-        [SerializeField] private bool dryRun = true;
+        [SerializeField] private bool fixShaderExponentNotation = true;
+        [SerializeField] private bool reportOnly = false;
         [SerializeField] private bool overwriteExisting = true;
         [SerializeField] private Vector2 reportScrollPosition;
         [SerializeField] private string report = "Select an AssetRipper asset to begin.";
@@ -103,7 +108,9 @@ namespace DaftAppleGames.Editor
 #endif
                 forceAssetRipperReindex = EditorGUILayout.Toggle(
                     "Force AssetRipper Re-index", forceAssetRipperReindex);
-                dryRun = EditorGUILayout.Toggle("Report only", dryRun);
+                fixShaderExponentNotation = EditorGUILayout.Toggle(
+                    "Fix shader E notation", fixShaderExponentNotation);
+                reportOnly = EditorGUILayout.Toggle("Report only", reportOnly);
                 overwriteExisting = EditorGUILayout.Toggle("Overwrite Existing", overwriteExisting);
             }
 
@@ -192,6 +199,12 @@ namespace DaftAppleGames.Editor
                 return;
             }
 
+            if (IsManagedAssemblyArtifact(absoluteSourcePath))
+            {
+                report = "Managed assemblies and their debug symbols cannot be imported as reference assets.";
+                return;
+            }
+
             if (!IsPathWithinRoot(absoluteSourcePath, absoluteExportRoot))
             {
                 report = $"The selected asset is outside the configured export root: {absoluteExportRoot}";
@@ -239,7 +252,7 @@ namespace DaftAppleGames.Editor
                     normalizedDestination, normalizedSelectedObjectDestination, sourceAssets, scriptReferences,
                     reportBuilder, progress, cancellationToken);
 
-                if (!dryRun)
+                if (!reportOnly)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     SetImportProgress(0.96f, "Refreshing the Unity Asset Database...");
@@ -253,8 +266,8 @@ namespace DaftAppleGames.Editor
                 }
 
                 reportBuilder.Insert(0,
-                    $"{(dryRun ? "Report only" : "Import")} complete. Discovered {sourceAssets.Count} assets, " +
-                    $"{(dryRun ? "would copy or update" : "copied or updated")} {copiedCount}, " +
+                    $"{(reportOnly ? "Report only" : "Import")} complete. Discovered {sourceAssets.Count} assets, " +
+                    $"{(reportOnly ? "would copy or update" : "copied or updated")} {copiedCount}, " +
                     $"and resolved {scriptReferences.Count} game script references.\n\n");
                 report = reportBuilder.ToString();
                 SetImportProgress(1.0f, "Import complete");
@@ -493,6 +506,8 @@ namespace DaftAppleGames.Editor
 
                 if (referencedPath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
                     scriptGuids.Add(guid);
+                else if (IsManagedAssemblyArtifact(referencedPath))
+                    continue;
                 else
                     pendingAssets.Enqueue(referencedPath);
             }
@@ -550,6 +565,12 @@ namespace DaftAppleGames.Editor
             foreach (string sourcePath in sourceAssets)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                if (IsManagedAssemblyArtifact(sourcePath))
+                {
+                    reportBuilder.AppendLine($"EXCLUDED MANAGED ASSEMBLY: {sourcePath}");
+                    continue;
+                }
+
                 string sourceMetaPath = sourcePath + ".meta";
                 string sourceGuid = GetMetaGuid(sourceMetaPath);
                 string existingAssetPath = string.IsNullOrEmpty(sourceGuid)
@@ -569,6 +590,19 @@ namespace DaftAppleGames.Editor
                 if (guidExistsAtAnotherPath && !copySelectedAssetWithNewGuid)
                 {
                     reportBuilder.AppendLine($"REUSED: {relativePath} -> {existingAssetPath}");
+                    if (fixShaderExponentNotation && IsShaderAsset(sourcePath) &&
+                        IsProjectAssetPath(existingAssetPath))
+                    {
+                        int replacementCount = FixShaderFile(
+                            GetAbsolutePath(existingAssetPath), !reportOnly);
+                        if (replacementCount > 0)
+                        {
+                            copiedCount++;
+                            reportBuilder.AppendLine(
+                                $"{(reportOnly ? "WOULD FIX" : "FIXED")} SHADER E NOTATION: " +
+                                $"{existingAssetPath} ({replacementCount} replacements)");
+                        }
+                    }
                 }
                 else
                 {
@@ -577,13 +611,21 @@ namespace DaftAppleGames.Editor
                     {
                         reportBuilder.AppendLine($"SKIPPED EXISTING: {destinationAssetPath}");
                     }
-                    else if (dryRun)
+                    else if (reportOnly)
                     {
                         copiedCount++;
                         string copyDescription = copySelectedAssetWithNewGuid
                             ? "WOULD COPY WITH NEW GUID"
                             : "WOULD COPY";
                         reportBuilder.AppendLine($"{copyDescription}: {destinationAssetPath}");
+                        if (fixShaderExponentNotation && IsShaderAsset(sourcePath))
+                        {
+                            int replacementCount = CountShaderExponentReplacements(ReadAllText(sourcePath));
+                            if (replacementCount > 0)
+                                reportBuilder.AppendLine(
+                                    $"WOULD FIX SHADER E NOTATION: {destinationAssetPath} " +
+                                    $"({replacementCount} replacements)");
+                        }
                     }
                     else
                     {
@@ -594,6 +636,16 @@ namespace DaftAppleGames.Editor
                         {
                             string contents = ReadAllText(sourcePath);
                             contents = RemapScriptReferences(contents, scriptReferences);
+                            if (fixShaderExponentNotation && IsShaderAsset(sourcePath))
+                            {
+                                int replacementCount;
+                                contents = FixShaderExponentNotation(contents, out replacementCount);
+                                if (replacementCount > 0)
+                                    reportBuilder.AppendLine(
+                                        $"FIXED SHADER E NOTATION: {destinationAssetPath} " +
+                                        $"({replacementCount} replacements)");
+                            }
+
                             WriteAllText(absoluteDestinationPath, contents);
                         }
                         else
@@ -615,7 +667,7 @@ namespace DaftAppleGames.Editor
                 processedCount++;
                 progress.Report(new ImportProgress(
                     0.70f + 0.24f * processedCount / sourceAssets.Count,
-                    $"{(dryRun ? "Planning" : "Copying")} assets ({processedCount}/{sourceAssets.Count})..."));
+                    $"{(reportOnly ? "Planning" : "Copying")} assets ({processedCount}/{sourceAssets.Count})..."));
                 if (processedCount % 10 == 0)
                 {
                     Repaint();
@@ -628,8 +680,12 @@ namespace DaftAppleGames.Editor
 
         private static bool IsValidProjectDestination(string path)
         {
-            return path.StartsWith("Assets/", StringComparison.Ordinal) ||
-                   string.Equals(path, "Assets", StringComparison.Ordinal);
+            return IsProjectAssetPath(path) || string.Equals(path, "Assets", StringComparison.Ordinal);
+        }
+
+        private static bool IsProjectAssetPath(string path)
+        {
+            return path.StartsWith("Assets/", StringComparison.Ordinal);
         }
 
         private static string CombineAssetPath(string directory, string relativePath)
@@ -659,6 +715,53 @@ namespace DaftAppleGames.Editor
             }
 
             return contents;
+        }
+
+        private static int FixShaderFile(string path, bool writeChanges)
+        {
+            if (!FileExists(path)) return 0;
+
+            string contents = ReadAllText(path);
+            int replacementCount;
+            string fixedContents = FixShaderExponentNotation(contents, out replacementCount);
+            if (writeChanges && replacementCount > 0) WriteAllText(path, fixedContents);
+            return replacementCount;
+        }
+
+        private static int CountShaderExponentReplacements(string contents)
+        {
+            int replacementCount;
+            FixShaderExponentNotation(contents, out replacementCount);
+            return replacementCount;
+        }
+
+        private static string FixShaderExponentNotation(string contents, out int replacementCount)
+        {
+            int convertedCount = 0;
+            string fixedContents = ShaderExponentRegex.Replace(contents, match =>
+            {
+                decimal value;
+                if (!decimal.TryParse(match.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
+                    return match.Value;
+
+                convertedCount++;
+                return value.ToString("0.#############################", CultureInfo.InvariantCulture);
+            });
+            replacementCount = convertedCount;
+            return fixedContents;
+        }
+
+        private static bool IsShaderAsset(string path)
+        {
+            return string.Equals(Path.GetExtension(path), ".shader", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsManagedAssemblyArtifact(string path)
+        {
+            string extension = Path.GetExtension(path);
+            return string.Equals(extension, ".dll", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(extension, ".pdb", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(extension, ".mdb", StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool IsTextSerializedAsset(string path)

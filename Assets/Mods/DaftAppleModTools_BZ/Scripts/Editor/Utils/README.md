@@ -30,12 +30,13 @@ The window uses enhanced headings and information styling when Odin Inspector is
 4. Set **Dependencies Destination** to a project-relative folder beneath `Assets`. Dependencies are copied beneath this folder while retaining their paths relative to the export root.
 5. If the selected asset should be stored separately, enable **Override Object Destination** and choose **Selected Object Destination**. The selected asset is written directly into that folder using its original filename.
 6. Leave **Force AssetRipper Re-index** disabled for normal use. Enable it only when the AssetRipper export has changed or the cached index needs to be rebuilt.
-7. Leave **Report only** enabled for an initial pass. The tool discovers dependencies and reports the operations it would perform without writing files.
-8. Choose whether **Overwrite Existing** should replace files already present at their calculated destinations.
-9. Click **Import Asset and Dependencies**.
-10. Follow the progress bar while the export is indexed, dependencies are discovered, scripts are resolved, and assets are copied. The import can be cancelled between processing operations; files already copied are retained.
-11. Review **Import Report** for copied, reused, skipped, or unresolved assets and scripts.
-12. When the report looks correct, disable **Report only** and run the import again. Unity refreshes the Asset Database and highlights the imported selected asset when the operation completes.
+7. Leave **Fix shader E notation** enabled to convert scientific notation in copied or reused shader files into decimal notation accepted by Unity 2019's ShaderLab parser.
+8. Leave **Report only** enabled for an initial pass. The tool discovers dependencies and reports the operations it would perform without writing files.
+9. Choose whether **Overwrite Existing** should replace files already present at their calculated destinations.
+10. Click **Import Asset and Dependencies**.
+11. Follow the progress bar while the export is indexed, dependencies are discovered, scripts are resolved, and assets are copied. The import can be cancelled between processing operations; files already copied are retained.
+12. Review **Import Report** for copied, reused, skipped, fixed, or unresolved assets, scripts, and shaders.
+13. When the report looks correct, disable **Report only** and run the import again. Unity refreshes the Asset Database and highlights the imported selected asset when the operation completes.
 
 ## What Happens During an Import
 
@@ -66,6 +67,8 @@ The selected asset is scanned for serialized GUID references. Resolved non-scrip
 
 Only Unity text-serialized asset formats can be scanned for references. Binary assets can still be copied when another serialized asset refers to them.
 
+Managed assembly artifacts (`.dll`, `.pdb`, and `.mdb`) are excluded from dependency discovery and copying. AssetRipper exports may contain game or Unity assemblies whose names conflict with ThunderKit or Unity package assemblies and can otherwise prevent the project from compiling.
+
 ### 5. Resolve script references
 
 AssetRipper exports game scripts as `.cs` files with their own GUIDs. The importer matches those scripts by namespace and type name to `MonoScript` entries in the imported game DLLs. During copying, matching `m_Script` references are rewritten to use the DLL asset GUID and local file ID expected by Unity.
@@ -87,6 +90,8 @@ The selected asset is treated differently when **Override Object Destination** i
 In a dry run, no directories or files are created; the planned destinations are reported as `WOULD COPY`.
 
 During a real import, destination directories are created, assets and applicable `.meta` files are copied, and script references in text-serialized assets are rewritten. Existing destination files are skipped when **Overwrite Existing** is disabled.
+
+When **Fix shader E notation** is enabled, scientific-notation numeric literals in copied shaders are converted to decimal notation in the destination file. Reused shaders from previous imports are repaired in place when needed. The AssetRipper export is always treated as read-only and is never modified.
 
 ### 8. Refresh Unity
 
