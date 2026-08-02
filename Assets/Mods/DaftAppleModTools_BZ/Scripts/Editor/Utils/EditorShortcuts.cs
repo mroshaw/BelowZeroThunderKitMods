@@ -23,31 +23,31 @@ namespace DaftAppleGames.Editor
         private static readonly string BzLogPath = Path.Combine(LogBasePath, "Subnautica Below Zero\\Player.log");
         private static readonly string BzGameAssemblyPath = Path.Combine(BzGamePath, "SubnauticaZero_Data\\Managed\\Assembly-CSharp.dll");
         
-        [MenuItem("Tools/Run DnSpy (BZ)")]
+        [MenuItem("Tools/Shortcuts/Run DnSpy (BZ)")]
         private static void RunDnSpyBz()
         {
             LaunchProcess("dnSpy.exe", DnSpyPath, BzGameAssemblyPath);
         }
 
-        [MenuItem("Tools/Open BZ Plugins Folder")]
+        [MenuItem("Tools/Shortcuts/Open BZ Plugins Folder")]
         private static void OpenBzFolder()
         {
             OpenExplorer(BzBepInExPath);
         }
         
-        [MenuItem("Tools/Nexus ZIP Folder")]
+        [MenuItem("Tools/Shortcuts/Nexus ZIP Folder")]
         private static void OpenNexusZipFolder()
         {
             OpenExplorer(NexusZipFolder);
         }
 
-        [MenuItem("Tools/Open BZ Player Log")]
+        [MenuItem("Tools/Shortcuts/Open BZ Player Log")]
         private static void OpenBzLog()
         {
             OpenLog(BzLogPath);            
         }
 
-        [MenuItem("Tools/Open Unity Editor Log")]
+        [MenuItem("Tools/Shortcuts/Open Unity Editor Log")]
         private static void OpenUnityEditorLog()
         {
             OpenLog(UnityEditorLogPath);            
