@@ -7,7 +7,9 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
-
+#if ODIN_INSPECTOR
+using Sirenix.Utilities.Editor;
+#endif
 namespace DaftAppleGames.Editor
 {
     /// <summary>
@@ -18,6 +20,7 @@ namespace DaftAppleGames.Editor
         private const string DefaultExportAssetsPath = "GameFiles~/ExportedProject/Assets";
         private const string DefaultDestinationPath = "Assets/SubnauticaRefAssets";
         private const string GameAssemblyPackagePath = "Packages/SubnauticaZero";
+        private const float LabelWidth = 205.0f;
         private const int LegacyMaxDirectoryPath = 247;
         private const int LegacyMaxFilePath = 259;
         private const int ErrorAlreadyExists = 183;
@@ -35,12 +38,14 @@ namespace DaftAppleGames.Editor
         [SerializeField] private string sourceAssetPath = string.Empty;
         [SerializeField] private string exportAssetsPath = DefaultExportAssetsPath;
         [SerializeField] private string destinationPath = DefaultDestinationPath;
+        [SerializeField] private bool overrideSelectedObjectDestination;
+        [SerializeField] private string selectedObjectDestinationPath = DefaultDestinationPath;
         [SerializeField] private bool dryRun = true;
         [SerializeField] private bool overwriteExisting = true;
         [SerializeField] private Vector2 reportScrollPosition;
         [SerializeField] private string report = "Select an AssetRipper asset to begin.";
 
-        [MenuItem("Tools/Subnautica/Import Reference Asset")]
+        [MenuItem("Tools/Import Reference Asset")]
         public static void ShowWindow()
         {
             ReferenceAssetImporterWindow window = GetWindow<ReferenceAssetImporterWindow>();
@@ -50,16 +55,40 @@ namespace DaftAppleGames.Editor
 
         private void OnGUI()
         {
+            EditorGUIUtility.labelWidth = LabelWidth;
+
+#if ODIN_INSPECTOR
+            SirenixEditorGUI.Title(
+                "AssetRipper Reference Asset Importer",
+                "Import an asset and its recursive dependency closure",
+                TextAlignment.Left,
+                true);
+            SirenixEditorGUI.InfoMessageBox(
+                "Copies the selected asset and its recursive dependencies while preserving AssetRipper GUIDs. " +
+                "Exported scripts are remapped to MonoScript types in ThunderKit's imported game DLLs.");
+            SirenixEditorGUI.Title("Import Paths", null, TextAlignment.Left, true);
+#else
             EditorGUILayout.LabelField("AssetRipper Reference Asset Importer", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox(
                 "Copies the selected asset and its recursive dependencies while preserving AssetRipper GUIDs. " +
                 "Exported scripts are remapped to MonoScript types in ThunderKit's imported game DLLs.",
                 MessageType.Info);
+#endif
 
             DrawPathField("Export Assets Root", ref exportAssetsPath, true);
             DrawSourceAssetField();
-            DrawPathField("Destination", ref destinationPath, false);
-            dryRun = EditorGUILayout.Toggle("Dry Run", dryRun);
+            DrawPathField("Dependencies Destination", ref destinationPath, false);
+            overrideSelectedObjectDestination = EditorGUILayout.Toggle(
+                "Override Object Destination", overrideSelectedObjectDestination);
+            if (overrideSelectedObjectDestination)
+                DrawPathField("Selected Object Destination", ref selectedObjectDestinationPath, false);
+
+#if ODIN_INSPECTOR
+            SirenixEditorGUI.Title("Import Options", null, TextAlignment.Left, true);
+#else
+            EditorGUILayout.Space();
+#endif
+            dryRun = EditorGUILayout.Toggle("Report only", dryRun);
             overwriteExisting = EditorGUILayout.Toggle("Overwrite Existing", overwriteExisting);
 
             EditorGUILayout.Space();
@@ -70,7 +99,11 @@ namespace DaftAppleGames.Editor
             }
 
             EditorGUILayout.Space();
+#if ODIN_INSPECTOR
+            SirenixEditorGUI.Title("Import Report", null, TextAlignment.Left, true);
+#else
             EditorGUILayout.LabelField("Import Report", EditorStyles.boldLabel);
+#endif
             reportScrollPosition = EditorGUILayout.BeginScrollView(reportScrollPosition);
             EditorGUILayout.TextArea(report, GUILayout.ExpandHeight(true));
             EditorGUILayout.EndScrollView();
@@ -116,6 +149,8 @@ namespace DaftAppleGames.Editor
             string absoluteExportRoot = NormalizeFullPath(GetAbsolutePath(exportAssetsPath));
             string absoluteSourcePath = NormalizeFullPath(sourceAssetPath);
             string normalizedDestination = destinationPath.Replace('\\', '/').TrimEnd('/');
+            string normalizedSelectedObjectDestination =
+                selectedObjectDestinationPath.Replace('\\', '/').TrimEnd('/');
 
             if (!Directory.Exists(absoluteExportRoot))
             {
@@ -135,10 +170,16 @@ namespace DaftAppleGames.Editor
                 return;
             }
 
-            if (!normalizedDestination.StartsWith("Assets/", StringComparison.Ordinal) &&
-                !string.Equals(normalizedDestination, "Assets", StringComparison.Ordinal))
+            if (!IsValidProjectDestination(normalizedDestination))
             {
                 report = "Destination must be a project-relative path under Assets.";
+                return;
+            }
+
+            if (overrideSelectedObjectDestination &&
+                !IsValidProjectDestination(normalizedSelectedObjectDestination))
+            {
+                report = "Selected Object Destination must be a project-relative path under Assets.";
                 return;
             }
 
@@ -153,20 +194,22 @@ namespace DaftAppleGames.Editor
 
                 Dictionary<string, string> scriptReferences = BuildScriptReferences(
                     scriptGuids, exportedAssetsByGuid, gameScriptsByType, reportBuilder);
-                int copiedCount = CopyAssets(absoluteExportRoot, normalizedDestination, sourceAssets,
-                    scriptReferences, reportBuilder);
+                int copiedCount = CopyAssets(absoluteExportRoot, absoluteSourcePath, normalizedDestination,
+                    normalizedSelectedObjectDestination, sourceAssets, scriptReferences, reportBuilder);
 
                 if (!dryRun)
                 {
                     AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
                     string rootRelativePath = GetRelativePath(absoluteExportRoot, absoluteSourcePath);
-                    string importedRootPath = normalizedDestination + "/" + rootRelativePath.Replace('\\', '/');
+                    string importedRootPath = overrideSelectedObjectDestination
+                        ? CombineAssetPath(normalizedSelectedObjectDestination, Path.GetFileName(absoluteSourcePath))
+                        : CombineAssetPath(normalizedDestination, rootRelativePath.Replace('\\', '/'));
                     Object importedAsset = AssetDatabase.LoadMainAssetAtPath(importedRootPath);
                     if (importedAsset) EditorGUIUtility.PingObject(importedAsset);
                 }
 
                 reportBuilder.Insert(0,
-                    $"{(dryRun ? "Dry run" : "Import")} complete. Discovered {sourceAssets.Count} assets, " +
+                    $"{(dryRun ? "Report only" : "Import")} complete. Discovered {sourceAssets.Count} assets, " +
                     $"{(dryRun ? "would copy or update" : "copied or updated")} {copiedCount}, " +
                     $"and resolved {scriptReferences.Count} game script references.\n\n");
                 report = reportBuilder.ToString();
@@ -330,7 +373,8 @@ namespace DaftAppleGames.Editor
             return references;
         }
 
-        private int CopyAssets(string exportRoot, string projectDestination, HashSet<string> sourceAssets,
+        private int CopyAssets(string exportRoot, string selectedSourcePath, string projectDestination,
+            string selectedObjectDestination, HashSet<string> sourceAssets,
             Dictionary<string, string> scriptReferences, StringBuilder reportBuilder)
         {
             int copiedCount = 0;
@@ -345,7 +389,11 @@ namespace DaftAppleGames.Editor
                         ? string.Empty
                         : AssetDatabase.GUIDToAssetPath(sourceGuid);
                     string relativePath = GetRelativePath(exportRoot, sourcePath).Replace('\\', '/');
-                    string destinationAssetPath = projectDestination + "/" + relativePath;
+                    bool isSelectedAsset = string.Equals(
+                        sourcePath, selectedSourcePath, StringComparison.OrdinalIgnoreCase);
+                    string destinationAssetPath = overrideSelectedObjectDestination && isSelectedAsset
+                        ? CombineAssetPath(selectedObjectDestination, Path.GetFileName(sourcePath))
+                        : CombineAssetPath(projectDestination, relativePath);
 
                     if (!string.IsNullOrEmpty(existingAssetPath) &&
                         !string.Equals(existingAssetPath, destinationAssetPath, StringComparison.OrdinalIgnoreCase))
@@ -393,6 +441,17 @@ namespace DaftAppleGames.Editor
             }
 
             return copiedCount;
+        }
+
+        private static bool IsValidProjectDestination(string path)
+        {
+            return path.StartsWith("Assets/", StringComparison.Ordinal) ||
+                   string.Equals(path, "Assets", StringComparison.Ordinal);
+        }
+
+        private static string CombineAssetPath(string directory, string relativePath)
+        {
+            return directory + "/" + relativePath.TrimStart('/');
         }
 
         private static string RemapScriptReferences(string contents, Dictionary<string, string> scriptReferences)
