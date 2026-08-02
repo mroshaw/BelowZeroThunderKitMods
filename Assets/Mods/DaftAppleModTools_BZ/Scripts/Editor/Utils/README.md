@@ -31,12 +31,13 @@ The window uses enhanced headings and information styling when Odin Inspector is
 5. If the selected asset should be stored separately, enable **Override Object Destination** and choose **Selected Object Destination**. The selected asset is written directly into that folder using its original filename.
 6. Leave **Force AssetRipper Re-index** disabled for normal use. Enable it only when the AssetRipper export has changed or the cached index needs to be rebuilt.
 7. Leave **Fix shader E notation** enabled to convert scientific notation in copied or reused shader files into decimal notation accepted by Unity 2019's ShaderLab parser.
-8. Leave **Report only** enabled for an initial pass. The tool discovers dependencies and reports the operations it would perform without writing files.
-9. Choose whether **Overwrite Existing** should replace files already present at their calculated destinations.
-10. Click **Import Asset and Dependencies**.
-11. Follow the progress bar while the export is indexed, dependencies are discovered, scripts are resolved, and assets are copied. The import can be cancelled between processing operations; files already copied are retained.
-12. Review **Import Report** for copied, reused, skipped, fixed, or unresolved assets, scripts, and shaders.
-13. When the report looks correct, disable **Report only** and run the import again. Unity refreshes the Asset Database and highlights the imported selected asset when the operation completes.
+8. Leave **Repair missing TMP atlases** enabled to generate readable atlas sub-assets for dynamic TextMeshPro fonts whose atlas textures were not exported by AssetRipper.
+9. Leave **Report only** enabled for an initial pass. The tool discovers dependencies and reports the operations it would perform without writing files.
+10. Choose whether **Overwrite Existing** should replace files already present at their calculated destinations.
+11. Click **Import Asset and Dependencies**.
+12. Follow the progress bar while the export is indexed, dependencies are discovered, scripts are resolved, and assets are copied. The import can be cancelled between processing operations; files already copied are retained.
+13. Review **Import Report** for copied, reused, skipped, fixed, or unresolved assets, scripts, shaders, and font atlases.
+14. When the report looks correct, disable **Report only** and run the import again. Unity refreshes the Asset Database and highlights the imported selected asset when the operation completes.
 
 ## What Happens During an Import
 
@@ -85,6 +86,8 @@ The selected asset normally follows the same rule. When **Override Object Destin
 
 If Unity already knows a dependency with the same GUID at another project path, the existing dependency is reused rather than creating a duplicate GUID. This is reported as `REUSED`.
 
+GUID paths returned by Unity are verified against the filesystem before reuse. This prevents stale Asset Database entries from causing dependencies to be skipped after previously generated reference assets have been deleted. Ignored stale entries are reported as `IGNORED STALE GUID PATH`.
+
 The selected asset is treated differently when **Override Object Destination** is enabled. If its AssetRipper GUID is already present elsewhere in the project, the asset is still copied to the requested destination but its source `.meta` file is not copied. Unity therefore assigns the new copy its own GUID. This is reported as `COPIED WITH NEW GUID` and prevents the selected asset from being silently reused at its previous location.
 
 ### 7. Copy or report
@@ -94,6 +97,8 @@ In a dry run, no directories or files are created; the planned destinations are 
 During a real import, destination directories are created, assets and applicable `.meta` files are copied, and script references in text-serialized assets are rewritten. Existing destination files are skipped when **Overwrite Existing** is disabled.
 
 When **Fix shader E notation** is enabled, scientific-notation numeric literals in copied shaders are converted to decimal notation in the destination file. Reused shaders from previous imports are repaired in place when needed. The AssetRipper export is always treated as read-only and is never modified.
+
+When **Repair missing TMP atlases** is enabled, imported and reused dynamic `TMP_FontAsset` assets are checked after Unity refreshes the Asset Database. If the first atlas texture is missing but the source font is available, the importer creates a readable atlas texture using the font asset's serialized dimensions, stores it as a sub-asset, assigns it to the atlas array, and updates the font material's main texture. Static fonts and valid dynamic fonts are not changed. Repairs are reported as `REPAIRED TMP ATLAS`.
 
 ### 8. Refresh Unity
 

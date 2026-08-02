@@ -55,6 +55,7 @@ namespace DaftAppleGames.Editor
         [SerializeField] private string selectedObjectDestinationPath = DefaultDestinationPath;
         [SerializeField] private bool forceAssetRipperReindex;
         [SerializeField] private bool fixShaderExponentNotation = true;
+        [SerializeField] private bool repairMissingTmpAtlases = true;
         [SerializeField] private bool reportOnly = false;
         [SerializeField] private bool overwriteExisting = true;
         [SerializeField] private Vector2 reportScrollPosition;
@@ -114,6 +115,8 @@ namespace DaftAppleGames.Editor
                     "Force AssetRipper Re-index", forceAssetRipperReindex);
                 fixShaderExponentNotation = EditorGUILayout.Toggle(
                     "Fix shader E notation", fixShaderExponentNotation);
+                repairMissingTmpAtlases = EditorGUILayout.Toggle(
+                    "Repair missing TMP atlases", repairMissingTmpAtlases);
                 reportOnly = EditorGUILayout.Toggle("Report only", reportOnly);
                 overwriteExisting = EditorGUILayout.Toggle("Overwrite Existing", overwriteExisting);
             }
@@ -258,15 +261,24 @@ namespace DaftAppleGames.Editor
                 Dictionary<ManagedScriptReference, string> managedAssemblyScriptReferences =
                     BuildManagedAssemblyScriptReferences(
                         managedScriptReferences, exportedAssetsByGuid, reportBuilder);
+                HashSet<string> tmpFontAssetsToRepair =
+                    new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 int copiedCount = await CopyAssetsAsync(absoluteExportRoot, absoluteSourcePath,
                     normalizedDestination, normalizedSelectedObjectDestination, sourceAssets, scriptReferences,
-                    managedAssemblyScriptReferences, reportBuilder, progress, cancellationToken);
+                    managedAssemblyScriptReferences, tmpFontAssetsToRepair, reportBuilder, progress,
+                    cancellationToken);
 
                 if (!reportOnly)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     SetImportProgress(0.96f, "Refreshing the Unity Asset Database...");
                     AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+                    if (repairMissingTmpAtlases && tmpFontAssetsToRepair.Count > 0)
+                    {
+                        SetImportProgress(0.98f, "Repairing missing TextMeshPro atlases...");
+                        RepairMissingTmpFontAtlases(tmpFontAssetsToRepair, reportBuilder);
+                    }
+
                     string rootRelativePath = GetRelativePath(absoluteExportRoot, absoluteSourcePath);
                     string importedRootPath = overrideSelectedObjectDestination
                         ? CombineAssetPath(normalizedSelectedObjectDestination, Path.GetFileName(absoluteSourcePath))
@@ -753,7 +765,8 @@ namespace DaftAppleGames.Editor
         private async Task<int> CopyAssetsAsync(string exportRoot, string selectedSourcePath, string projectDestination,
             string selectedObjectDestination, HashSet<string> sourceAssets,
             Dictionary<string, string> scriptReferences,
-            Dictionary<ManagedScriptReference, string> managedAssemblyScriptReferences, StringBuilder reportBuilder,
+            Dictionary<ManagedScriptReference, string> managedAssemblyScriptReferences,
+            HashSet<string> tmpFontAssetsToRepair, StringBuilder reportBuilder,
             IProgress<ImportProgress> progress, CancellationToken cancellationToken)
         {
             int copiedCount = 0;
@@ -772,6 +785,14 @@ namespace DaftAppleGames.Editor
                 string existingAssetPath = string.IsNullOrEmpty(sourceGuid)
                     ? string.Empty
                     : AssetDatabase.GUIDToAssetPath(sourceGuid);
+                if (!string.IsNullOrEmpty(existingAssetPath) &&
+                    !FileExists(GetAbsolutePath(existingAssetPath)))
+                {
+                    reportBuilder.AppendLine(
+                        $"IGNORED STALE GUID PATH: {sourceGuid} -> {existingAssetPath}");
+                    existingAssetPath = string.Empty;
+                }
+
                 string relativePath = GetRelativePath(exportRoot, sourcePath).Replace('\\', '/');
                 bool isSelectedAsset = string.Equals(
                     sourcePath, selectedSourcePath, StringComparison.OrdinalIgnoreCase);
@@ -782,6 +803,13 @@ namespace DaftAppleGames.Editor
                     !string.Equals(existingAssetPath, destinationAssetPath, StringComparison.OrdinalIgnoreCase);
                 bool copySelectedAssetWithNewGuid = guidExistsAtAnotherPath &&
                     overrideSelectedObjectDestination && isSelectedAsset;
+                if (repairMissingTmpAtlases && IsDynamicTmpFontAsset(sourcePath))
+                {
+                    string fontAssetPath = guidExistsAtAnotherPath && !copySelectedAssetWithNewGuid
+                        ? existingAssetPath
+                        : destinationAssetPath;
+                    if (IsProjectAssetPath(fontAssetPath)) tmpFontAssetsToRepair.Add(fontAssetPath);
+                }
 
                 if (guidExistsAtAnotherPath && !copySelectedAssetWithNewGuid)
                 {
@@ -930,6 +958,111 @@ namespace DaftAppleGames.Editor
             }
 
             return contents;
+        }
+
+        private static void RepairMissingTmpFontAtlases(HashSet<string> fontAssetPaths,
+            StringBuilder reportBuilder)
+        {
+            List<string> repairedAssetPaths = new List<string>();
+            foreach (string fontAssetPath in fontAssetPaths)
+            {
+                Object fontAsset = AssetDatabase.LoadMainAssetAtPath(fontAssetPath);
+                if (!fontAsset || !string.Equals(
+                        fontAsset.GetType().FullName, "TMPro.TMP_FontAsset", StringComparison.Ordinal)) continue;
+
+                SerializedObject serializedFontAsset = new SerializedObject(fontAsset);
+                serializedFontAsset.Update();
+                SerializedProperty populationMode = serializedFontAsset.FindProperty("m_AtlasPopulationMode");
+                SerializedProperty atlasTextures = serializedFontAsset.FindProperty("m_AtlasTextures");
+                if (populationMode is null || populationMode.intValue != 1 || atlasTextures is null) continue;
+
+                if (atlasTextures.arraySize > 0 &&
+                    atlasTextures.GetArrayElementAtIndex(0).objectReferenceValue) continue;
+
+                SerializedProperty sourceFontFile = serializedFontAsset.FindProperty("m_SourceFontFile");
+                if (sourceFontFile is null || !sourceFontFile.objectReferenceValue)
+                {
+                    reportBuilder.AppendLine($"UNRESOLVED TMP SOURCE FONT: {fontAssetPath}");
+                    continue;
+                }
+
+                int atlasWidth = GetPositiveSerializedInt(serializedFontAsset, "m_AtlasWidth", 1024);
+                int atlasHeight = GetPositiveSerializedInt(serializedFontAsset, "m_AtlasHeight", 1024);
+                Texture2D atlasTexture = FindAtlasTextureSubAsset(fontAssetPath);
+                if (!atlasTexture)
+                {
+                    atlasTexture = new Texture2D(
+                        atlasWidth, atlasHeight, TextureFormat.Alpha8, false, true)
+                    {
+                        name = fontAsset.name + " Atlas",
+                        filterMode = FilterMode.Bilinear,
+                        wrapMode = TextureWrapMode.Clamp,
+                        hideFlags = HideFlags.HideInHierarchy
+                    };
+                    atlasTexture.LoadRawTextureData(new byte[atlasWidth * atlasHeight]);
+                    atlasTexture.Apply(false, false);
+                    AssetDatabase.AddObjectToAsset(atlasTexture, fontAsset);
+                }
+
+                atlasTextures.arraySize = 1;
+                atlasTextures.GetArrayElementAtIndex(0).objectReferenceValue = atlasTexture;
+                SerializedProperty atlasTextureIndex = serializedFontAsset.FindProperty("m_AtlasTextureIndex");
+                if (atlasTextureIndex != null) atlasTextureIndex.intValue = 0;
+                serializedFontAsset.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(fontAsset);
+
+                SerializedProperty materialProperty = serializedFontAsset.FindProperty("material") ??
+                                                      serializedFontAsset.FindProperty("m_Material");
+                Material fontMaterial = materialProperty?.objectReferenceValue as Material;
+                if (fontMaterial)
+                {
+                    fontMaterial.mainTexture = atlasTexture;
+                    if (fontMaterial.HasProperty("_TextureWidth"))
+                        fontMaterial.SetFloat("_TextureWidth", atlasWidth);
+                    if (fontMaterial.HasProperty("_TextureHeight"))
+                        fontMaterial.SetFloat("_TextureHeight", atlasHeight);
+                    EditorUtility.SetDirty(fontMaterial);
+                }
+
+                repairedAssetPaths.Add(fontAssetPath);
+                reportBuilder.AppendLine(
+                    $"REPAIRED TMP ATLAS: {fontAssetPath} ({atlasWidth}x{atlasHeight})");
+            }
+
+            if (repairedAssetPaths.Count == 0) return;
+
+            AssetDatabase.SaveAssets();
+            for (int assetIndex = 0; assetIndex < repairedAssetPaths.Count; assetIndex++)
+                AssetDatabase.ImportAsset(repairedAssetPaths[assetIndex], ImportAssetOptions.ForceUpdate);
+        }
+
+        private static int GetPositiveSerializedInt(SerializedObject serializedObject, string propertyName,
+            int defaultValue)
+        {
+            SerializedProperty property = serializedObject.FindProperty(propertyName);
+            return property != null && property.intValue > 0 ? property.intValue : defaultValue;
+        }
+
+        private static Texture2D FindAtlasTextureSubAsset(string fontAssetPath)
+        {
+            Object[] assets = AssetDatabase.LoadAllAssetsAtPath(fontAssetPath);
+            for (int assetIndex = 0; assetIndex < assets.Length; assetIndex++)
+            {
+                Texture2D texture = assets[assetIndex] as Texture2D;
+                if (texture) return texture;
+            }
+
+            return null;
+        }
+
+        private static bool IsDynamicTmpFontAsset(string path)
+        {
+            if (!string.Equals(Path.GetExtension(path), ".asset", StringComparison.OrdinalIgnoreCase)) return false;
+
+            string contents = ReadAllText(path);
+            return contents.IndexOf("m_AtlasPopulationMode: 1", StringComparison.Ordinal) >= 0 &&
+                   contents.IndexOf("m_AtlasTextures:", StringComparison.Ordinal) >= 0 &&
+                   contents.IndexOf("m_SourceFontFile:", StringComparison.Ordinal) >= 0;
         }
 
         private static int FixShaderFile(string path, bool writeChanges)
