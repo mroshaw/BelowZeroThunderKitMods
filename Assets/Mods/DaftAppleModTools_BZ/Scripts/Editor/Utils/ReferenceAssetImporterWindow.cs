@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -246,10 +247,12 @@ namespace DaftAppleGames.Editor
 
                 cancellationToken.ThrowIfCancellationRequested();
                 SetImportProgress(0.55f, "Indexing ThunderKit game scripts...");
+                await Task.Yield();
                 Dictionary<string, MonoScript> gameScriptsByType = BuildGameScriptIndex(reportBuilder);
 
                 cancellationToken.ThrowIfCancellationRequested();
                 SetImportProgress(0.65f, "Resolving game script references...");
+                await Task.Yield();
                 Dictionary<string, string> scriptReferences = BuildScriptReferences(
                     scriptGuids, exportedAssetsByGuid, gameScriptsByType, reportBuilder);
                 Dictionary<ManagedScriptReference, string> managedAssemblyScriptReferences =
@@ -495,7 +498,8 @@ namespace DaftAppleGames.Editor
 
                 if (discoveredAssets.Count % 25 == 0)
                     progress.Report(new ImportProgress(
-                        0.47f, $"Discovering dependencies ({discoveredAssets.Count} found)..."));
+                        0.47f, $"Discovering dependencies ({discoveredAssets.Count} found): " +
+                               Path.GetFileName(assetPath)));
 
                 FindReferencedAssets(
                     assetPath, assetsByGuid, pendingAssets, scriptGuids, managedScriptReferences);
@@ -600,7 +604,7 @@ namespace DaftAppleGames.Editor
             if (sourceReferences.Count == 0) return references;
 
             Dictionary<string, MonoScript> projectScriptsByAssemblyAndLocalId =
-                BuildProjectScriptLocalIdIndex(reportBuilder);
+                BuildProjectScriptLocalIdIndex(sourceReferences, assetsByGuid, reportBuilder);
             foreach (ManagedScriptReference sourceReference in sourceReferences)
             {
                 string sourceAssemblyPath;
@@ -637,32 +641,100 @@ namespace DaftAppleGames.Editor
             return references;
         }
 
-        private static Dictionary<string, MonoScript> BuildProjectScriptLocalIdIndex(StringBuilder reportBuilder)
+        private static Dictionary<string, MonoScript> BuildProjectScriptLocalIdIndex(
+            HashSet<ManagedScriptReference> sourceReferences, Dictionary<string, string> assetsByGuid,
+            StringBuilder reportBuilder)
         {
             Dictionary<string, MonoScript> scriptsByAssemblyAndLocalId =
                 new Dictionary<string, MonoScript>(StringComparer.Ordinal);
-            string[] scriptGuids = AssetDatabase.FindAssets("t:MonoScript");
-            int indexedCount = 0;
-            for (int scriptIndex = 0; scriptIndex < scriptGuids.Length; scriptIndex++)
+            Dictionary<string, HashSet<long>> requiredIdsByAssembly =
+                BuildRequiredManagedScriptIds(sourceReferences, assetsByGuid);
+            Assembly[] loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+            for (int assemblyIndex = 0; assemblyIndex < loadedAssemblies.Length; assemblyIndex++)
             {
-                string assetPath = AssetDatabase.GUIDToAssetPath(scriptGuids[scriptIndex]);
-                MonoScript monoScript = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
-                if (!monoScript) continue;
+                Assembly assembly = loadedAssemblies[assemblyIndex];
+                string assemblyName = assembly.GetName().Name;
+                HashSet<long> requiredLocalIds;
+                if (!requiredIdsByAssembly.TryGetValue(assemblyName, out requiredLocalIds)) continue;
 
-                Type scriptType = monoScript.GetClass();
-                if (scriptType is null) continue;
+                Type[] types = GetLoadableTypes(assembly);
+                for (int typeIndex = 0; typeIndex < types.Length; typeIndex++)
+                {
+                    Type scriptType = types[typeIndex];
+                    if (scriptType is null || !typeof(UnityEngine.Object).IsAssignableFrom(scriptType)) continue;
 
-                long dllLocalId = ComputeManagedScriptLocalId(scriptType);
-                string assemblyName = scriptType.Assembly.GetName().Name;
-                string lookupKey = GetManagedScriptLookupKey(assemblyName, dllLocalId);
-                if (!scriptsByAssemblyAndLocalId.ContainsKey(lookupKey))
-                    scriptsByAssemblyAndLocalId.Add(lookupKey, monoScript);
-                indexedCount++;
+                    long dllLocalId = ComputeManagedScriptLocalId(scriptType);
+                    if (!requiredLocalIds.Contains(dllLocalId)) continue;
+
+                    MonoScript monoScript = FindMonoScriptForType(scriptType);
+                    if (!monoScript) continue;
+
+                    string lookupKey = GetManagedScriptLookupKey(assemblyName, dllLocalId);
+                    scriptsByAssemblyAndLocalId[lookupKey] = monoScript;
+                }
             }
 
             reportBuilder.AppendLine(
-                $"Indexed {indexedCount} project scripts for managed assembly reference remapping.");
+                $"Resolved {scriptsByAssemblyAndLocalId.Count} targeted project scripts for " +
+                "managed assembly reference remapping.");
             return scriptsByAssemblyAndLocalId;
+        }
+
+        private static Dictionary<string, HashSet<long>> BuildRequiredManagedScriptIds(
+            HashSet<ManagedScriptReference> sourceReferences, Dictionary<string, string> assetsByGuid)
+        {
+            Dictionary<string, HashSet<long>> requiredIdsByAssembly =
+                new Dictionary<string, HashSet<long>>(StringComparer.Ordinal);
+            foreach (ManagedScriptReference sourceReference in sourceReferences)
+            {
+                string assemblyPath;
+                if (!assetsByGuid.TryGetValue(sourceReference.Guid, out assemblyPath)) continue;
+
+                string assemblyName = Path.GetFileNameWithoutExtension(assemblyPath);
+                HashSet<long> requiredLocalIds;
+                if (!requiredIdsByAssembly.TryGetValue(assemblyName, out requiredLocalIds))
+                {
+                    requiredLocalIds = new HashSet<long>();
+                    requiredIdsByAssembly.Add(assemblyName, requiredLocalIds);
+                }
+
+                requiredLocalIds.Add(sourceReference.LocalId);
+            }
+
+            return requiredIdsByAssembly;
+        }
+
+        private static Type[] GetLoadableTypes(Assembly assembly)
+        {
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException exception)
+            {
+                List<Type> loadableTypes = new List<Type>(exception.Types.Length);
+                for (int typeIndex = 0; typeIndex < exception.Types.Length; typeIndex++)
+                {
+                    Type type = exception.Types[typeIndex];
+                    if (type != null) loadableTypes.Add(type);
+                }
+
+                return loadableTypes.ToArray();
+            }
+        }
+
+        private static MonoScript FindMonoScriptForType(Type targetType)
+        {
+            string[] candidateGuids = AssetDatabase.FindAssets(targetType.Name + " t:MonoScript");
+            for (int candidateIndex = 0; candidateIndex < candidateGuids.Length; candidateIndex++)
+            {
+                string assetPath = AssetDatabase.GUIDToAssetPath(candidateGuids[candidateIndex]);
+                MonoScript monoScript = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
+                if (monoScript && monoScript.GetClass() == targetType) return monoScript;
+            }
+
+            return null;
         }
 
         private static string GetManagedScriptLookupKey(string assemblyName, long localId)

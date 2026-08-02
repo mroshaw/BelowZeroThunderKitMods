@@ -73,7 +73,7 @@ Managed assembly artifacts (`.dll`, `.pdb`, and `.mdb`) are excluded from depend
 
 AssetRipper exports game scripts as `.cs` files with their own GUIDs. The importer matches those scripts by namespace and type name to `MonoScript` entries in the imported game DLLs. During copying, matching `m_Script` references are rewritten to use the DLL asset GUID and local file ID expected by Unity.
 
-Some package components, particularly UGUI and TextMeshPro components, are exported as `MonoScript` references into managed DLLs. The importer derives their Unity DLL-local script IDs, matches them by assembly and type against the valid `MonoScript` assets installed in the project, and rewrites the references to those package scripts. This preserves components such as `Image`, `LayoutElement`, and `TextMeshProUGUI` without copying conflicting Unity assemblies into the project.
+Some package components, particularly UGUI and TextMeshPro components, are exported as `MonoScript` references into managed DLLs. The importer derives their Unity DLL-local script IDs, matches only the referenced assemblies and IDs against valid `MonoScript` assets installed in the project, and rewrites the references to those package scripts. This targeted lookup preserves components such as `Image`, `LayoutElement`, and `TextMeshProUGUI` without copying conflicting Unity assemblies or scanning every script in the project.
 
 Unmatched scripts are listed as `UNRESOLVED SCRIPT` entries in the report.
 
