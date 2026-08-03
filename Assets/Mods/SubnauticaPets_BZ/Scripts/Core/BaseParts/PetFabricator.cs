@@ -122,13 +122,11 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             var newPet = newPetGameObject.GetComponent<Pet>();
             if (newPet)
             {
+                PetPrefabConfigUtils.ConfigureCreature(newPetGameObject);
+
                 ModDebugLog.LogDebug("PetFabricator: Setting Pet Name...");
                 newPet.PetName = $"Test Subject {SubnauticaPetsPlugin.PetSaver.PetList.Count + 1}";
                 ModDebugLog.LogDebug("PetFabricator: Setting Pet Name... Done.");
-
-                ModDebugLog.LogDebug("PetFabricator: Setting Pet scale...");
-                newPet.gameObject.transform.localScale = Vector3.one * newPet.ScaleFactor;
-                ModDebugLog.LogDebug("PetFabricator: Setting Pet scale... Done.");
                 
                 // Tell the pet which base it belongs to and parent the transform
                 newPet.Base = Base;

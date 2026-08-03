@@ -27,7 +27,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         ///     Creates an authored pet prefab and grafts a model from a vanilla prefab onto it.
         /// </summary>
         internal static IEnumerator CreateWithVanillaModel(IOut<GameObject> result, PrefabInfo info,
-            string prefabAssetName, string vanillaClassId, System.Action<GameObject> modifyPrefab = null)
+            string prefabAssetName, string vanillaClassId)
         {
             GameObject prefabAsset =
                 ModAssetUtils.GetObjectFromAssetBundle<GameObject>(prefabAssetName) as GameObject;
@@ -72,7 +72,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             Object.Destroy(vanillaInstance);
 
             PetPrefabConfigUtils.ConfigurePrefabIdentifier(petPrefab, info.ClassID, info.TechType);
-            modifyPrefab?.Invoke(petPrefab);
+            PetPrefabConfigUtils.ConfigureLandOnlyCreature(petPrefab);
             petPrefab.name = info.ClassID;
             result.Set(petPrefab);
             ModDebugLog.LogDebug($"Attached vanilla model '{configurator.ModelGameObjectName}' to {info.TechType}.");

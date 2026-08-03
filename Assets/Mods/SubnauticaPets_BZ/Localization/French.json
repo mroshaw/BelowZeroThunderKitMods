@@ -91,5 +91,10 @@
   "Tooltip_TrivalveBluePet": "Un trivalve bleu domestique. Une superbe créature, très amicale.",
   "TrivalveBluePetDna": "Échantillon d'ADN de trivalve bleu",
   "Tooltip_TrivalveBluePetDna": "Un échantillon d'ADN de trivalve bleu. Plus commun que leurs cousins jaunes, mais pas moins époustouflant.",
-  "Scanner_TrivalveBluePetDna": "ADN de Trivalve B."
+  "Scanner_TrivalveBluePetDna": "ADN de Trivalve B.",
+  "RockPuncherPet": "Brise-roche apprivoisé",
+  "Tooltip_RockPuncherPet": "Un brise-roche apprivoisé. Gardez les objets fragiles loin de ses poings !",
+  "RockPuncherPetDna": "Échantillon d'ADN de brise-roche",
+  "Tooltip_RockPuncherPetDna": "Un échantillon d'ADN de brise-roche. À manipuler avec précaution : cette créature peut pulvériser la roche.",
+  "Scanner_RockPuncherPetDna": "ADN de brise-roche"
 }

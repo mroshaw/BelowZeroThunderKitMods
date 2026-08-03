@@ -21,8 +21,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 .WithIcon(ModAssetUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
             CustomPrefab prefab = new CustomPrefab(Info);
             prefab.SetGameObject(result =>
-                PetPrefabs.CreateWithVanillaModel(result, Info, PrefabAssetName, CloneClassId,
-                    PetPrefabConfigUtils.ConfigureLandOnlyCreature));
+                PetPrefabs.CreateWithVanillaModel(result, Info, PrefabAssetName, CloneClassId));
             RecipeData recipe = ConfigFile.ModMode == ModMode.Adventure
                 ? new RecipeData(new Ingredient(TechType.Gold, 1), new Ingredient(PetDnaPrefabs.RockPuncherDnaPrefab.Info.TechType, 3), new Ingredient(TechType.Nickel, 1), new Ingredient(TechType.Quartz, 2))
                 : new RecipeData(new Ingredient(TechType.Titanium, 1));

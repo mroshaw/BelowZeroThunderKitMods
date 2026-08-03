@@ -91,5 +91,10 @@
   "Tooltip_TrivalveBluePet": "Питомец  Синий Тривалв. Прекрасное существо, и еще и дружелюбное.",
   "TrivalveBluePetDna": "Образец ДНК Синего Тривалва",
   "Tooltip_TrivalveBluePetDna": "Образец ДНК Синего Тривалва. Не так уникальны, как их золотистые собратья, но все равно потрясающее существо.",
-  "Scanner_TrivalveBluePetDna": "B. Trivalve DNA"
+  "Scanner_TrivalveBluePetDna": "B. Trivalve DNA",
+  "RockPuncherPet": "Питомец Камнедробитель",
+  "Tooltip_RockPuncherPet": "Питомец камнедробитель. Держите хрупкие предметы подальше от его кулаков!",
+  "RockPuncherPetDna": "Образец ДНК камнедробителя",
+  "Tooltip_RockPuncherPetDna": "Образец ДНК камнедробителя. Обращайтесь осторожно: это существо способно дробить цельную скалу.",
+  "Scanner_RockPuncherPetDna": "ДНК камнедробителя"
 }

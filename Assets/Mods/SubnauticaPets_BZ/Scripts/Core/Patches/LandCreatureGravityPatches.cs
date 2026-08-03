@@ -24,7 +24,7 @@ namespace DaftAppleGames.SubnauticaPets.Patches
         /// </summary>
         [HarmonyPatch(nameof(LandCreatureGravity.IsUnderwater))]
         [HarmonyPrefix]
-        public static bool IsUnderwater_Prefix(Player __instance, float waterLevelOffset, bool __result)
+        public static bool IsUnderwater_Prefix(LandCreatureGravity __instance, float waterLevelOffset, ref bool __result)
         {
             if (__instance.TryGetComponent(out Pet pet))
             {

@@ -91,5 +91,10 @@
   "Tooltip_TrivalveBluePet": "A pet blue Trivalve. A gorgeous creature, and friendly too.",
   "TrivalveBluePetDna": "Blue Trivalve DNA Sample",
   "Tooltip_TrivalveBluePetDna": "A sample of DNA from a blue Trivalve. Not quite as unique as their golden cousins, but a stunning creature nonetheless.",
-  "Scanner_TrivalveBluePetDna": "B. Trivalve DNA"
+  "Scanner_TrivalveBluePetDna": "B. Trivalve DNA",
+  "RockPuncherPet": "Rock Puncher Pet",
+  "Tooltip_RockPuncherPet": "A pet Rock Puncher. Keep anything fragile away from those fists!",
+  "RockPuncherPetDna": "Rock Puncher DNA Sample",
+  "Tooltip_RockPuncherPetDna": "A sample of DNA from a Rock Puncher. Handle with care: this creature can shatter solid rock.",
+  "Scanner_RockPuncherPetDna": "Rock Puncher DNA"
 }

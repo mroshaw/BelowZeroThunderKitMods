@@ -267,6 +267,26 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             prefab.Register();
         }
 
+        internal static void ConfigureCreature(GameObject targetGameObject)
+        {
+            Creature creature = targetGameObject.GetComponent<Creature>();
+            Pet pet = targetGameObject.GetComponent<Pet>();
+
+            if (!pet)
+                return;
+
+            if (creature)
+            {
+                ModDebugLog.LogDebug($"... ConfigureCreature:  Creature.SetScale set to {pet.ScaleFactor}...");
+                creature.SetScale(pet.ScaleFactor);
+            }
+            else
+            {
+                ModDebugLog.LogDebug($"... ConfigureCreature:  Transform Scale set to {pet.ScaleFactor}...");
+                targetGameObject.transform.localScale = Vector3.one * pet.ScaleFactor;
+            }
+        }
+
         /// <summary>
         ///     Configure Swimming components
         /// </summary>

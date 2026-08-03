@@ -131,7 +131,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         {
             SubnauticaPetsPlugin.PetSaver.UnregisterPet(this);
         }
-
+        
         /// <summary>
         ///     Ensures the Pet gameobject is parented to the base
         /// </summary>

@@ -91,5 +91,10 @@
   "Tooltip_TrivalveBluePet": "Una mascota Trivalvo Azul.",
   "TrivalveBluePetDna": "Blue Trivalve DNA Sample",
   "Tooltip_TrivalveBluePetDna": "A sample of DNA from a blue Trivalve. Not quite as unique as their golden cousins, but a stunning creature nonetheless.",
-  "Scanner_TrivalveBluePetDna": "B. Trivalve DNA"
+  "Scanner_TrivalveBluePetDna": "B. Trivalve DNA",
+  "RockPuncherPet": "Mascota Machacarrocas",
+  "Tooltip_RockPuncherPet": "Un machacarrocas mascota. ¡Mantén los objetos frágiles lejos de sus puños!",
+  "RockPuncherPetDna": "Muestra de ADN de machacarrocas",
+  "Tooltip_RockPuncherPetDna": "Una muestra de ADN de un machacarrocas. Manipúlala con cuidado: esta criatura puede triturar roca sólida.",
+  "Scanner_RockPuncherPetDna": "ADN de machacarrocas"
 }

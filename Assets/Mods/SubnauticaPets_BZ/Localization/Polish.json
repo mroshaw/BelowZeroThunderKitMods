@@ -91,5 +91,10 @@
   "Tooltip_TrivalveBluePet": "Niebieski Trivalve",
   "TrivalveBluePetDna": "Prubka DNA niebieskiego Trivalve",
   "Tooltip_TrivalveBluePetDna": "Prubka DNA pobrana z niebieskiego Trivalve",
-  "Scanner_TrivalveBluePetDna": "B. Trivalve DNA"
+  "Scanner_TrivalveBluePetDna": "B. Trivalve DNA",
+  "RockPuncherPet": "Udomowiony skałogniot",
+  "Tooltip_RockPuncherPet": "Udomowiony skałogniot. Trzymaj delikatne przedmioty z dala od jego pięści!",
+  "RockPuncherPetDna": "Próbka DNA skałogniota",
+  "Tooltip_RockPuncherPetDna": "Próbka DNA skałogniota. Zachowaj ostrożność: to stworzenie potrafi kruszyć litą skałę.",
+  "Scanner_RockPuncherPetDna": "DNA skałogniota"
 }
