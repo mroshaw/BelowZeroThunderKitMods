@@ -46,7 +46,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             PetPrefabConfigUtils.ConfigureSkyApplier(damagedConsolePrefab);
             PetPrefabConfigUtils.ConfigurePickupable(damagedConsolePrefab, false);
             PetPrefabConfigUtils.SetRigidBodyKinematic(damagedConsolePrefab, true);
-            damagedConsolePrefab.AddComponent<PetFabricatorFragment>();
+            damagedConsolePrefab.AddComponent<PetConsoleFragment>();
 
             consoleFragmentPrefab.SetGameObject(damagedConsolePrefab);
 
@@ -55,11 +55,11 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             SpawnLocation[] spawnLocations =
             {
                 new SpawnLocation(new Vector3(98.44f, -384.53f, -930.38f),
-                    new Vector3(55.80f, 80.04f, 101.99f)), // warp 97.62 -383.40 -929.72
+                    new Vector3(55.80f, 80.04f, 101.99f)), // warp 98.44 -382.53 -930.38
                 new SpawnLocation(new Vector3(94.51f, -392.88f, -918.59f),
-                    new Vector3(77.87f, 278.71f, 198.68f)), // warp 95.17 -388.81 -919.84
+                    new Vector3(77.87f, 278.71f, 198.68f)), // warp 94.51 -390.88 -918.59
                 new SpawnLocation(new Vector3(-247.83f, 40.48f, -780.01f),
-                    new Vector3(79.41f, 296.13f, 67.11f)), // warp -245.70 41.95 -779.69
+                    new Vector3(79.41f, 296.13f, 67.11f)), // warp -247.83 42.48 -780.01
                 new SpawnLocation(new Vector3(-93.28f, 9.55f, 305.32f),
                     new Vector3(53.20f, 303.42f, 88.92f)), // warp -90.27 10.57 305.48
                 new SpawnLocation(new Vector3(56.41f, -75.96f, -793.46f),

@@ -37,7 +37,8 @@
         "Nautilus.dll",
         "FMODUnity.dll",
         "Unity.Addressables.dll",
-        "Sirenix.OdinInspector.Editor.dll"
+        "Sirenix.OdinInspector.Editor.dll",
+        "Sirenix.OdinInspector.Attributes.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

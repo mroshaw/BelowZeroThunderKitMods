@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using DaftAppleGames.SubnauticaPets.Extensions;
+using DaftAppleGames.ModTools.Extensions;
 using UnityEngine;
 using static DaftAppleGames.SubnauticaPets.SubnauticaPetsPlugin;
 
@@ -21,6 +21,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
     /// </summary>
     internal class Pet : MonoBehaviour
     {
+        [SerializeField] private float scaleFactor = 1.0f;
         private const float DelayBeforeDestroy = 10.0f;
 
         private readonly RaycastHit[] _baseCheckCache = new RaycastHit[10];
@@ -46,6 +47,8 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         internal Base Base { get; set; }
         internal string BaseId => Base != null ? Base.GetComponent<PrefabIdentifier>().Id : "NO BASE!";
 
+        internal float ScaleFactor => scaleFactor;
+        
         /// <summary>
         ///     The TechType or type of Pet
         /// </summary>
@@ -371,12 +374,13 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// </summary>
         internal static bool IsPetTechType(TechType techType)
         {
-            return techType == PetPrefabs.PenglingBabyPrefab.Info.TechType ||
-                   techType == PetPrefabs.PengwingAdultPrefab.Info.TechType ||
-                   techType == PetPrefabs.SnowstalkerBabyPrefab.Info.TechType ||
-                   techType == PetPrefabs.PinnacaridPrefab.Info.TechType ||
-                   techType == PetPrefabs.TrivalveYellowPrefab.Info.TechType ||
-                   techType == PetPrefabs.TrivalveBluePrefab.Info.TechType ||
+            return techType == PenglingBabyPrefab.Info.TechType ||
+                   techType == PengwingAdultPrefab.Info.TechType ||
+                   techType == SnowstalkerBabyPrefab.Info.TechType ||
+                   techType == PinnacaridPrefab.Info.TechType ||
+                   techType == RockPuncherPrefab.Info.TechType ||
+                   techType == TrivalveYellowPrefab.Info.TechType ||
+                   techType == TrivalveBluePrefab.Info.TechType ||
                    techType == CustomPetPrefabs.CatPetPrefab.Info.TechType ||
                    techType == CustomPetPrefabs.DogPetPrefab.Info.TechType ||
                    techType == CustomPetPrefabs.RabbitPetPrefab.Info.TechType ||

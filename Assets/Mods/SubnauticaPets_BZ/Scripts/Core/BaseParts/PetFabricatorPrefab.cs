@@ -1,4 +1,4 @@
-﻿using DaftAppleGames.SubnauticaPets.Extensions;
+﻿using DaftAppleGames.ModTools.Extensions;
 using DaftAppleGames.SubnauticaPets.Pets;
 using Nautilus.Assets;
 using Nautilus.Assets.Gadgets;
@@ -35,12 +35,13 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             var fabricatorPrefab = new CustomPrefab(Info);
 
             var fabGadget = fabricatorPrefab.CreateFabricator(out var treeType)
-                .AddCraftNode(PetPrefabs.PenglingBabyPrefab.Info.TechType)
-                .AddCraftNode(PetPrefabs.PengwingAdultPrefab.Info.TechType)
-                .AddCraftNode(PetPrefabs.PinnacaridPrefab.Info.TechType)
-                .AddCraftNode(PetPrefabs.SnowstalkerBabyPrefab.Info.TechType)
-                .AddCraftNode(PetPrefabs.TrivalveBluePrefab.Info.TechType)
-                .AddCraftNode(PetPrefabs.TrivalveYellowPrefab.Info.TechType);
+                .AddCraftNode(PenglingBabyPrefab.Info.TechType)
+                .AddCraftNode(PengwingAdultPrefab.Info.TechType)
+                .AddCraftNode(PinnacaridPrefab.Info.TechType)
+                .AddCraftNode(RockPuncherPrefab.Info.TechType)
+                .AddCraftNode(SnowstalkerBabyPrefab.Info.TechType)
+                .AddCraftNode(TrivalveBluePrefab.Info.TechType)
+                .AddCraftNode(TrivalveYellowPrefab.Info.TechType);
 
             // If enabled, add the "bonus pets" to the fabricator
             if (SubnauticaPetsPlugin.ConfigFile.EnableBonusPets)
@@ -59,7 +60,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
                 {
                     obj.SetActive(false);
                     obj.AddComponent<PetFabricator>();
-                    obj.ApplyNewMeshTexture("PetFabricatorTexture", "");
+                    obj.ApplyNewMeshTexture("PetFabricatorTexture", "", SubnauticaPetsPlugin.ModAssetUtils);
                     obj.SetActive(false);
                 }
             };
@@ -67,8 +68,8 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             fabricatorPrefab.SetGameObject(fabPrefab);
 
             // Define the recipe for the new Fabricator, depends on whether in "Adventure" or "Creative" mode.
-            RecipeData recipe = null;
-            if (SubnauticaPetsPlugin.ConfigFile.ModMode == ModMode.Adventure)
+            RecipeData recipe;
+            if (ConfigFile.ModMode == ModMode.Adventure)
                 recipe = new RecipeData(
                     new Ingredient(TechType.Titanium, 5),
                     new Ingredient(TechType.ComputerChip, 1),

@@ -1,4 +1,5 @@
 using System.Collections;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using static DaftAppleGames.SubnauticaPets.SubnauticaPetsPlugin;
 
@@ -78,6 +79,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             if (_pet.IsDead && !_animator.GetBool(DeadAnim)) _animator.SetBool(DeadAnim, true);
         }
 
+        [Button("Play Random Body Anim")]
         internal void PlayRandomBodyAnim(bool playSound)
         {
             if (!_animator || _bodyAnimHashKeys == null || _bodyAnimHashKeys.Length == 0) return;
@@ -95,6 +97,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             StartCoroutine(PlayRandomFaceAnimAsync(duration));
         }
 
+        [Button("Play Random Face Anim")]
         internal void PlayRandomFaceAnim()
         {
             if (!_animator || _faceAnimHashKeys == null || _faceAnimHashKeys.Length == 0 ||

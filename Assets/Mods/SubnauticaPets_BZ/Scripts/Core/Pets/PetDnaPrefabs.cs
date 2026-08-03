@@ -89,6 +89,10 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             new SpawnLocation(new Vector3(547.11f, -206.15f, -1092.51f)),
             new SpawnLocation(new Vector3(-252.56f, -126.35f, -238.21f))
         };
+        
+        private static readonly SpawnLocation[] RockPuncherFixedSpawns =
+        {
+        };
 
         /// <summary>
         ///     Registers all DNA prefabs.
@@ -106,6 +110,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             SnowstalkerBabyDnaPrefab.Register(dnaModelPrefab);
             TrivalveBlueDnaPrefab.Register(dnaModelPrefab);
             TrivalveYellowDnaPrefab.Register(dnaModelPrefab);
+            RockPuncherDnaPrefab.Register(dnaModelPrefab);
             ConfigureDataBank();
         }
 
@@ -176,7 +181,8 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 return TrivalveYellowFixedSpawns;
             if (classId == PinnacaridDnaPrefab.ClassId)
                 return PinnacaridFixedSpawns;
-
+            if (classId == RockPuncherDnaPrefab.ClassId)
+                return RockPuncherFixedSpawns;
             return NoFixedSpawns;
         }
 
@@ -268,22 +274,6 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             {
                 Biome = biome;
                 Probability = probability;
-            }
-        }
-
-        internal static class CatDnaPrefab
-        {
-            private const string ClassId = "CatPetDna";
-            private const string TextureAssetName = "CatDnaStrandTexture.png";
-            internal static PrefabInfo Info;
-
-            internal static void Register(GameObject dnaModelPrefab)
-            {
-                Info = RegisterDnaPrefab(ClassId, TextureAssetName, Color.grey, dnaModelPrefab, NestDistribution.All,
-                    Spawn(BiomeType.EastArctic_Ground, 0.08f),
-                    Spawn(BiomeType.WestArctic_Ground, 0.08f),
-                    Spawn(BiomeType.TwistyBridges_Ground, 0.08f),
-                    Spawn(BiomeType.GlacialBasin_BikeCrashSite, 0.08f));
             }
         }
 
@@ -448,6 +438,34 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                     Spawn(BiomeType.CrystalCave_Castle_Ground, 0.04f),
                     Spawn(BiomeType.CrystalCave_Ground, 0.04f),
                     Spawn(BiomeType.CrystalCave_Inner_Ground, 0.04f),
+                    Spawn(BiomeType.LilyPads_ShipWreck_Ground, 0.08f),
+                    Spawn(BiomeType.LilyPads_ShipWreck_Grass, 0.08f),
+                    Spawn(BiomeType.PurpleVents_ShipWreck_Ground, 0.08f),
+                    Spawn(BiomeType.MiningSite_Ground, 0.06f),
+                    Spawn(BiomeType.MargArea_BaseGround, 0.06f));
+            }
+        }
+        
+        internal static class RockPuncherDnaPrefab
+        {
+            internal const string ClassId = "RockPuncherPetDna";
+            private const string TextureAssetName = "RockPuncherDnaStrandTexture.png";
+            internal static PrefabInfo Info;
+
+            internal static void Register(GameObject dnaModelPrefab)
+            {
+                Info = RegisterDnaPrefab(ClassId, TextureAssetName, Color.red, dnaModelPrefab,
+                    NestDistribution.LilyPads,
+                    Spawn(BiomeType.LilyPads_Crevice_Ground, 0.10f),
+                    Spawn(BiomeType.LilyPads_Deep_Grass, 0.12f),
+                    Spawn(BiomeType.LilyPads_Deep_Ground, 0.12f),
+                    Spawn(BiomeType.LilyPads_Islands_Cave_Ground, 0.12f),
+                    Spawn(BiomeType.TreeSpires_BigFissure_Ground, 0.06f),
+                    Spawn(BiomeType.CrystalCave_Castle_Ground, 0.06f),
+                    Spawn(BiomeType.CrystalCave_Ground, 0.06f),
+                    Spawn(BiomeType.CrystalCave_Inner_Ground, 0.06f),
+                    Spawn(BiomeType.FabricatorCavern_Ground, 0.05f),
+                    Spawn(BiomeType.FabricatorCavern_Grass, 0.05f),
                     Spawn(BiomeType.LilyPads_ShipWreck_Ground, 0.08f),
                     Spawn(BiomeType.LilyPads_ShipWreck_Grass, 0.08f),
                     Spawn(BiomeType.PurpleVents_ShipWreck_Ground, 0.08f),

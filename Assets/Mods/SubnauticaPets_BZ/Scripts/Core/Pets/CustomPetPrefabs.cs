@@ -36,7 +36,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                     .WithIcon(ModAssetUtils.GetObjectFromAssetBundle<Sprite>(IconTextureAssetName) as Sprite);
                 PetPrefabConfigUtils.RegisterCustomPet(Info, ClassId, PrefabAssetName,
                     AudioAssetName,
-                    Info.TechType, PetDnaPrefabs.CatDnaPrefab.Info.TechType);
+                    Info.TechType, TechType.None);
             }
         }
 

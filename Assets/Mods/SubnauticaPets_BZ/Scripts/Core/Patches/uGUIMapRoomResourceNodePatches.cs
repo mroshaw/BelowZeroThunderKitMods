@@ -24,7 +24,7 @@ namespace DaftAppleGames.SubnauticaPets.Patches
                 techType != PetDnaPrefabs.SnowstalkerBabyDnaPrefab.Info.TechType &&
                 techType != PetDnaPrefabs.TrivalveBlueDnaPrefab.Info.TechType &&
                 techType != PetDnaPrefabs.TrivalveYellowDnaPrefab.Info.TechType &&
-                techType != PetDnaPrefabs.CatDnaPrefab.Info.TechType)
+                techType != PetDnaPrefabs.RockPuncherDnaPrefab.Info.TechType)
                 return;
 
             // Lookup our scanner text
