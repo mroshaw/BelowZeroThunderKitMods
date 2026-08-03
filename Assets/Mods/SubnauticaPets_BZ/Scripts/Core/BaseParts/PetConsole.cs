@@ -42,6 +42,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         [SerializeField] private GameObject foxTemplate;
         [SerializeField] private GameObject sealTemplate;
         [SerializeField] private GameObject walrusTemplate;
+        [SerializeField] private GameObject rockPuncherTemplate;
         private readonly string _confirmButtonText = "";
 
         private FMOD_CustomEmitter _alertEmitter;
@@ -486,6 +487,8 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
                     return sealTemplate;
                 case "WalrusPet":
                     return walrusTemplate;
+                case "RockPuncherPet":
+                    return rockPuncherTemplate;
                 default:
                     ModDebugLog.LogError($"GetScrollListTemplate: Unknown pet type: {petType}");
                     return null;

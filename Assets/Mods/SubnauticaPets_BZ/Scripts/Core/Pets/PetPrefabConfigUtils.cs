@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using DaftAppleGames.ModTools;
-using DaftAppleGames.SubnauticaPets.Extensions;
+﻿using DaftAppleGames.ModTools;
+using DaftAppleGames.ModTools.Extensions;
 using DaftAppleGames.SubnauticaPets.Utils;
 using Nautilus.Assets;
 using Nautilus.Assets.Gadgets;
@@ -10,7 +8,6 @@ using Nautilus.Handlers;
 using Nautilus.Utility;
 using UnityEngine;
 using UnityEngine.AI;
-using Object = UnityEngine.Object;
 using static DaftAppleGames.SubnauticaPets.SubnauticaPetsPlugin;
 
 namespace DaftAppleGames.SubnauticaPets.Pets
@@ -273,15 +270,15 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         ///     Configure Swimming components
         /// </summary>
-        internal static void ConfigureSwimming(GameObject targetGameObject)
+        internal static void ConfigureLandOnlyCreature(GameObject targetGameObject)
         {
-            ModDebugLog.LogDebug("ConfigureSwimming started...");
+            ModDebugLog.LogDebug("ConfigureLandOnlyCreature started...");
             // Prevent Pet from swimming in interiors   
             ModDebugLog.LogDebug("... ConfigurePetCreature:  LandCreatureGravity...");
             var landCreatureGravity = targetGameObject.GetComponent<LandCreatureGravity>();
             landCreatureGravity.forceLandMode = true;
             landCreatureGravity.enabled = true;
-            ModDebugLog.LogDebug("ConfigureSwimming done.");
+            ModDebugLog.LogDebug("ConfigureLandOnlyCreature done.");
         }
 
         /// <summary>
