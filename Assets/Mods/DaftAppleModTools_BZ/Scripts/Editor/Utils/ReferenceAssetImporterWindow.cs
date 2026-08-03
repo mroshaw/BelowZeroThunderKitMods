@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -11,9 +10,8 @@ using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
-#if ODIN_INSPECTOR
-using Sirenix.Utilities.Editor;
-#endif
+using static DaftAppleGames.Editor.ReferenceAssetImporterFileSystem;
+using static DaftAppleGames.Editor.ReferenceAssetImporterRepairs;
 namespace DaftAppleGames.Editor
 {
     /// <summary>
@@ -26,27 +24,14 @@ namespace DaftAppleGames.Editor
         private const string GameAssemblyPackagePath = "Packages/SubnauticaZero";
         private const string GuidIndexCachePath = "Library/DaftAppleModTools/ReferenceAssetImporterGuidIndex.cache";
         private const string GuidIndexCacheVersion = "REFERENCE_ASSET_GUID_INDEX_V1";
-        private const float LabelWidth = 205.0f;
-        private const int LegacyMaxDirectoryPath = 247;
-        private const int LegacyMaxFilePath = 259;
-        private const int ErrorAlreadyExists = 183;
 
         private static readonly Regex GuidRegex = new Regex(
             @"\bguid:\s*([0-9a-fA-F]{32})\b", RegexOptions.Compiled);
-        private static readonly Regex MetaGuidRegex = new Regex(
-            @"^guid:\s*([0-9a-fA-F]{32})\s*$", RegexOptions.Compiled | RegexOptions.Multiline);
         private static readonly Regex NamespaceRegex = new Regex(
             @"\bnamespace\s+([A-Za-z_][A-Za-z0-9_.]*)", RegexOptions.Compiled);
         private static readonly Regex MonoScriptReferenceRegex = new Regex(
             @"m_Script:\s*\{\s*fileID:\s*(-?\d+)\s*,\s*guid:\s*([0-9a-fA-F]{32})\s*,\s*type:\s*3\s*\}",
             RegexOptions.Compiled);
-        private static readonly Regex ShaderExponentRegex = new Regex(
-            @"(?<![A-Za-z0-9_.])[+-]?(?:\d+(?:\.\d*)?|\.\d+)[eE][+-]?\d+(?![A-Za-z0-9_.])",
-            RegexOptions.Compiled);
-        private static readonly bool IsWindowsEditor = Application.platform == RuntimePlatform.WindowsEditor;
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern bool CreateDirectoryW(string path, IntPtr securityAttributes);
 
         [SerializeField] private string sourceAssetPath = string.Empty;
         [SerializeField] private string exportAssetsPath = DefaultExportAssetsPath;
@@ -66,6 +51,56 @@ namespace DaftAppleGames.Editor
         private float importProgress;
         private string importStatus = string.Empty;
 
+        internal string SourceAssetPath { get => sourceAssetPath; set => sourceAssetPath = value; }
+        internal string ExportAssetsPath { get => exportAssetsPath; set => exportAssetsPath = value; }
+        internal string DestinationPath { get => destinationPath; set => destinationPath = value; }
+        internal bool OverrideSelectedObjectDestination
+        {
+            get => overrideSelectedObjectDestination;
+            set => overrideSelectedObjectDestination = value;
+        }
+        internal string SelectedObjectDestinationPath
+        {
+            get => selectedObjectDestinationPath;
+            set => selectedObjectDestinationPath = value;
+        }
+        internal bool ForceAssetRipperReindex
+        {
+            get => forceAssetRipperReindex;
+            set => forceAssetRipperReindex = value;
+        }
+        internal bool FixShaderENotation
+        {
+            get => fixShaderExponentNotation;
+            set => fixShaderExponentNotation = value;
+        }
+        internal bool RepairMissingTmpAtlases
+        {
+            get => repairMissingTmpAtlases;
+            set => repairMissingTmpAtlases = value;
+        }
+        internal bool ReportOnly { get => reportOnly; set => reportOnly = value; }
+        internal bool OverwriteExisting { get => overwriteExisting; set => overwriteExisting = value; }
+        internal Vector2 ReportScrollPosition
+        {
+            get => reportScrollPosition;
+            set => reportScrollPosition = value;
+        }
+        internal string Report => report;
+        internal bool IsImporting => isImporting;
+        internal float ProgressValue => importProgress;
+        internal string ImportStatus => importStatus;
+
+        internal void BeginImport()
+        {
+            ImportSelectedAssetAsync();
+        }
+
+        internal void CancelImport()
+        {
+            if (importCancellation != null) importCancellation.Cancel();
+        }
+
         [MenuItem("Tools/Import Reference Asset")]
         public static void ShowWindow()
         {
@@ -76,110 +111,7 @@ namespace DaftAppleGames.Editor
 
         private void OnGUI()
         {
-            EditorGUIUtility.labelWidth = LabelWidth;
-
-#if ODIN_INSPECTOR
-            SirenixEditorGUI.Title(
-                "AssetRipper Reference Asset Importer",
-                "Import an asset and its recursive dependency closure",
-                TextAlignment.Left,
-                true);
-            SirenixEditorGUI.InfoMessageBox(
-                "Copies the selected asset and its recursive dependencies while preserving AssetRipper GUIDs. " +
-                "Exported scripts are remapped to MonoScript types in ThunderKit's imported game DLLs.");
-            SirenixEditorGUI.Title("Import Paths", null, TextAlignment.Left, true);
-#else
-            EditorGUILayout.LabelField("AssetRipper Reference Asset Importer", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox(
-                "Copies the selected asset and its recursive dependencies while preserving AssetRipper GUIDs. " +
-                "Exported scripts are remapped to MonoScript types in ThunderKit's imported game DLLs.",
-                MessageType.Info);
-#endif
-
-            using (new EditorGUI.DisabledScope(isImporting))
-            {
-                DrawPathField("Export Assets Root", ref exportAssetsPath, true);
-                DrawSourceAssetField();
-                DrawPathField("Dependencies Destination", ref destinationPath, false);
-                overrideSelectedObjectDestination = EditorGUILayout.Toggle(
-                    "Override Object Destination", overrideSelectedObjectDestination);
-                if (overrideSelectedObjectDestination)
-                    DrawPathField("Selected Object Destination", ref selectedObjectDestinationPath, false);
-
-#if ODIN_INSPECTOR
-                SirenixEditorGUI.Title("Import Options", null, TextAlignment.Left, true);
-#else
-                EditorGUILayout.Space();
-#endif
-                forceAssetRipperReindex = EditorGUILayout.Toggle(
-                    "Force AssetRipper Re-index", forceAssetRipperReindex);
-                fixShaderExponentNotation = EditorGUILayout.Toggle(
-                    "Fix shader E notation", fixShaderExponentNotation);
-                repairMissingTmpAtlases = EditorGUILayout.Toggle(
-                    "Repair missing TMP atlases", repairMissingTmpAtlases);
-                reportOnly = EditorGUILayout.Toggle("Report only", reportOnly);
-                overwriteExisting = EditorGUILayout.Toggle("Overwrite Existing", overwriteExisting);
-            }
-
-            EditorGUILayout.Space();
-            if (isImporting)
-            {
-                Rect progressRect = EditorGUILayout.GetControlRect(false, 22.0f);
-                EditorGUI.ProgressBar(progressRect, importProgress, importStatus);
-                if (GUILayout.Button("Cancel Import", GUILayout.Height(28.0f))) importCancellation.Cancel();
-            }
-            else
-            {
-                using (new EditorGUI.DisabledScope(string.IsNullOrWhiteSpace(sourceAssetPath)))
-                {
-                    if (GUILayout.Button("Import Asset and Dependencies", GUILayout.Height(32.0f)))
-                        ImportSelectedAssetAsync();
-                }
-            }
-
-            EditorGUILayout.Space();
-#if ODIN_INSPECTOR
-            SirenixEditorGUI.Title("Import Report", null, TextAlignment.Left, true);
-#else
-            EditorGUILayout.LabelField("Import Report", EditorStyles.boldLabel);
-#endif
-            reportScrollPosition = EditorGUILayout.BeginScrollView(reportScrollPosition);
-            EditorGUILayout.TextArea(report, GUILayout.ExpandHeight(true));
-            EditorGUILayout.EndScrollView();
-        }
-
-        private void DrawSourceAssetField()
-        {
-            EditorGUILayout.BeginHorizontal();
-            sourceAssetPath = EditorGUILayout.TextField("Source Asset", sourceAssetPath);
-            if (GUILayout.Button("Browse", GUILayout.Width(72.0f)))
-            {
-                string absoluteRoot = GetAbsolutePath(exportAssetsPath);
-                string selectedPath = EditorUtility.OpenFilePanel("Select AssetRipper asset", absoluteRoot, string.Empty);
-                if (!string.IsNullOrEmpty(selectedPath)) sourceAssetPath = selectedPath;
-            }
-
-            EditorGUILayout.EndHorizontal();
-        }
-
-        private static void DrawPathField(string label, ref string path, bool allowAbsolutePath)
-        {
-            EditorGUILayout.BeginHorizontal();
-            path = EditorGUILayout.TextField(label, path);
-            if (GUILayout.Button("Browse", GUILayout.Width(72.0f)))
-            {
-                string initialPath = GetAbsolutePath(path);
-                string selectedPath = EditorUtility.OpenFolderPanel(label, initialPath, string.Empty);
-                if (!string.IsNullOrEmpty(selectedPath))
-                {
-                    string projectRelativePath = GetProjectRelativePath(selectedPath);
-                    path = allowAbsolutePath || string.IsNullOrEmpty(projectRelativePath)
-                        ? selectedPath
-                        : projectRelativePath;
-                }
-            }
-
-            EditorGUILayout.EndHorizontal();
+            ReferenceAssetImporterWindowGui.Draw(this);
         }
 
         private async void ImportSelectedAssetAsync()
@@ -757,7 +689,7 @@ namespace DaftAppleGames.Editor
         private static long ComputeManagedScriptLocalId(Type scriptType)
         {
             string hashInput = "s\0\0\0" + (scriptType.Namespace ?? string.Empty) + scriptType.Name;
-            byte[] hash = Md4.ComputeHash(Encoding.UTF8.GetBytes(hashInput));
+            byte[] hash = ReferenceAssetImporterMd4.ComputeHash(Encoding.UTF8.GetBytes(hashInput));
             uint unsignedValue = (uint)(hash[0] | hash[1] << 8 | hash[2] << 16 | hash[3] << 24);
             return unchecked((int)unsignedValue);
         }
@@ -960,150 +892,6 @@ namespace DaftAppleGames.Editor
             return contents;
         }
 
-        private static void RepairMissingTmpFontAtlases(HashSet<string> fontAssetPaths,
-            StringBuilder reportBuilder)
-        {
-            List<string> repairedAssetPaths = new List<string>();
-            foreach (string fontAssetPath in fontAssetPaths)
-            {
-                Object fontAsset = AssetDatabase.LoadMainAssetAtPath(fontAssetPath);
-                if (!fontAsset || !string.Equals(
-                        fontAsset.GetType().FullName, "TMPro.TMP_FontAsset", StringComparison.Ordinal)) continue;
-
-                SerializedObject serializedFontAsset = new SerializedObject(fontAsset);
-                serializedFontAsset.Update();
-                SerializedProperty populationMode = serializedFontAsset.FindProperty("m_AtlasPopulationMode");
-                SerializedProperty atlasTextures = serializedFontAsset.FindProperty("m_AtlasTextures");
-                if (populationMode is null || populationMode.intValue != 1 || atlasTextures is null) continue;
-
-                if (atlasTextures.arraySize > 0 &&
-                    atlasTextures.GetArrayElementAtIndex(0).objectReferenceValue) continue;
-
-                SerializedProperty sourceFontFile = serializedFontAsset.FindProperty("m_SourceFontFile");
-                if (sourceFontFile is null || !sourceFontFile.objectReferenceValue)
-                {
-                    reportBuilder.AppendLine($"UNRESOLVED TMP SOURCE FONT: {fontAssetPath}");
-                    continue;
-                }
-
-                int atlasWidth = GetPositiveSerializedInt(serializedFontAsset, "m_AtlasWidth", 1024);
-                int atlasHeight = GetPositiveSerializedInt(serializedFontAsset, "m_AtlasHeight", 1024);
-                Texture2D atlasTexture = FindAtlasTextureSubAsset(fontAssetPath);
-                if (!atlasTexture)
-                {
-                    atlasTexture = new Texture2D(
-                        atlasWidth, atlasHeight, TextureFormat.Alpha8, false, true)
-                    {
-                        name = fontAsset.name + " Atlas",
-                        filterMode = FilterMode.Bilinear,
-                        wrapMode = TextureWrapMode.Clamp,
-                        hideFlags = HideFlags.HideInHierarchy
-                    };
-                    atlasTexture.LoadRawTextureData(new byte[atlasWidth * atlasHeight]);
-                    atlasTexture.Apply(false, false);
-                    AssetDatabase.AddObjectToAsset(atlasTexture, fontAsset);
-                }
-
-                atlasTextures.arraySize = 1;
-                atlasTextures.GetArrayElementAtIndex(0).objectReferenceValue = atlasTexture;
-                SerializedProperty atlasTextureIndex = serializedFontAsset.FindProperty("m_AtlasTextureIndex");
-                if (atlasTextureIndex != null) atlasTextureIndex.intValue = 0;
-                serializedFontAsset.ApplyModifiedPropertiesWithoutUndo();
-                EditorUtility.SetDirty(fontAsset);
-
-                SerializedProperty materialProperty = serializedFontAsset.FindProperty("material") ??
-                                                      serializedFontAsset.FindProperty("m_Material");
-                Material fontMaterial = materialProperty?.objectReferenceValue as Material;
-                if (fontMaterial)
-                {
-                    fontMaterial.mainTexture = atlasTexture;
-                    if (fontMaterial.HasProperty("_TextureWidth"))
-                        fontMaterial.SetFloat("_TextureWidth", atlasWidth);
-                    if (fontMaterial.HasProperty("_TextureHeight"))
-                        fontMaterial.SetFloat("_TextureHeight", atlasHeight);
-                    EditorUtility.SetDirty(fontMaterial);
-                }
-
-                repairedAssetPaths.Add(fontAssetPath);
-                reportBuilder.AppendLine(
-                    $"REPAIRED TMP ATLAS: {fontAssetPath} ({atlasWidth}x{atlasHeight})");
-            }
-
-            if (repairedAssetPaths.Count == 0) return;
-
-            AssetDatabase.SaveAssets();
-            for (int assetIndex = 0; assetIndex < repairedAssetPaths.Count; assetIndex++)
-                AssetDatabase.ImportAsset(repairedAssetPaths[assetIndex], ImportAssetOptions.ForceUpdate);
-        }
-
-        private static int GetPositiveSerializedInt(SerializedObject serializedObject, string propertyName,
-            int defaultValue)
-        {
-            SerializedProperty property = serializedObject.FindProperty(propertyName);
-            return property != null && property.intValue > 0 ? property.intValue : defaultValue;
-        }
-
-        private static Texture2D FindAtlasTextureSubAsset(string fontAssetPath)
-        {
-            Object[] assets = AssetDatabase.LoadAllAssetsAtPath(fontAssetPath);
-            for (int assetIndex = 0; assetIndex < assets.Length; assetIndex++)
-            {
-                Texture2D texture = assets[assetIndex] as Texture2D;
-                if (texture) return texture;
-            }
-
-            return null;
-        }
-
-        private static bool IsDynamicTmpFontAsset(string path)
-        {
-            if (!string.Equals(Path.GetExtension(path), ".asset", StringComparison.OrdinalIgnoreCase)) return false;
-
-            string contents = ReadAllText(path);
-            return contents.IndexOf("m_AtlasPopulationMode: 1", StringComparison.Ordinal) >= 0 &&
-                   contents.IndexOf("m_AtlasTextures:", StringComparison.Ordinal) >= 0 &&
-                   contents.IndexOf("m_SourceFontFile:", StringComparison.Ordinal) >= 0;
-        }
-
-        private static int FixShaderFile(string path, bool writeChanges)
-        {
-            if (!FileExists(path)) return 0;
-
-            string contents = ReadAllText(path);
-            int replacementCount;
-            string fixedContents = FixShaderExponentNotation(contents, out replacementCount);
-            if (writeChanges && replacementCount > 0) WriteAllText(path, fixedContents);
-            return replacementCount;
-        }
-
-        private static int CountShaderExponentReplacements(string contents)
-        {
-            int replacementCount;
-            FixShaderExponentNotation(contents, out replacementCount);
-            return replacementCount;
-        }
-
-        private static string FixShaderExponentNotation(string contents, out int replacementCount)
-        {
-            int convertedCount = 0;
-            string fixedContents = ShaderExponentRegex.Replace(contents, match =>
-            {
-                decimal value;
-                if (!decimal.TryParse(match.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
-                    return match.Value;
-
-                convertedCount++;
-                return value.ToString("0.#############################", CultureInfo.InvariantCulture);
-            });
-            replacementCount = convertedCount;
-            return fixedContents;
-        }
-
-        private static bool IsShaderAsset(string path)
-        {
-            return string.Equals(Path.GetExtension(path), ".shader", StringComparison.OrdinalIgnoreCase);
-        }
-
         private static bool IsManagedAssemblyArtifact(string path)
         {
             string extension = Path.GetExtension(path);
@@ -1134,126 +922,6 @@ namespace DaftAppleGames.Editor
                 default:
                     return false;
             }
-        }
-
-        private static string GetMetaGuid(string metaPath)
-        {
-            if (!FileExists(metaPath)) return string.Empty;
-            return ReadMetaGuid(metaPath);
-        }
-
-        private static string ReadMetaGuid(string metaPath)
-        {
-            using (StreamReader reader = new StreamReader(ToExtendedLengthPath(metaPath)))
-            {
-                for (int lineIndex = 0; lineIndex < 20 && !reader.EndOfStream; lineIndex++)
-                {
-                    string line = reader.ReadLine();
-                    Match match = MetaGuidRegex.Match(line ?? string.Empty);
-                    if (match.Success) return match.Groups[1].Value;
-                }
-            }
-
-            return string.Empty;
-        }
-
-        private static bool IsPathWithinRoot(string path, string root)
-        {
-            string rootWithSeparator = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) +
-                                       Path.DirectorySeparatorChar;
-            return path.StartsWith(rootWithSeparator, StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static string GetRelativePath(string root, string path)
-        {
-            Uri rootUri = new Uri(root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) +
-                                  Path.DirectorySeparatorChar);
-            Uri pathUri = new Uri(path);
-            return Uri.UnescapeDataString(rootUri.MakeRelativeUri(pathUri).ToString())
-                .Replace('/', Path.DirectorySeparatorChar);
-        }
-
-        private static string GetAbsolutePath(string path)
-        {
-            if (Path.IsPathRooted(path)) return NormalizeFullPath(path);
-            string projectRoot = Directory.GetParent(Application.dataPath).FullName;
-            return NormalizeFullPath(Path.Combine(projectRoot, path));
-        }
-
-        private static string GetProjectRelativePath(string absolutePath)
-        {
-            string projectRoot = NormalizeFullPath(Directory.GetParent(Application.dataPath).FullName);
-            string normalizedPath = NormalizeFullPath(absolutePath);
-            if (!IsPathWithinRoot(normalizedPath, projectRoot) &&
-                !string.Equals(normalizedPath, projectRoot, StringComparison.OrdinalIgnoreCase)) return string.Empty;
-
-            return GetRelativePath(projectRoot, normalizedPath).Replace('\\', '/');
-        }
-
-        private static string NormalizeFullPath(string path)
-        {
-            return Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        }
-
-        private static bool FileExists(string path)
-        {
-            return File.Exists(ToExtendedLengthPath(path));
-        }
-
-        private static string ReadAllText(string path)
-        {
-            return File.ReadAllText(ToExtendedLengthPath(path));
-        }
-
-        private static void WriteAllText(string path, string contents)
-        {
-            File.WriteAllText(ToExtendedLengthPath(path), contents, new UTF8Encoding(false));
-        }
-
-        private static void CopyFile(string sourcePath, string destinationPath)
-        {
-            File.Copy(ToExtendedLengthPath(sourcePath), ToExtendedLengthPath(destinationPath), true);
-        }
-
-        private static void CreateDirectory(string path)
-        {
-            if (!IsWindowsEditor || path.Length <= LegacyMaxDirectoryPath)
-            {
-                Directory.CreateDirectory(path);
-                return;
-            }
-
-            CreateLongDirectory(path);
-        }
-
-        private static void CreateLongDirectory(string path)
-        {
-            if (Directory.Exists(ToExtendedLengthPath(path, LegacyMaxDirectoryPath))) return;
-
-            string parentPath = Path.GetDirectoryName(path);
-            if (!string.IsNullOrEmpty(parentPath) &&
-                !Directory.Exists(ToExtendedLengthPath(parentPath, LegacyMaxDirectoryPath)))
-                CreateDirectory(parentPath);
-
-            if (CreateDirectoryW(ToExtendedLengthPath(path, LegacyMaxDirectoryPath), IntPtr.Zero)) return;
-
-            int errorCode = Marshal.GetLastWin32Error();
-            if (errorCode != ErrorAlreadyExists)
-                throw new IOException($"Could not create directory '{path}'. Windows error: {errorCode}.");
-        }
-
-        /// <summary>
-        ///     Allows Unity 2019's Mono file APIs to access Windows paths beyond the legacy MAX_PATH limit.
-        /// </summary>
-        private static string ToExtendedLengthPath(string path, int legacyMaxPath = LegacyMaxFilePath)
-        {
-            if (!IsWindowsEditor || !Path.IsPathRooted(path) ||
-                path.Length <= legacyMaxPath || path.StartsWith(@"\\?\", StringComparison.Ordinal)) return path;
-
-            if (path.StartsWith(@"\\", StringComparison.Ordinal))
-                return @"\\?\UNC\" + path.Substring(2);
-
-            return @"\\?\" + path;
         }
 
         private sealed class IndexResult
@@ -1317,138 +985,6 @@ namespace DaftAppleGames.Editor
             {
                 Value = value;
                 Status = status;
-            }
-        }
-
-        private static class Md4
-        {
-            public static byte[] ComputeHash(byte[] input)
-            {
-                int paddedLength = ((input.Length + 8) / 64 + 1) * 64;
-                byte[] paddedInput = new byte[paddedLength];
-                Buffer.BlockCopy(input, 0, paddedInput, 0, input.Length);
-                paddedInput[input.Length] = 0x80;
-                ulong bitLength = (ulong)input.Length * 8;
-                for (int byteIndex = 0; byteIndex < 8; byteIndex++)
-                    paddedInput[paddedLength - 8 + byteIndex] = (byte)(bitLength >> byteIndex * 8);
-
-                uint a = 0x67452301;
-                uint b = 0xefcdab89;
-                uint c = 0x98badcfe;
-                uint d = 0x10325476;
-                uint[] words = new uint[16];
-
-                for (int blockOffset = 0; blockOffset < paddedInput.Length; blockOffset += 64)
-                {
-                    for (int wordIndex = 0; wordIndex < words.Length; wordIndex++)
-                    {
-                        int offset = blockOffset + wordIndex * 4;
-                        words[wordIndex] = (uint)(paddedInput[offset] |
-                                                  paddedInput[offset + 1] << 8 |
-                                                  paddedInput[offset + 2] << 16 |
-                                                  paddedInput[offset + 3] << 24);
-                    }
-
-                    uint originalA = a;
-                    uint originalB = b;
-                    uint originalC = c;
-                    uint originalD = d;
-
-                    Round1(ref a, b, c, d, words[0], 3);
-                    Round1(ref d, a, b, c, words[1], 7);
-                    Round1(ref c, d, a, b, words[2], 11);
-                    Round1(ref b, c, d, a, words[3], 19);
-                    Round1(ref a, b, c, d, words[4], 3);
-                    Round1(ref d, a, b, c, words[5], 7);
-                    Round1(ref c, d, a, b, words[6], 11);
-                    Round1(ref b, c, d, a, words[7], 19);
-                    Round1(ref a, b, c, d, words[8], 3);
-                    Round1(ref d, a, b, c, words[9], 7);
-                    Round1(ref c, d, a, b, words[10], 11);
-                    Round1(ref b, c, d, a, words[11], 19);
-                    Round1(ref a, b, c, d, words[12], 3);
-                    Round1(ref d, a, b, c, words[13], 7);
-                    Round1(ref c, d, a, b, words[14], 11);
-                    Round1(ref b, c, d, a, words[15], 19);
-
-                    Round2(ref a, b, c, d, words[0], 3);
-                    Round2(ref d, a, b, c, words[4], 5);
-                    Round2(ref c, d, a, b, words[8], 9);
-                    Round2(ref b, c, d, a, words[12], 13);
-                    Round2(ref a, b, c, d, words[1], 3);
-                    Round2(ref d, a, b, c, words[5], 5);
-                    Round2(ref c, d, a, b, words[9], 9);
-                    Round2(ref b, c, d, a, words[13], 13);
-                    Round2(ref a, b, c, d, words[2], 3);
-                    Round2(ref d, a, b, c, words[6], 5);
-                    Round2(ref c, d, a, b, words[10], 9);
-                    Round2(ref b, c, d, a, words[14], 13);
-                    Round2(ref a, b, c, d, words[3], 3);
-                    Round2(ref d, a, b, c, words[7], 5);
-                    Round2(ref c, d, a, b, words[11], 9);
-                    Round2(ref b, c, d, a, words[15], 13);
-
-                    Round3(ref a, b, c, d, words[0], 3);
-                    Round3(ref d, a, b, c, words[8], 9);
-                    Round3(ref c, d, a, b, words[4], 11);
-                    Round3(ref b, c, d, a, words[12], 15);
-                    Round3(ref a, b, c, d, words[2], 3);
-                    Round3(ref d, a, b, c, words[10], 9);
-                    Round3(ref c, d, a, b, words[6], 11);
-                    Round3(ref b, c, d, a, words[14], 15);
-                    Round3(ref a, b, c, d, words[1], 3);
-                    Round3(ref d, a, b, c, words[9], 9);
-                    Round3(ref c, d, a, b, words[5], 11);
-                    Round3(ref b, c, d, a, words[13], 15);
-                    Round3(ref a, b, c, d, words[3], 3);
-                    Round3(ref d, a, b, c, words[11], 9);
-                    Round3(ref c, d, a, b, words[7], 11);
-                    Round3(ref b, c, d, a, words[15], 15);
-
-                    unchecked
-                    {
-                        a += originalA;
-                        b += originalB;
-                        c += originalC;
-                        d += originalD;
-                    }
-                }
-
-                byte[] hash = new byte[16];
-                WriteUInt32(hash, 0, a);
-                WriteUInt32(hash, 4, b);
-                WriteUInt32(hash, 8, c);
-                WriteUInt32(hash, 12, d);
-                return hash;
-            }
-
-            private static void Round1(ref uint value, uint b, uint c, uint d, uint word, int shift)
-            {
-                value = RotateLeft(unchecked(value + ((b & c) | (~b & d)) + word), shift);
-            }
-
-            private static void Round2(ref uint value, uint b, uint c, uint d, uint word, int shift)
-            {
-                value = RotateLeft(
-                    unchecked(value + ((b & c) | (b & d) | (c & d)) + word + 0x5a827999), shift);
-            }
-
-            private static void Round3(ref uint value, uint b, uint c, uint d, uint word, int shift)
-            {
-                value = RotateLeft(unchecked(value + (b ^ c ^ d) + word + 0x6ed9eba1), shift);
-            }
-
-            private static uint RotateLeft(uint value, int shift)
-            {
-                return value << shift | value >> 32 - shift;
-            }
-
-            private static void WriteUInt32(byte[] destination, int offset, uint value)
-            {
-                destination[offset] = (byte)value;
-                destination[offset + 1] = (byte)(value >> 8);
-                destination[offset + 2] = (byte)(value >> 16);
-                destination[offset + 3] = (byte)(value >> 24);
             }
         }
     }
