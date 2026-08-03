@@ -2992,6 +2992,10 @@ MonoBehaviour:
   - {fileID: 1337334052692010800}
   rocksObject: {fileID: 3873141829460764874}
   colliderObject: {fileID: 7725545489830447490}
+  objectRenderers:
+  - {fileID: 8134488316918433621}
+  glassRenderers:
+  - {fileID: 6498995757390264282}
   constructableBoundsObject: {fileID: 596692632}
   animator1: {fileID: 6859817472609089374}
   animator2: {fileID: 6859817472609089372}

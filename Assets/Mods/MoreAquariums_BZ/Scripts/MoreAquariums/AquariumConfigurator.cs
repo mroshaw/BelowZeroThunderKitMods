@@ -45,6 +45,9 @@ namespace DaftAppleGames.MoreAquariums
         [BoxGroup("Object References")] [SerializeField] private Transform[] newCoralTransforms;
         [BoxGroup("Object References")] [SerializeField] private GameObject rocksObject;
         [BoxGroup("Object References")] [SerializeField] private GameObject colliderObject;
+
+        [BoxGroup("Sky Applier")] [SerializeField] private Renderer[] objectRenderers;
+        [BoxGroup("Sky Applier")] [SerializeField] private Renderer[] glassRenderers;
         
         [BoxGroup("Constructable")] [SerializeField] private GameObject constructableBoundsObject;
         
@@ -337,14 +340,21 @@ namespace DaftAppleGames.MoreAquariums
             newRocks.transform.localPosition = rocksObject.transform.localPosition;
             newRocks.transform.localScale = Vector3.one;
             
-            ModDebugLog.LogDebug("Updating SkyApplier...");
-            SkyApplier skyApplier = vanillaAquariumGo.GetComponent<SkyApplier>();
-            if (!skyApplier)
+            ModDebugLog.LogDebug("Updating SkyAppliers...");
+            SkyApplier[] skyAppliers = vanillaAquariumGo.GetComponentsInChildren<SkyApplier>();
+            foreach (SkyApplier skyApplier in skyAppliers)
             {
-                ModDebugLog.LogDebug("Looking for SkyApplier in children...");
-                skyApplier = vanillaAquariumGo.GetComponentInChildren<SkyApplier>();
+                if (skyApplier.anchorSky == Skies.BaseGlass)
+                {
+                    ModDebugLog.LogDebug("Setting glass SkyApplier...");
+                    skyApplier.renderers = glassRenderers;
+                }
+                else
+                {
+                    ModDebugLog.LogDebug("Setting object SkyApplier...");
+                    skyApplier.renderers = objectRenderers;
+                }
             }
-            skyApplier.renderers = vanillaAquariumGo.GetComponentsInChildren<Renderer>(true);
         }
 
         /// <summary>
