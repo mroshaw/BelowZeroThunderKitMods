@@ -75,10 +75,8 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
                     new Ingredient(TechType.ComputerChip, 1),
                     new Ingredient(TechType.CopperWire, 2),
                     new Ingredient(PetDnaPrefabs.PengwingAdultDnaPrefab.Info.TechType, 1),
-                    new Ingredient(PetDnaPrefabs.PenglingBabyDnaPrefab.Info.TechType, 1),
                     new Ingredient(PetDnaPrefabs.SnowstalkerBabyDnaPrefab.Info.TechType, 1),
                     new Ingredient(PetDnaPrefabs.TrivalveBlueDnaPrefab.Info.TechType, 1),
-                    new Ingredient(PetDnaPrefabs.TrivalveYellowDnaPrefab.Info.TechType, 1),
                     new Ingredient(PetDnaPrefabs.PinnacaridDnaPrefab.Info.TechType, 1));
             else
                 // Only costs 1 titanium in "Easy" mode

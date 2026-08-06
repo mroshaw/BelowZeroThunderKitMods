@@ -254,6 +254,8 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 TrivalveYellowDnaPrefab.Info.TechType);
             Nautilus.Handlers.StoryGoalHandler.RegisterItemGoal(EncKey, Story.GoalType.Encyclopedia,
                 TrivalveBlueDnaPrefab.Info.TechType);
+            Nautilus.Handlers.StoryGoalHandler.RegisterItemGoal(EncKey, Story.GoalType.Encyclopedia,
+                RockPuncherDnaPrefab.Info.TechType);
         }
 
         [System.Flags]
@@ -455,22 +457,17 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             internal static void Register(GameObject dnaModelPrefab)
             {
                 Info = RegisterDnaPrefab(ClassId, TextureAssetName, Color.red, dnaModelPrefab,
-                    NestDistribution.LilyPads,
-                    Spawn(BiomeType.LilyPads_Crevice_Ground, 0.10f),
-                    Spawn(BiomeType.LilyPads_Deep_Grass, 0.12f),
-                    Spawn(BiomeType.LilyPads_Deep_Ground, 0.12f),
-                    Spawn(BiomeType.LilyPads_Islands_Cave_Ground, 0.12f),
-                    Spawn(BiomeType.TreeSpires_BigFissure_Ground, 0.06f),
-                    Spawn(BiomeType.CrystalCave_Castle_Ground, 0.06f),
-                    Spawn(BiomeType.CrystalCave_Ground, 0.06f),
-                    Spawn(BiomeType.CrystalCave_Inner_Ground, 0.06f),
-                    Spawn(BiomeType.FabricatorCavern_Ground, 0.05f),
-                    Spawn(BiomeType.FabricatorCavern_Grass, 0.05f),
-                    Spawn(BiomeType.LilyPads_ShipWreck_Ground, 0.08f),
-                    Spawn(BiomeType.LilyPads_ShipWreck_Grass, 0.08f),
-                    Spawn(BiomeType.PurpleVents_ShipWreck_Ground, 0.08f),
+                    NestDistribution.None,
+                    Spawn(BiomeType.PurpleVents_Ground, 0.06f),
+                    Spawn(BiomeType.PurpleVents_Crevice_Ground, 0.06f),
+                    Spawn(BiomeType.ThermalSpires_Ground, 0.06f),
+                    Spawn(BiomeType.ThermalSpires_Cave_Ground, 0.06f),
                     Spawn(BiomeType.MiningSite_Ground, 0.06f),
-                    Spawn(BiomeType.MargArea_BaseGround, 0.06f));
+                    Spawn(BiomeType.TreeSpires_BigFissure_Ground, 0.05f),
+                    Spawn(BiomeType.TreeSpires_BigTree_Ground, 0.05f),
+                    Spawn(BiomeType.CrystalCave_Castle_Ground, 0.04f),
+                    Spawn(BiomeType.CrystalCave_Ground, 0.04f),
+                    Spawn(BiomeType.CrystalCave_Inner_Ground, 0.04f));
             }
         }
     }

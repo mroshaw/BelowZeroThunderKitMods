@@ -151,6 +151,7 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
             renameButton.onClick.RemoveListener(RenameButtonHandler);
             killButton.onClick.RemoveListener(KillButtonHandler);
             killAllButton.onClick.RemoveListener(KillAllButtonHandler);
+            killConfirmButton.onClick.RemoveListener(KillConfirmButtonHandler);
             killAllConfirmButton.onClick.RemoveListener(KillAllConfirmButtonHandler);
             syncButton.onClick.RemoveListener(UpdatePetList);
             

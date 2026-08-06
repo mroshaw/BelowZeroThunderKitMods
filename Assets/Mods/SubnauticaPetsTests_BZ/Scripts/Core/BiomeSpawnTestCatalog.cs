@@ -13,7 +13,8 @@ namespace DaftAppleGames.SubnauticaPetsTests
                 new BiomeSpawnExpectation("SnowstalkerBabyPetDna", 15),
                 new BiomeSpawnExpectation("TrivalveBluePetDna", 22),
                 new BiomeSpawnExpectation("TrivalveYellowPetDna", 20),
-                new BiomeSpawnExpectation("PinnacaridPetDna", 33)
+                new BiomeSpawnExpectation("PinnacaridPetDna", 33),
+                new BiomeSpawnExpectation("RockPuncherPetDna", 10)
             };
         }
     }

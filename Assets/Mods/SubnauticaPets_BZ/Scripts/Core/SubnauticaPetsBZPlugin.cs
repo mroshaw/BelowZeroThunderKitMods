@@ -33,21 +33,29 @@ namespace DaftAppleGames.SubnauticaPets
 
         // Keep tabs on currently selected options
         internal static TechType SelectedCreaturePetType;
-
+#if !UNITY_EDITOR
         // Mod Options Config
         internal static ModConfigFile ConfigFile = OptionsPanelHandler.RegisterModOptions<ModConfigFile>();
-
+#else
+        internal static ModConfigFile ConfigFile;
+#endif
         // Mod Debug Log
+#if UNITY_EDITOR
+        internal static ModLog ModDebugLog = new ModLog(Log, true);
+#else
         internal static ModLog ModDebugLog;
+#endif
 
         private static readonly Harmony Harmony = new Harmony(MyGuid);
 
         private void Awake()
         {
-
+#if !UNITY_EDITOR
             // Initialise Logger
             ModDebugLog =  new ModLog(Logger, ConfigFile.DetailedLogging);
-            
+#else
+            ModDebugLog = new ModLog(Logger, true);
+#endif
             // Initialise AssetBundle
             ModAssetUtils = new ModAssetBundleUtils(AssetBundleName, Assembly.GetExecutingAssembly(),true, ModDebugLog);
             
@@ -62,7 +70,9 @@ namespace DaftAppleGames.SubnauticaPets
             {
                 ModDebugLog.LogDebug("Started Saving Data...");
                 var data = e.Instance as SaveData;
-                data.PetDetailsHashSet = PetSaver.GetPetListAsHashSet();
+                HashSet<PetSaver.PetDetails> petDetails = PetSaver.GetPetListAsHashSet();
+                data.PetDetailsHashSet = petDetails;
+                LoadedPetDetailsHashSet = petDetails;
                 ModDebugLog.LogDebug("Started Saving Data... Done.");
             };
             // Load the HashSet

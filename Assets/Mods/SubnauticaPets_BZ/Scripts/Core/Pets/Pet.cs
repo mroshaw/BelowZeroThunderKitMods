@@ -198,6 +198,8 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// </summary>
         internal void LoadPetData()
         {
+            if (LoadedPetDetailsHashSet == null) return;
+
             foreach (var petDetails in LoadedPetDetailsHashSet)
                 if (petDetails.PrefabId == PrefabId)
                 {
@@ -335,7 +337,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             _rigidBody.isKinematic = true;
             if (_petStateController) _petStateController.Kill();
 
-            SubnauticaPetsPlugin.PetSaver.UnregisterPet(this);
+            SubnauticaPetsPlugin.PetSaver.UnregisterPet(this, true);
             ModDebugLog.LogDebug($"Picked up the OnKill message in {gameObject.name}");
 
             if (!string.IsNullOrEmpty(PetNameString))

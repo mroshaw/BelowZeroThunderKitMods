@@ -110,33 +110,55 @@ namespace DaftAppleGames.SubnauticaPets.BaseParts
         /// </summary>
         private IEnumerator SpawnPetAsync(TechType techType, Action<GameObject> callback = null)
         {
-            var task = CraftData.GetPrefabForTechTypeAsync(techType);
+            CoroutineTask<GameObject> task = CraftData.GetPrefabForTechTypeAsync(techType);
             yield return task;
-            var prefab = task.GetResult();
+            GameObject prefab = task.GetResult();
+            if (!prefab)
+            {
+                ModDebugLog.LogError($"PetFabricator: Could not load prefab for {techType}!");
+                callback?.Invoke(null);
+                yield break;
+            }
+
+            if (!Base)
+            {
+                ModDebugLog.LogError($"PetFabricator: Cannot spawn {techType} without a parent Base!");
+                callback?.Invoke(null);
+                yield break;
+            }
+
+            if (!Player.main)
+            {
+                ModDebugLog.LogError($"PetFabricator: Cannot spawn {techType} because the Player is unavailable!");
+                callback?.Invoke(null);
+                yield break;
+            }
+
             prefab.SetActive(false);
             // Instantiate in the spawn position
             ModDebugLog.LogDebug($"PetFabricator: Instantiating Pet {techType}");
-            var newPetGameObject = Instantiate(prefab, _spawnPoint, Quaternion.identity);
+            GameObject newPetGameObject = Instantiate(prefab, _spawnPoint, Quaternion.identity);
 
             ModDebugLog.LogDebug("PetFabricator: Instantiating Pet done!");
-            var newPet = newPetGameObject.GetComponent<Pet>();
-            if (newPet)
-            {
-                PetPrefabConfigUtils.ConfigureCreature(newPetGameObject);
-
-                ModDebugLog.LogDebug("PetFabricator: Setting Pet Name...");
-                newPet.PetName = $"Test Subject {SubnauticaPetsPlugin.PetSaver.PetList.Count + 1}";
-                ModDebugLog.LogDebug("PetFabricator: Setting Pet Name... Done.");
-                
-                // Tell the pet which base it belongs to and parent the transform
-                newPet.Base = Base;
-                newPet.transform.SetParent(Base.transform);
-                PetPrefabConfigUtils.ConfigureSkyApplier(newPetGameObject);
-            }
-            else
+            Pet newPet = newPetGameObject.GetComponent<Pet>();
+            if (!newPet)
             {
                 ModDebugLog.LogError("PetFabricator: Spawned Pet has no Pet component!");
+                Destroy(newPetGameObject);
+                callback?.Invoke(null);
+                yield break;
             }
+
+            PetPrefabConfigUtils.ConfigureCreature(newPetGameObject);
+
+            ModDebugLog.LogDebug("PetFabricator: Setting Pet Name...");
+            newPet.PetName = $"Test Subject {SubnauticaPetsPlugin.PetSaver.PetList.Count + 1}";
+            ModDebugLog.LogDebug("PetFabricator: Setting Pet Name... Done.");
+
+            // Tell the pet which base it belongs to and parent the transform
+            newPet.Base = Base;
+            newPet.transform.SetParent(Base.transform);
+            PetPrefabConfigUtils.ConfigureSkyApplier(newPetGameObject);
 
             // Rotate to face the player
             newPetGameObject.transform.LookAt(Player.main.transform.position);
