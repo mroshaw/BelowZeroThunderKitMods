@@ -46,7 +46,6 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         ///     Register a new Pet to the HashList
         /// </summary>
-        /// <param name="pet"></param>
         internal void RegisterPet(Pet pet)
         {
             if (PetList == null) PetList = new List<Pet>();
@@ -63,7 +62,6 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         ///     Remove a Pet from the HashList
         /// </summary>
-        /// <param name="pet"></param>
         internal void UnregisterPet(Pet pet, bool removeSavedDetails = false)
         {
             if (PetList.Contains(pet))
@@ -75,11 +73,18 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             }
 
             if (LoadedPetDetailsHashSet == null)
+            {
                 LoadedPetDetailsHashSet = new HashSet<PetDetails>();
+            }
 
-            LoadedPetDetailsHashSet.RemoveWhere(details => details.PrefabId == pet.PrefabId);
-            if (!removeSavedDetails && pet && !string.IsNullOrEmpty(pet.PetName))
-                LoadedPetDetailsHashSet.Add(new PetDetails(pet.PrefabId, pet.PetName, pet.PetTypeString));
+            if (removeSavedDetails || pet && !string.IsNullOrEmpty(pet.PetName))
+            {
+                LoadedPetDetailsHashSet.RemoveWhere(details => details.PrefabId == pet.PrefabId);
+                if (!removeSavedDetails)
+                {
+                    LoadedPetDetailsHashSet.Add(new PetDetails(pet.PrefabId, pet.PetName, pet.PetTypeString));
+                }
+            }
         }
 
         /// <summary>
@@ -99,7 +104,6 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// <summary>
         ///     Creates a HashSet of current pets, suitable using in a save game
         /// </summary>
-        /// <returns></returns>
         internal HashSet<PetDetails> GetPetListAsHashSet()
         {
             var hashSet = new HashSet<PetDetails>();
@@ -113,13 +117,14 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             if (PetList == null) PetList = new List<Pet>();
 
             foreach (Pet pet in PetList)
+            {
                 if (pet)
                 {
                     hashSet.RemoveWhere(details => details.PrefabId == pet.PrefabId);
                     PetDetails newPetDetails = new PetDetails(pet.PrefabId, pet.PetName, pet.PetTypeString);
                     hashSet.Add(newPetDetails);
                 }
-
+            }
             return hashSet;
         }
 
@@ -145,7 +150,10 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 yield return new WaitForEndOfFrame();
             }
 
-            while (!streamer.IsWorldSettled()) yield return new WaitForEndOfFrame();
+            while (!streamer.IsWorldSettled())
+            {
+                yield return new WaitForEndOfFrame();
+            }
             FixPetLoadData();
         }
 
@@ -155,7 +163,15 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         private void FixPetLoadData()
         {
             ModDebugLog.LogDebug("Loading Pet Data...");
-            foreach (var pet in FindObjectsOfType<Pet>()) pet.LoadPetData();
+            Pet[] loadedPets = FindObjectsOfType<Pet>();
+            for (int petIndex = 0; petIndex < loadedPets.Length; petIndex++)
+            {
+                Pet pet = loadedPets[petIndex];
+                pet.LoadPetData();
+                RegisterPet(pet);
+            }
+
+            ModDebugLog.LogDebug($"Loading Pet Data... Reconciled {loadedPets.Length} loaded pets.");
         }
 
         /// <summary>
@@ -163,7 +179,10 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         /// </summary>
         private void ClearPetList()
         {
-            if (PetList != null) PetList.Clear();
+            if (PetList != null)
+            {
+                PetList.Clear();
+            }
         }
 
         /// <summary>
