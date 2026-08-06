@@ -1332,7 +1332,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 154754342b407924e823308bbb5d4074, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  modelParent: {fileID: 0}
+  modelParent: {fileID: 3886737673406790191}
   modelGameObjectName: Rock_Puncher_01
 --- !u!114 &3888391954049018948
 MonoBehaviour:
