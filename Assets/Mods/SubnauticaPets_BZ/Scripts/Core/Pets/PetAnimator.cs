@@ -48,7 +48,6 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
         private int[] _bodyAnimHashKeys;
         private int[] _faceAnimHashKeys;
-        private bool _inRandomAnim;
 
         private int _numBodyAnims;
         private int _numFaceAnims;
@@ -109,10 +108,8 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
         private IEnumerator PlayRandomFaceAnimAsync(float duration)
         {
-            _inRandomAnim = true;
             PlayRandomFaceAnim();
             yield return new WaitForSeconds(duration);
-            _inRandomAnim = false;
         }
 
         internal void SetSleeping(bool isSleeping)

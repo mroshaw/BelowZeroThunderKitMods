@@ -45,50 +45,44 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         // These are the documented safe observation positions beside the explicitly spawned
         // Pet Console and Pet Fabricator fragments, rather than the fragment pivots themselves.
         private static readonly SpawnLocation[] PenglingBabyFixedSpawns =
-        {
-            new SpawnLocation(new Vector3(-90.27f, 10.57f, 305.48f)),
-            new SpawnLocation(new Vector3(110.30f, -31.89f, -2.63f)),
-            new SpawnLocation(new Vector3(47.44f, -73.60f, -789.15f))
-        };
+            CreateFixedSpawnClusters(
+                Cluster(-90.27f, 10.57f, 305.48f, 2),
+                Cluster(110.30f, -31.89f, -2.63f, 3),
+                Cluster(47.44f, -73.60f, -789.15f, 4));
 
         private static readonly SpawnLocation[] PengwingAdultFixedSpawns =
-        {
-            new SpawnLocation(new Vector3(53.79f, -72.21f, -795.16f)),
-            new SpawnLocation(new Vector3(-142.73f, -56.46f, -179.24f)),
-            new SpawnLocation(new Vector3(-289.41f, -12.63f, -15.73f)),
-            new SpawnLocation(new Vector3(118.61f, -98.51f, -839.25f))
-        };
+            CreateFixedSpawnClusters(
+                Cluster(53.79f, -72.21f, -795.16f, 2),
+                Cluster(-142.73f, -56.46f, -179.24f, 3),
+                Cluster(-289.41f, -12.63f, -15.73f, 4),
+                Cluster(118.61f, -98.51f, -839.25f, 5));
 
         private static readonly SpawnLocation[] SnowstalkerBabyFixedSpawns =
-        {
-            new SpawnLocation(new Vector3(-245.70f, 41.95f, -779.69f)),
-            new SpawnLocation(new Vector3(-1032.35f, 7.57f, -383.36f)),
-            new SpawnLocation(new Vector3(-1001.00f, -43.32f, -319.54f))
-        };
+            CreateFixedSpawnClusters(
+                Cluster(-245.70f, 41.95f, -779.69f, 3),
+                Cluster(-1032.35f, 7.57f, -383.36f, 4),
+                Cluster(-1001.00f, -43.32f, -319.54f, 5));
 
         private static readonly SpawnLocation[] TrivalveBlueFixedSpawns =
-        {
-            new SpawnLocation(new Vector3(97.62f, -383.40f, -929.72f)),
-            new SpawnLocation(new Vector3(243.49f, -99.22f, -613.92f)),
-            new SpawnLocation(new Vector3(52.56f, -379.21f, -893.41f)),
-            new SpawnLocation(new Vector3(-318.58f, -194.50f, -331.79f))
-        };
+            CreateFixedSpawnClusters(
+                Cluster(97.62f, -383.40f, -929.72f, 2),
+                Cluster(243.49f, -99.22f, -613.92f, 3),
+                Cluster(52.56f, -379.21f, -893.41f, 4),
+                Cluster(-318.58f, -194.50f, -331.79f, 5));
 
         private static readonly SpawnLocation[] TrivalveYellowFixedSpawns =
-        {
-            new SpawnLocation(new Vector3(95.17f, -388.81f, -919.84f)),
-            new SpawnLocation(new Vector3(268.03f, -231.77f, -1226.99f)),
-            new SpawnLocation(new Vector3(514.48f, -831.69f, -693.87f)),
-            new SpawnLocation(new Vector3(-255.338f, -127.287f, -245.725f))
-        };
+            CreateFixedSpawnClusters(
+                Cluster(95.17f, -388.81f, -919.84f, 5),
+                Cluster(268.03f, -231.77f, -1226.99f, 4),
+                Cluster(514.48f, -831.69f, -693.87f, 3),
+                Cluster(-255.338f, -127.287f, -245.725f, 2));
 
         private static readonly SpawnLocation[] PinnacaridFixedSpawns =
-        {
-            new SpawnLocation(new Vector3(-365.50f, -171.18f, -319.87f)),
-            new SpawnLocation(new Vector3(-541.18f, -202.38f, -495.66f)),
-            new SpawnLocation(new Vector3(547.11f, -206.15f, -1092.51f)),
-            new SpawnLocation(new Vector3(-252.56f, -126.35f, -238.21f))
-        };
+            CreateFixedSpawnClusters(
+                Cluster(-365.50f, -171.18f, -319.87f, 2),
+                Cluster(-541.18f, -202.38f, -495.66f, 3),
+                Cluster(547.11f, -206.15f, -1092.51f, 4),
+                Cluster(-252.56f, -126.35f, -238.21f, 5));
         
         private static readonly SpawnLocation[] RockPuncherFixedSpawns =
         {
@@ -238,6 +232,38 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             return new SpawnBiome(biome, probability);
         }
 
+        private static FixedSpawnCluster Cluster(float x, float y, float z, int count)
+        {
+            return new FixedSpawnCluster(new Vector3(x, y, z), count);
+        }
+
+        private static SpawnLocation[] CreateFixedSpawnClusters(params FixedSpawnCluster[] clusters)
+        {
+            Vector3[] offsets =
+            {
+                Vector3.zero,
+                new Vector3(3.0f, 0.0f, 0.0f),
+                new Vector3(-1.5f, 0.0f, 2.6f),
+                new Vector3(-1.5f, 0.0f, -2.6f),
+                new Vector3(0.0f, 0.0f, 4.5f)
+            };
+
+            int spawnCount = 0;
+            for (int clusterIndex = 0; clusterIndex < clusters.Length; clusterIndex++)
+                spawnCount += clusters[clusterIndex].Count;
+
+            SpawnLocation[] spawns = new SpawnLocation[spawnCount];
+            int spawnIndex = 0;
+            for (int clusterIndex = 0; clusterIndex < clusters.Length; clusterIndex++)
+            {
+                FixedSpawnCluster cluster = clusters[clusterIndex];
+                for (int offsetIndex = 0; offsetIndex < cluster.Count; offsetIndex++)
+                    spawns[spawnIndex++] = new SpawnLocation(cluster.Center + offsets[offsetIndex]);
+            }
+
+            return spawns;
+        }
+
         private static void ConfigureDataBank()
         {
             PetPrefabConfigUtils.ConfigureDatabankEntry(EncKey, EncPath, DatabankMainImageAssetName,
@@ -276,6 +302,18 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             {
                 Biome = biome;
                 Probability = probability;
+            }
+        }
+
+        private struct FixedSpawnCluster
+        {
+            internal readonly Vector3 Center;
+            internal readonly int Count;
+
+            internal FixedSpawnCluster(Vector3 center, int count)
+            {
+                Center = center;
+                Count = count;
             }
         }
 
