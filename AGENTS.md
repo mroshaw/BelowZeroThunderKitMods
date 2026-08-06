@@ -39,6 +39,7 @@ The project contains multiple "mods" for the Subnautica: Below Zero game. The pr
 - Avoid `public` fields — use `[SerializeField] private` (or Odin-attributed equivalents) with properties where external access is required.
 - Null-check with pattern matching (`if (obj is null)`) rather than `== null` where practical, respecting Unity's overridden `==` for `UnityEngine.Object` (never use `is null`/`??`/`?.` on `UnityEngine.Object`-derived types - use Unity's own null check).
 - Always wrap blocks in `{}`, even if there is just a single line.
+- Prefer `foreach` iterators over `for (int counter)`
 
 ## Unity-Specific Conventions
 

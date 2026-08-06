@@ -61,18 +61,18 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             CreateFixedSpawnClusters(
                 Cluster(-245.70f, 41.95f, -779.69f, 3),
                 Cluster(-1032.35f, 7.57f, -383.36f, 4),
-                Cluster(-1001.00f, -43.32f, -319.54f, 5));
+                Cluster(-1001.00f, -43.32f, -319.54f, 2, 2));
 
         private static readonly SpawnLocation[] TrivalveBlueFixedSpawns =
             CreateFixedSpawnClusters(
                 Cluster(97.62f, -383.40f, -929.72f, 2),
                 Cluster(243.49f, -99.22f, -613.92f, 3),
                 Cluster(52.56f, -379.21f, -893.41f, 4),
-                Cluster(-318.58f, -194.50f, -331.79f, 5));
+                Cluster(-318.58f, -194.50f, -331.79f, 2));
 
         private static readonly SpawnLocation[] TrivalveYellowFixedSpawns =
             CreateFixedSpawnClusters(
-                Cluster(95.17f, -388.81f, -919.84f, 5),
+                Cluster(95.17f, -388.81f, -919.84f, 3),
                 Cluster(268.03f, -231.77f, -1226.99f, 4),
                 Cluster(514.48f, -831.69f, -693.87f, 3),
                 Cluster(-255.338f, -127.287f, -245.725f, 2));
@@ -82,7 +82,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 Cluster(-365.50f, -171.18f, -319.87f, 2),
                 Cluster(-541.18f, -202.38f, -495.66f, 3),
                 Cluster(547.11f, -206.15f, -1092.51f, 4),
-                Cluster(-252.56f, -126.35f, -238.21f, 5));
+                Cluster(-252.56f, -126.35f, -238.21f, 4));
         
         private static readonly SpawnLocation[] RockPuncherFixedSpawns =
         {
@@ -234,7 +234,12 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
         private static FixedSpawnCluster Cluster(float x, float y, float z, int count)
         {
-            return new FixedSpawnCluster(new Vector3(x, y, z), count);
+            return Cluster(x, y, z, count, 0);
+        }
+
+        private static FixedSpawnCluster Cluster(float x, float y, float z, int count, int firstOffsetIndex)
+        {
+            return new FixedSpawnCluster(new Vector3(x, y, z), count, firstOffsetIndex);
         }
 
         private static SpawnLocation[] CreateFixedSpawnClusters(params FixedSpawnCluster[] clusters)
@@ -250,7 +255,9 @@ namespace DaftAppleGames.SubnauticaPets.Pets
 
             int spawnCount = 0;
             for (int clusterIndex = 0; clusterIndex < clusters.Length; clusterIndex++)
+            {
                 spawnCount += clusters[clusterIndex].Count;
+            }
 
             SpawnLocation[] spawns = new SpawnLocation[spawnCount];
             int spawnIndex = 0;
@@ -258,7 +265,10 @@ namespace DaftAppleGames.SubnauticaPets.Pets
             {
                 FixedSpawnCluster cluster = clusters[clusterIndex];
                 for (int offsetIndex = 0; offsetIndex < cluster.Count; offsetIndex++)
-                    spawns[spawnIndex++] = new SpawnLocation(cluster.Center + offsets[offsetIndex]);
+                {
+                    spawns[spawnIndex++] =
+                        new SpawnLocation(cluster.Center + offsets[cluster.FirstOffsetIndex + offsetIndex]);
+                }
             }
 
             return spawns;
@@ -309,11 +319,13 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         {
             internal readonly Vector3 Center;
             internal readonly int Count;
+            internal readonly int FirstOffsetIndex;
 
-            internal FixedSpawnCluster(Vector3 center, int count)
+            internal FixedSpawnCluster(Vector3 center, int count, int firstOffsetIndex)
             {
                 Center = center;
                 Count = count;
+                FirstOffsetIndex = firstOffsetIndex;
             }
         }
 

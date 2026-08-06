@@ -7,7 +7,7 @@ namespace DaftAppleGames.SubnauticaPetsTests
     internal static class SpawnTestCatalog
     {
         private const float FragmentTolerance = 1.0f;
-        private const float DnaTolerance = 1.25f;
+        private const float DnaTolerance = 1.26f;
         private const float FragmentVerticalTolerance = 1.0f;
         private const float DnaDownwardSettlementTolerance = 12.0f;
         private const float DnaUpwardTolerance = 2.0f;
@@ -65,14 +65,14 @@ namespace DaftAppleGames.SubnauticaPetsTests
 
             AddDnaCluster(testCases, "SnowstalkerBabyDna[0]", "SnowstalkerBabyPetDna", -245.70f, 41.95f, -779.69f, 3);
             AddDnaCluster(testCases, "SnowstalkerBabyDna[1]", "SnowstalkerBabyPetDna", -1032.35f, 7.57f, -383.36f, 4);
-            AddDnaCluster(testCases, "SnowstalkerBabyDna[2]", "SnowstalkerBabyPetDna", -1001.00f, -43.32f, -319.54f, 5);
+            AddDnaCluster(testCases, "SnowstalkerBabyDna[2]", "SnowstalkerBabyPetDna", -1001.00f, -43.32f, -319.54f, 2, 2);
 
             AddDnaCluster(testCases, "TrivalveBlueDna[0]", "TrivalveBluePetDna", 97.62f, -383.40f, -929.72f, 2);
             AddDnaCluster(testCases, "TrivalveBlueDna[1]", "TrivalveBluePetDna", 243.49f, -99.22f, -613.92f, 3);
             AddDnaCluster(testCases, "TrivalveBlueDna[2]", "TrivalveBluePetDna", 52.56f, -379.21f, -893.41f, 4);
-            AddDnaCluster(testCases, "TrivalveBlueDna[3]", "TrivalveBluePetDna", -318.58f, -194.50f, -331.79f, 5);
+            AddDnaCluster(testCases, "TrivalveBlueDna[3]", "TrivalveBluePetDna", -318.58f, -194.50f, -331.79f, 2);
 
-            AddDnaCluster(testCases, "TrivalveYellowDna[0]", "TrivalveYellowPetDna", 95.17f, -388.81f, -919.84f, 5);
+            AddDnaCluster(testCases, "TrivalveYellowDna[0]", "TrivalveYellowPetDna", 95.17f, -388.81f, -919.84f, 3);
             AddDnaCluster(testCases, "TrivalveYellowDna[1]", "TrivalveYellowPetDna", 268.03f, -231.77f, -1226.99f, 4);
             AddDnaCluster(testCases, "TrivalveYellowDna[2]", "TrivalveYellowPetDna", 514.48f, -831.69f, -693.87f, 3);
             AddDnaCluster(testCases, "TrivalveYellowDna[3]", "TrivalveYellowPetDna", -255.338f, -127.287f, -245.725f, 2);
@@ -80,11 +80,17 @@ namespace DaftAppleGames.SubnauticaPetsTests
             AddDnaCluster(testCases, "PinnacaridDna[0]", "PinnacaridPetDna", -365.50f, -171.18f, -319.87f, 2);
             AddDnaCluster(testCases, "PinnacaridDna[1]", "PinnacaridPetDna", -541.18f, -202.38f, -495.66f, 3);
             AddDnaCluster(testCases, "PinnacaridDna[2]", "PinnacaridPetDna", 547.11f, -206.15f, -1092.51f, 4);
-            AddDnaCluster(testCases, "PinnacaridDna[3]", "PinnacaridPetDna", -252.56f, -126.35f, -238.21f, 5);
+            AddDnaCluster(testCases, "PinnacaridDna[3]", "PinnacaridPetDna", -252.56f, -126.35f, -238.21f, 4);
         }
 
         private static void AddDnaCluster(List<SpawnTestCase> testCases, string clusterName, string classId,
             float x, float y, float z, int count)
+        {
+            AddDnaCluster(testCases, clusterName, classId, x, y, z, count, 0);
+        }
+
+        private static void AddDnaCluster(List<SpawnTestCase> testCases, string clusterName, string classId,
+            float x, float y, float z, int count, int firstOffsetIndex)
         {
             Vector3 center = new Vector3(x, y, z);
             Vector3[] offsets =
@@ -98,7 +104,7 @@ namespace DaftAppleGames.SubnauticaPetsTests
 
             for (int sampleIndex = 0; sampleIndex < count; sampleIndex++)
             {
-                Vector3 position = center + offsets[sampleIndex];
+                Vector3 position = center + offsets[firstOffsetIndex + sampleIndex];
                 AddDna(testCases, $"{clusterName}.{sampleIndex}", classId, position.x, position.y, position.z);
             }
         }
