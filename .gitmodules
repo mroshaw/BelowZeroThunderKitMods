@@ -1,3 +1,6 @@
 [submodule "Assets/ThirdPartyAssets/Nautilus"]
 	path = Assets/ThirdPartyAssets/Nautilus
 	url = https://github.com/SubnauticaModding/Nautilus.git
+[submodule "Packages/RippedAssetImporter"]
+	path = Packages/RippedAssetImporter
+	url = https://github.com/mroshaw/RippedAssetImporter.git

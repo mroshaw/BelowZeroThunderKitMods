@@ -82,7 +82,7 @@ crashlytics-build.properties
 /[Aa]ssets/ThunderKitSettings/Logs/
 
 # Packages
-/[Pp]ackages/
+/[Pp]ackages/*
 
 # Unity folders
 /UIElementsSchema/
@@ -110,3 +110,7 @@ crashlytics-build.properties
 **/GameRefAssets.meta
 **/ImportedRefAssets/
 **/ImportedRefAssets.meta
+
+# Include the RipperAssetImporter package submodule
+!/[Pp]ackages/RippedAssetImporter
+!/[Pp]ackages/RippedAssetImporter/**
