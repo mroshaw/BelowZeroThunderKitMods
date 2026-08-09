@@ -35,6 +35,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         [SerializeField] private bool instantNav = false;
         [SerializeField] private int maximumReplanAttempts = 3;
         [SerializeField] private int maximumNoProgressSegments = 3;
+        [SerializeField] private StrategicNavigationGraph strategicNavigationGraph;
         
         [Header("Debug")]
         [SerializeField] private SeaTruckAutoPilot currentAutoPilot;
@@ -59,10 +60,12 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         private NavGridHelper _navGridHelper;
         private int _pathRequestVersion;
         private int _replanAttemptCount;
+        private readonly List<Vector3> _strategicRoute = new List<Vector3>();
+        private int _strategicRouteIndex;
         private bool _localGridGenerating;
         private bool _activeSegmentIncludesDockApproach;
         private bool _segmentAdvancePending;
-        private float _segmentStartDistanceToDock;
+        private float _segmentStartDistanceToStrategicTarget;
         private int _noProgressSegmentCount;
 
         private void OnEnable()
@@ -270,6 +273,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 return;
             }
             
+            CreateStrategicRoute();
             BeginLocalNavigationSegment(false);
         }
 
@@ -352,12 +356,13 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             }
 
             Vector3 startPosition = currentAutoPilot.transform.position;
-            Vector3 destination = _startOfDockRunway.Position;
+            Vector3 destination = _strategicRoute[_strategicRouteIndex];
             Vector3 destinationOffset = destination - startPosition;
-            _segmentStartDistanceToDock = destinationOffset.magnitude;
+            _segmentStartDistanceToStrategicTarget = destinationOffset.magnitude;
             float planningDistance = _navGridHelper.LocalPlanningDistance;
-            bool includesDockApproach = destinationOffset.magnitude <= planningDistance;
-            Vector3 segmentDestination = includesDockApproach
+            bool reachesStrategicTarget = destinationOffset.magnitude <= planningDistance;
+            bool includesDockApproach = reachesStrategicTarget && _strategicRouteIndex == _strategicRoute.Count - 1;
+            Vector3 segmentDestination = reachesStrategicTarget
                 ? destination
                 : startPosition + destinationOffset.normalized * planningDistance;
 
@@ -413,14 +418,21 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 return;
             }
 
-            float distanceToDock = Vector3.Distance(currentAutoPilot.transform.position,
-                _startOfDockRunway.Position);
-            if (_segmentStartDistanceToDock - distanceToDock < _navGridHelper.distanceBetweenCells)
+            Vector3 strategicTarget = _strategicRoute[_strategicRouteIndex];
+            float distanceToStrategicTarget = Vector3.Distance(currentAutoPilot.transform.position, strategicTarget);
+            if (distanceToStrategicTarget <= _navGridHelper.distanceBetweenCells * 2.0f &&
+                _strategicRouteIndex < _strategicRoute.Count - 1)
+            {
+                _strategicRouteIndex++;
+                _noProgressSegmentCount = 0;
+            }
+            else if (_segmentStartDistanceToStrategicTarget - distanceToStrategicTarget <
+                     _navGridHelper.distanceBetweenCells)
             {
                 _noProgressSegmentCount++;
                 if (_noProgressSegmentCount >= maximumNoProgressSegments)
                 {
-                    ModDebugLog.LogDebug("Rolling navigation did not make sufficient progress toward the dock.");
+                    ModDebugLog.LogDebug("Rolling navigation did not make sufficient progress toward its strategic target.");
                     FailRecall(DockRecallState.Stuck);
                     return;
                 }
@@ -432,6 +444,29 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
             _segmentAdvancePending = true;
             StartCoroutine(AdvanceToNextSegment());
+        }
+
+        private void CreateStrategicRoute()
+        {
+            _strategicRouteIndex = 0;
+            Vector3 startPosition = currentAutoPilot.transform.position;
+            Vector3 destination = _startOfDockRunway.Position;
+            if (!StrategicRoutePlanner.TryCalculateRoute(strategicNavigationGraph, startPosition, destination,
+                    _strategicRoute))
+            {
+                _strategicRoute.Clear();
+                _strategicRoute.Add(destination);
+                ModDebugLog.LogDebug("No strategic graph route is available; using direct rolling navigation.");
+                return;
+            }
+
+            float skipDistance = _navGridHelper.distanceBetweenCells * 2.0f;
+            while (_strategicRouteIndex < _strategicRoute.Count - 1 &&
+                   Vector3.Distance(startPosition, _strategicRoute[_strategicRouteIndex]) <= skipDistance)
+            {
+                _strategicRouteIndex++;
+            }
+            ModDebugLog.LogDebug($"Strategic route contains {_strategicRoute.Count} navigation points.");
         }
 
         private IEnumerator AdvanceToNextSegment()
