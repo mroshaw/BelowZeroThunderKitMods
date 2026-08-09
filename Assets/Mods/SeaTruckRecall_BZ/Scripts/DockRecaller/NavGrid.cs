@@ -44,7 +44,6 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
         // Cached RayCastHits for collider checks
         private readonly Collider[] _colliderHitCache = new Collider[100];
-        private readonly RaycastHit[] _hitCache =  new RaycastHit[10];
         private Vector3 _gridOrigin;
         private float _cellSize;
         private int _gridOperationVersion;
@@ -112,7 +111,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         }
 
         internal IEnumerator GenerateNavGridAsync(Vector3 sourcePosition, float range, float distanceBetweenCells,
-            float vehicleClearance, LayerMask colliderLayerMask,
+            float vehicleClearance, LayerMask colliderLayerMask, GameObject ignoredEntity,
             Action<GenerateStatus> gridCompleteAction = null,
            bool debug = false,  Transform debugContainer = null, CellVisualiser debugVisualiser = null)
         {
@@ -171,11 +170,6 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 #if !UNITY_EDITOR
                         isTraversable = !(cellPosition.y > Ocean.GetOceanLevel() - 2.0f);
 
-                        // If below the terrain, mark as invalid
-                        if (isTraversable)
-                        {
-                            isTraversable = Physics.RaycastNonAlloc(cellPosition, Vector3.down, _hitCache) != 0;
-                        }
 #endif
                         int numColliderHits = Physics.OverlapBoxNonAlloc(cellPosition, overlapHalfExtents,
                             _colliderHitCache, Quaternion.identity, colliderLayerMask, QueryTriggerInteraction.Ignore);
@@ -183,7 +177,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                         // Check if the cell contains any colliders
                         if (isTraversable)
                         {
-                            isTraversable = !(HasValidColliders(numColliderHits, _colliderHitCache));
+                            isTraversable = !(HasValidColliders(numColliderHits, _colliderHitCache, ignoredEntity));
                         }
 
                         int cellXIndex = x;
@@ -238,12 +232,29 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             gridCompleteAction?.Invoke(GenerateStatus.Success);
         }
 
-        private static bool HasValidColliders(int numColliders, Collider[] allColliders)
+        private static bool HasValidColliders(int numColliders, Collider[] allColliders, GameObject ignoredEntity)
         {
             for (int curColliderIndex = 0; curColliderIndex < numColliders; curColliderIndex++)
             {
-                // LogDebug($"Found collider: {allColliders[curColliderIndex].name} on layer named: {LayerMask.LayerToName(allColliders[curColliderIndex].gameObject.layer)}");
-                if (allColliders[curColliderIndex].gameObject.transform.parent && allColliders[curColliderIndex].gameObject.transform.parent.GetComponentInChildren<Creature>())
+                Collider collider = allColliders[curColliderIndex];
+                if (!collider)
+                {
+                    continue;
+                }
+
+                if (ignoredEntity &&
+                    (collider.gameObject == ignoredEntity || collider.transform.IsChildOf(ignoredEntity.transform)))
+                {
+                    continue;
+                }
+
+                GameObject entityRoot = UWE.Utils.GetEntityRoot(collider.gameObject);
+                if (ignoredEntity && entityRoot == ignoredEntity)
+                {
+                    continue;
+                }
+
+                if (collider.gameObject.transform.parent && collider.gameObject.transform.parent.GetComponentInChildren<Creature>())
                 {
                     // We want to ignore these
                     // ModDebugLog.LogDebug("NavGrid: found Creature collider, ignoring...");

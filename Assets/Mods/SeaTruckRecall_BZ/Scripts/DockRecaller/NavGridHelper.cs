@@ -10,6 +10,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         [Header("Settings")] [SerializeField]
         internal Transform gridCenterPosition;
         [SerializeField] internal float maxRange = 100.0f;
+        [SerializeField] internal float localPlanningRadius = 60.0f;
         [SerializeField] internal float distanceBetweenCells = 5.0f;
         [SerializeField] internal float vehicleClearance = 3.0f;
         [SerializeField] private LayerMask navGridIncludeLayerMask;
@@ -26,7 +27,10 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         
         private NavGrid _navGrid;
         internal NavGrid NavGrid => _navGrid;
-        internal float GridRadius => maxRange * 0.5f;
+        internal float RecallRange => maxRange;
+        internal float LocalPlanningRadius => localPlanningRadius;
+        internal float LocalPlanningDistance => Mathf.Max(distanceBetweenCells,
+            localPlanningRadius - Mathf.Max(distanceBetweenCells * 2.0f, vehicleClearance * 2.0f));
         
         internal bool NavGridDebug =>
 #if UNITY_EDITOR
@@ -49,32 +53,37 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 #if !UNITY_EDITOR
             navGridDebug = SeaTruckDockRecallPlugin.ConfigFile.EnableNavGridDebug;
             maxRange = SeaTruckDockRecallPlugin.ConfigFile.MaximumRange;
+            localPlanningRadius = SeaTruckDockRecallPlugin.ConfigFile.LocalPlanningRadius;
             distanceBetweenCells = SeaTruckDockRecallPlugin.ConfigFile.DistanceBetweenCells;
 #endif
 #if UNITY_EDITOR
             centerPosition = gridCenterPosition.position;
 #endif
             
-            yield return StartCoroutine(_navGrid.GenerateNavGridAsync(centerPosition, maxRange, distanceBetweenCells,
-                vehicleClearance, navGridIncludeLayerMask,
+            yield return StartCoroutine(_navGrid.GenerateNavGridAsync(centerPosition, localPlanningRadius * 2.0f,
+                distanceBetweenCells,
+                vehicleClearance, navGridIncludeLayerMask, null,
                 gridCompleteCallBack, navGridDebug, navGridDebugContainer, visualiserPrefab));
         }
         
         /// <summary>
         /// Refresh the internal grid
         /// </summary>
-        internal void RefreshNavGrid(Vector3 centerPosition, Action<GenerateStatus> gridCompleteCallBack)
+        internal void RefreshNavGrid(Vector3 centerPosition, Action<GenerateStatus> gridCompleteCallBack,
+            GameObject ignoredEntity = null)
         {
 #if !UNITY_EDITOR
             navGridDebug = SeaTruckDockRecallPlugin.ConfigFile.EnableNavGridDebug;
             maxRange = SeaTruckDockRecallPlugin.ConfigFile.MaximumRange;
+            localPlanningRadius = SeaTruckDockRecallPlugin.ConfigFile.LocalPlanningRadius;
             distanceBetweenCells = SeaTruckDockRecallPlugin.ConfigFile.DistanceBetweenCells;
 #endif
 #if UNITY_EDITOR
             centerPosition = gridCenterPosition.position;
 #endif
-            StartCoroutine(_navGrid.GenerateNavGridAsync(centerPosition, maxRange, distanceBetweenCells,
-                vehicleClearance, navGridIncludeLayerMask,
+            StartCoroutine(_navGrid.GenerateNavGridAsync(centerPosition, localPlanningRadius * 2.0f,
+                distanceBetweenCells,
+                vehicleClearance, navGridIncludeLayerMask, ignoredEntity,
                 gridCompleteCallBack, navGridDebug, navGridDebugContainer, visualiserPrefab));
         }
 

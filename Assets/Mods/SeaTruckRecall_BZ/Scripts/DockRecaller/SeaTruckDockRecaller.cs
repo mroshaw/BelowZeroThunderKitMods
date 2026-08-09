@@ -34,6 +34,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         [SerializeField] private bool createGridOnStart = true;
         [SerializeField] private bool instantNav = false;
         [SerializeField] private int maximumReplanAttempts = 3;
+        [SerializeField] private int maximumNoProgressSegments = 3;
         
         [Header("Debug")]
         [SerializeField] private SeaTruckAutoPilot currentAutoPilot;
@@ -58,7 +59,11 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         private NavGridHelper _navGridHelper;
         private int _pathRequestVersion;
         private int _replanAttemptCount;
-        private bool _replanGridGenerating;
+        private bool _localGridGenerating;
+        private bool _activeSegmentIncludesDockApproach;
+        private bool _segmentAdvancePending;
+        private float _segmentStartDistanceToDock;
+        private int _noProgressSegmentCount;
 
         private void OnEnable()
         {
@@ -179,7 +184,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                         SetDockState(DockRecallState.Aborted);
                     }
                     SetAutoPilot(null);
-                    SetDockState(_replanGridGenerating
+                    SetDockState(_localGridGenerating
                         ? DockRecallState.Initialising
                         : DockRecallState.Ready);
                     break;
@@ -187,6 +192,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                     BeginReplan();
                     break;
                 case AutoPilotState.Arrived:
+                    HandleSegmentArrived();
                     break;
                 case AutoPilotState.Docking:
                     SetDockState(DockRecallState.Docking);
@@ -239,7 +245,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             }
             ModDebugLog.LogDebug("Finding closest SeaTruck...");
             SeaTruckAutoPilot closestAutoPilot = AllSeaTruckAutoPilots.GetClosestAutoPilot(transform.position,
-                _navGridHelper.GridRadius);
+                _navGridHelper.RecallRange);
             if (closestAutoPilot == null)
             {
                 // Couldn't find a closest SeaTruck
@@ -252,6 +258,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             // Recall the SeaTruck
             SetAutoPilot(closestAutoPilot);
             _replanAttemptCount = 0;
+            _noProgressSegmentCount = 0;
             
 #if UNITY_EDITOR
             if (instantNav)
@@ -263,12 +270,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 return;
             }
             
-            // Generate a path for the SeaTruck
-            SetDockState(DockRecallState.FindingPath);
-            int requestVersion = ++_pathRequestVersion;
-            SeaTruckAutoPilot requestedAutoPilot = currentAutoPilot;
-            _navGridHelper.GenerateNavPath(closestAutoPilot.transform.position, _startOfDockRunway.Position,
-                (pathStatus, navPath) => PathReadyHandler(requestVersion, requestedAutoPilot, pathStatus, navPath));
+            BeginLocalNavigationSegment(false);
         }
 
         /// <summary>
@@ -285,7 +287,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         }
         
         private void PathReadyHandler(int requestVersion, SeaTruckAutoPilot requestedAutoPilot,
-            GenerateStatus pathStatus, NavPath navPath)
+            bool includesDockApproach, GenerateStatus pathStatus, NavPath navPath)
         {
             if (requestVersion != _pathRequestVersion || requestedAutoPilot != currentAutoPilot)
             {
@@ -297,10 +299,12 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             {
                 List<Waypoint> waypoints = navPath.GetWayPointsFromNavPath();
                 
-                // Add the two runway points
-                // waypoints.Add(_startOfDockRunway);
-                waypoints.Add(_endOfDockRunway);
-                waypoints.Add(_dockEngagement);
+                if (includesDockApproach)
+                {
+                    waypoints.Add(_endOfDockRunway);
+                    waypoints.Add(_dockEngagement);
+                }
+                _activeSegmentIncludesDockApproach = includesDockApproach;
                 if (!currentAutoPilot.StartNavigation(waypoints))
                 {
                     FailRecall(DockRecallState.PathingError);
@@ -327,21 +331,50 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             }
 
             _replanAttemptCount++;
-            ModDebugLog.LogDebug($"Refreshing navigation grid for replan attempt {_replanAttemptCount} of {maximumReplanAttempts}.");
-            currentAutoPilot.PrepareForReplan();
-            SetDockState(DockRecallState.FindingPath);
-            _replanGridGenerating = true;
-
-            int requestVersion = ++_pathRequestVersion;
-            SeaTruckAutoPilot requestedAutoPilot = currentAutoPilot;
-            _navGridHelper.RefreshNavGrid(_startOfDockRunway.Position,
-                gridStatus => ReplanGridReadyHandler(requestVersion, requestedAutoPilot, gridStatus));
+            ModDebugLog.LogDebug($"Replanning local route, attempt {_replanAttemptCount} of {maximumReplanAttempts}.");
+            BeginLocalNavigationSegment(true);
         }
 
-        private void ReplanGridReadyHandler(int requestVersion, SeaTruckAutoPilot requestedAutoPilot,
-            GenerateStatus gridStatus)
+        private void BeginLocalNavigationSegment(bool prepareAutoPilot)
         {
-            _replanGridGenerating = false;
+            if (!currentAutoPilot)
+            {
+                return;
+            }
+
+            if (prepareAutoPilot)
+            {
+                currentAutoPilot.PrepareForReplan();
+            }
+            else
+            {
+                currentAutoPilot.BeginPlanning();
+            }
+
+            Vector3 startPosition = currentAutoPilot.transform.position;
+            Vector3 destination = _startOfDockRunway.Position;
+            Vector3 destinationOffset = destination - startPosition;
+            _segmentStartDistanceToDock = destinationOffset.magnitude;
+            float planningDistance = _navGridHelper.LocalPlanningDistance;
+            bool includesDockApproach = destinationOffset.magnitude <= planningDistance;
+            Vector3 segmentDestination = includesDockApproach
+                ? destination
+                : startPosition + destinationOffset.normalized * planningDistance;
+
+            SetDockState(DockRecallState.FindingPath);
+            _localGridGenerating = true;
+            int requestVersion = ++_pathRequestVersion;
+            SeaTruckAutoPilot requestedAutoPilot = currentAutoPilot;
+            ModDebugLog.LogDebug($"Generating rolling navigation grid at {startPosition}; local destination is {segmentDestination}.");
+            _navGridHelper.RefreshNavGrid(startPosition,
+                gridStatus => LocalGridReadyHandler(requestVersion, requestedAutoPilot, segmentDestination,
+                    includesDockApproach, gridStatus), currentAutoPilot.gameObject);
+        }
+
+        private void LocalGridReadyHandler(int requestVersion, SeaTruckAutoPilot requestedAutoPilot,
+            Vector3 segmentDestination, bool includesDockApproach, GenerateStatus gridStatus)
+        {
+            _localGridGenerating = false;
             if (requestVersion != _pathRequestVersion || requestedAutoPilot != currentAutoPilot)
             {
                 if (!currentAutoPilot)
@@ -358,8 +391,60 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 return;
             }
 
-            _navGridHelper.GenerateNavPath(currentAutoPilot.transform.position, _startOfDockRunway.Position,
-                (pathStatus, navPath) => PathReadyHandler(requestVersion, requestedAutoPilot, pathStatus, navPath));
+            _navGridHelper.GenerateNavPath(currentAutoPilot.transform.position, segmentDestination,
+                (pathStatus, navPath) => PathReadyHandler(requestVersion, requestedAutoPilot,
+                    includesDockApproach, pathStatus, navPath));
+        }
+
+        private void HandleSegmentArrived()
+        {
+            if (!currentAutoPilot || _segmentAdvancePending)
+            {
+                return;
+            }
+
+            if (_activeSegmentIncludesDockApproach)
+            {
+                if (!_dockingManager || !_dockingManager.IsOccupied())
+                {
+                    ModDebugLog.LogDebug("SeaTruck reached the docking engagement point without starting docking.");
+                    FailRecall(DockRecallState.Stuck);
+                }
+                return;
+            }
+
+            float distanceToDock = Vector3.Distance(currentAutoPilot.transform.position,
+                _startOfDockRunway.Position);
+            if (_segmentStartDistanceToDock - distanceToDock < _navGridHelper.distanceBetweenCells)
+            {
+                _noProgressSegmentCount++;
+                if (_noProgressSegmentCount >= maximumNoProgressSegments)
+                {
+                    ModDebugLog.LogDebug("Rolling navigation did not make sufficient progress toward the dock.");
+                    FailRecall(DockRecallState.Stuck);
+                    return;
+                }
+            }
+            else
+            {
+                _noProgressSegmentCount = 0;
+            }
+
+            _segmentAdvancePending = true;
+            StartCoroutine(AdvanceToNextSegment());
+        }
+
+        private IEnumerator AdvanceToNextSegment()
+        {
+            yield return null;
+            _segmentAdvancePending = false;
+            if (!currentAutoPilot)
+            {
+                yield break;
+            }
+
+            _replanAttemptCount = 0;
+            BeginLocalNavigationSegment(true);
         }
 
         private void FailRecall(DockRecallState failureState)

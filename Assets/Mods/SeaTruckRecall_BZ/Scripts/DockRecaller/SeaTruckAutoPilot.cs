@@ -258,6 +258,17 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         }
 
         /// <summary>
+        /// Reserves this SeaTruck while its first navigation segment is being calculated.
+        /// </summary>
+        internal void BeginPlanning()
+        {
+            if (currentAutoPilotState == AutoPilotState.Ready)
+            {
+                SetAutopilotState(AutoPilotState.Replanning);
+            }
+        }
+
+        /// <summary>
         /// Resets the movement controller so a replacement route can be installed.
         /// </summary>
         internal void PrepareForReplan()

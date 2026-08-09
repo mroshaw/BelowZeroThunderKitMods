@@ -19,8 +19,11 @@ namespace DaftAppleGames.SeaTruckRecall_BZ
         /// <summary>
         /// Recaller NavGrid properties
         /// </summary>
-        [Slider("Navigation Grid Width (Restart Required)", Tooltip = "Determines the total width of the dock-centred navigation grid. The current recall radius is half this value. A large width and small cells may cause performance issues.", Step = 5, Min = 50, Max = 1000, DefaultValue = 300)]
+        [Slider("Maximum Recall Range", Tooltip = "Determines how far away a SeaTruck can be selected for recall.", Step = 5, Min = 50, Max = 1000, DefaultValue = 300)]
         public int MaximumRange = 300;
+
+        [Slider("Local Planning Radius", Tooltip = "Determines the radius of the rolling navigation grid around the recalled SeaTruck. Larger values consider more terrain but cost more memory and generation time.", Step = 5, Min = 25, Max = 100, DefaultValue = 60)]
+        public int LocalPlanningRadius = 60;
 
         [Slider("Distance Between Cells (Restart Required)", Tooltip = "The lower the value, the more accurate the path finding, but greater the performance and memory impact. ", Step = 1, Min = 5, Max = 50, DefaultValue = 5)]
         public int DistanceBetweenCells = 5;
