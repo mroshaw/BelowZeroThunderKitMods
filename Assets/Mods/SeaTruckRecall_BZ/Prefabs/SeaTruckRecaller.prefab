@@ -410,6 +410,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   createGridOnStart: 1
   instantNav: 0
+  maximumReplanAttempts: 3
+  maximumNoProgressSegments: 3
+  strategicNavigationGraph: {fileID: 11400000, guid: 48de325076276cb468e3dad70987c33b, type: 2}
   currentAutoPilot: {fileID: 0}
   onAutoPilotChanged:
     m_PersistentCalls:

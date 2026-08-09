@@ -23,7 +23,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
             int startNode = FindNearestNode(graph.Nodes, startPosition);
             int destinationNode = FindNearestNode(graph.Nodes, destination);
-            List<int>[] adjacency = BuildAdjacency(graph);
+            IReadOnlyList<int>[] adjacency = BuildAdjacency(graph);
             Dictionary<int, int> cameFrom = new Dictionary<int, int>();
             Dictionary<int, float> costs = new Dictionary<int, float>();
             NavPriorityQueue<int> frontier = new NavPriorityQueue<int>();
@@ -86,13 +86,24 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             return nearestIndex;
         }
 
-        private static List<int>[] BuildAdjacency(StrategicNavigationGraph graph)
+        private static IReadOnlyList<int>[] BuildAdjacency(StrategicNavigationGraph graph)
         {
             IReadOnlyList<StrategicNavigationGraph.Node> nodes = graph.Nodes;
-            List<int>[] adjacency = new List<int>[nodes.Count];
+            IReadOnlyList<int>[] adjacency = new IReadOnlyList<int>[nodes.Count];
+            if (!graph.ConnectionsBidirectional)
+            {
+                for (int index = 0; index < nodes.Count; index++)
+                {
+                    adjacency[index] = nodes[index].Connections;
+                }
+                return adjacency;
+            }
+
+            List<int>[] expandedAdjacency = new List<int>[nodes.Count];
             for (int index = 0; index < nodes.Count; index++)
             {
-                adjacency[index] = new List<int>();
+                expandedAdjacency[index] = new List<int>();
+                adjacency[index] = expandedAdjacency[index];
             }
 
             for (int index = 0; index < nodes.Count; index++)
@@ -103,10 +114,10 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                     {
                         continue;
                     }
-                    AddUnique(adjacency[index], connection);
+                    AddUnique(expandedAdjacency[index], connection);
                     if (graph.ConnectionsBidirectional)
                     {
-                        AddUnique(adjacency[connection], index);
+                        AddUnique(expandedAdjacency[connection], index);
                     }
                 }
             }

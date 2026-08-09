@@ -43,7 +43,16 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Editor
             }
 
             EditorGUILayout.Space();
-            DrawDefaultInspector();
+            if (nodes.Count <= 200)
+            {
+                DrawDefaultInspector();
+            }
+            else
+            {
+                EditorGUILayout.HelpBox(
+                    "Raw node fields are hidden for large baked graphs to protect Inspector responsiveness.",
+                    MessageType.None);
+            }
         }
 
         private void OnSceneGUI()

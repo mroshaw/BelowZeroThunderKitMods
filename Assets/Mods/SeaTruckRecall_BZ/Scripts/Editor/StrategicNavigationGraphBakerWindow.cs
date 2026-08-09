@@ -32,7 +32,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Editor
         /// <summary>
         /// Opens the strategic terrain graph baker.
         /// </summary>
-        [MenuItem("Tools/Daft Apple Games/SeaTruck Recall/Strategic Terrain Graph Baker")]
+        [MenuItem("Tools/Daft Apple Games/SeaTruck Recall/Loaded Collider Graph Baker (Validation)")]
         public static void ShowWindow()
         {
             StrategicNavigationGraphBakerWindow window = GetWindow<StrategicNavigationGraphBakerWindow>();
@@ -43,10 +43,10 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Editor
 
         private void OnGUI()
         {
-            EditorGUILayout.LabelField("Strategic Terrain Graph", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Loaded Collider Validation Graph", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox(
-                "The baker samples collider geometry currently loaded in the active Unity scene. " +
-                "Load or import every terrain chunk required by the selected bounds before baking.",
+                "Validation baker: samples collider geometry currently loaded in the active Unity scene. " +
+                "Use the Compiled Terrain Graph Baker for the production whole-map graph.",
                 MessageType.Info);
 
             targetGraph = (StrategicNavigationGraph)EditorGUILayout.ObjectField("Target Graph", targetGraph,
@@ -143,7 +143,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Editor
             }
 
             Undo.RecordObject(targetGraph, "Bake strategic terrain graph");
-            targetGraph.ReplaceBakedData(bakedNodes, true);
+            targetGraph.ReplaceBakedData(bakedNodes, false);
             EditorUtility.SetDirty(targetGraph);
             AssetDatabase.SaveAssets();
             resultSummary = $"Baked {bakedNodes.Count:N0} nodes from {eligibleColliders.Count:N0} colliders; " +
