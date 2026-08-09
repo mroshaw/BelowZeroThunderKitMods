@@ -289,9 +289,13 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         /// </summary>
         private void CreateWaypoints()
         {
+            Transform dockingTriggerTransform = _dockingManager && _dockingManager.bay
+                ? _dockingManager.bay.transform
+                : gameObject.transform;
+
             _startOfDockRunway = CreateDockWaypoint(gameObject.transform.position + (new Vector3(0, 0.1f, 0)) + (-gameObject.transform.right * 45.0f), "Docking Runway Start", Color.red);
             _endOfDockRunway = CreateDockWaypoint(gameObject.transform.position + (new Vector3(0, 0.1f, 0)) + (-gameObject.transform.right * 30.0f), "Docking Runway End", Color.yellow);
-            _dockEngagement = CreateDockWaypoint(gameObject.transform.position + (new Vector3(0, 0.8f, 0)) + (-gameObject.transform.right * 10.0f), "Dock Engagement", Color.green);
+            _dockEngagement = CreateDockWaypoint(dockingTriggerTransform.position, "Dock Engagement", Color.green);
             
             _instantNavWaypoints.Add(_endOfDockRunway);
             _instantNavWaypoints.Add(_dockEngagement);

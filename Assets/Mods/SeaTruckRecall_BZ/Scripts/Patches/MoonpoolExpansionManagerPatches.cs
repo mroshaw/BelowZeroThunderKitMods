@@ -70,47 +70,28 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Patches
         internal static bool AllowedToDock_Prefix(MoonpoolExpansionManager __instance, Dockable dockable,
             ref bool __result)
         {
-            // ModDebugLog.LogDebug($"MoonpoolExpansionManager.IsAllowedToDock called");
-
             SeaTruckDockRecaller dockRecaller = __instance.GetComponentInChildren<SeaTruckDockRecaller>();
-            SeaTruckAutoPilot autoPilot = dockable.GetComponent<SeaTruckAutoPilot>();
-            if (!dockRecaller || !autoPilot)
+            SeaTruckAutoPilot autoPilot = dockable ? dockable.GetComponent<SeaTruckAutoPilot>() : null;
+            if (!dockRecaller || !autoPilot || !autoPilot.IsBusy)
             {
-                if (!dockRecaller)
-                {
-                    ModDebugLog.LogDebug($"No DockRecaller found on MoonpoolExpansionManager: {__instance}");
-                }
-
-                if (!autoPilot)
-                {
-                    ModDebugLog.LogDebug($"No AutoPilot found on dockable: {dockable}");
-                }
-
                 return true;
             }
 
             __result = dockable.truckSegment != null &&
-                       dockable != null &&
+                       !__instance.IsOccupied() &&
                        __instance.exitingTruck == null &&
                        !__instance.DockingBlockersInTheWay() &&
                        (__instance.isLoading || __instance.IsPowered()) &&
                        (__instance.isLoading ||
-                        __instance.CheckIfSeatruckModulePresent(__instance.tailDockingPosition.position));
+                        !HasBlockingSeaTruckModule(__instance.tailDockingPosition.position, autoPilot));
             return false;
         }
 
-        [HarmonyPatch(nameof(MoonpoolExpansionManager.CheckIfSeatruckModulePresent))]
-        [HarmonyPostfix]
-        internal static void CheckIfSeatruckModulePresent_Prefix(MoonpoolExpansionManager __instance,
-            Vector3 designatedLocation, ref bool __result)
+        /// <summary>
+        /// Checks the docking area for SeaTruck modules while ignoring the cab currently under autopilot control.
+        /// </summary>
+        private static bool HasBlockingSeaTruckModule(Vector3 designatedLocation, SeaTruckAutoPilot activeAutoPilot)
         {
-            // If already true, then we don't need to do anything
-            if (__result)
-            {
-                return;
-            }
-
-            // Replicate the behaviour of the class method, but add a check for the AutoPilot
             int num = UWE.Utils.OverlapSphereIntoSharedBuffer(designatedLocation, 3f, 1 << LayerID.Vehicle,
                 QueryTriggerInteraction.UseGlobal);
             for (int i = 0; i < num; i++)
@@ -123,13 +104,27 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Patches
                     gameObject = collider.gameObject;
                 }
 
-                SeaTruckAutoPilot autoPilot = gameObject.GetComponent<SeaTruckAutoPilot>();
-                if (autoPilot && autoPilot.IsBusy)
+                SeaTruckSegment seaTruckSegment = gameObject.GetComponent<SeaTruckSegment>();
+                if (!seaTruckSegment)
                 {
-                    __result = true;
-                    return;
+                    continue;
+                }
+
+                SeaTruckAutoPilot autoPilot = gameObject.GetComponent<SeaTruckAutoPilot>();
+                if (seaTruckSegment.isMainCab && autoPilot == activeAutoPilot)
+                {
+                    continue;
+                }
+
+                if (!seaTruckSegment.isMainCab ||
+                    (!seaTruckSegment.motor.IsPiloted() &&
+                     (seaTruckSegment.motor.dockable == null || !seaTruckSegment.motor.dockable.isInTransition)))
+                {
+                    return true;
                 }
             }
+
+            return false;
         }
 
         /// <summary>
