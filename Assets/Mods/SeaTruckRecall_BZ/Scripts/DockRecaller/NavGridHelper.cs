@@ -11,6 +11,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         internal Transform gridCenterPosition;
         [SerializeField] internal float maxRange = 100.0f;
         [SerializeField] internal float distanceBetweenCells = 5.0f;
+        [SerializeField] internal float vehicleClearance = 3.0f;
         [SerializeField] private LayerMask navGridIncludeLayerMask;
         
         [Header("Debug")]
@@ -25,6 +26,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         
         private NavGrid _navGrid;
         internal NavGrid NavGrid => _navGrid;
+        internal float GridRadius => maxRange * 0.5f;
         
         internal bool NavGridDebug =>
 #if UNITY_EDITOR
@@ -53,7 +55,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             centerPosition = gridCenterPosition.position;
 #endif
             
-            yield return StartCoroutine(_navGrid.GenerateNavGridAsync(centerPosition, maxRange, distanceBetweenCells, navGridIncludeLayerMask,
+            yield return StartCoroutine(_navGrid.GenerateNavGridAsync(centerPosition, maxRange, distanceBetweenCells,
+                vehicleClearance, navGridIncludeLayerMask,
                 gridCompleteCallBack, navGridDebug, navGridDebugContainer, visualiserPrefab));
         }
         
@@ -70,7 +73,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 #if UNITY_EDITOR
             centerPosition = gridCenterPosition.position;
 #endif
-            StartCoroutine(_navGrid.GenerateNavGridAsync(centerPosition, maxRange, distanceBetweenCells, navGridIncludeLayerMask,
+            StartCoroutine(_navGrid.GenerateNavGridAsync(centerPosition, maxRange, distanceBetweenCells,
+                vehicleClearance, navGridIncludeLayerMask,
                 gridCompleteCallBack, navGridDebug, navGridDebugContainer, visualiserPrefab));
         }
 
@@ -86,6 +90,14 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             pathDebug = SeaTruckDockRecallPlugin.ConfigFile.EnableNavGridDebug;
 #endif
             StartCoroutine(_navGrid.GeneratePathAsync(startPos, endPos, pathGenCompleteCallBack, pathDebug, navGridDebugContainer));
+        }
+
+        /// <summary>
+        /// Cancels the active path calculation, if one is in progress.
+        /// </summary>
+        internal void CancelPathGeneration()
+        {
+            _navGrid.CancelPathGeneration();
         }
         
         /// <summary>

@@ -55,6 +55,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         
         private bool _gridReady;
         private NavGridHelper _navGridHelper;
+        private int _pathRequestVersion;
 
         private void OnEnable()
         {
@@ -209,6 +210,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         internal void AbortRecall()
         {
             ModDebugLog.LogDebug("Aborting Recall...");
+            _pathRequestVersion++;
+            _navGridHelper.CancelPathGeneration();
             currentAutoPilot.AbortNavigation();
         }
 
@@ -223,7 +226,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 return;
             }
             ModDebugLog.LogDebug("Finding closest SeaTruck...");
-            SeaTruckAutoPilot closestAutoPilot = AllSeaTruckAutoPilots.GetClosestAutoPilot(transform.position, _navGridHelper.maxRange);
+            SeaTruckAutoPilot closestAutoPilot = AllSeaTruckAutoPilots.GetClosestAutoPilot(transform.position,
+                _navGridHelper.GridRadius);
             if (closestAutoPilot == null)
             {
                 // Couldn't find a closest SeaTruck
@@ -248,7 +252,10 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             
             // Generate a path for the SeaTruck
             SetDockState(DockRecallState.FindingPath);
-            _navGridHelper.GenerateNavPath(closestAutoPilot.transform.position, _startOfDockRunway.Position, PathReadyHandler);
+            int requestVersion = ++_pathRequestVersion;
+            SeaTruckAutoPilot requestedAutoPilot = currentAutoPilot;
+            _navGridHelper.GenerateNavPath(closestAutoPilot.transform.position, _startOfDockRunway.Position,
+                (pathStatus, navPath) => PathReadyHandler(requestVersion, requestedAutoPilot, pathStatus, navPath));
         }
 
         /// <summary>
@@ -264,8 +271,15 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             }
         }
         
-        private void PathReadyHandler(GenerateStatus pathStatus, NavPath navPath)
+        private void PathReadyHandler(int requestVersion, SeaTruckAutoPilot requestedAutoPilot,
+            GenerateStatus pathStatus, NavPath navPath)
         {
+            if (requestVersion != _pathRequestVersion || requestedAutoPilot != currentAutoPilot)
+            {
+                ModDebugLog.LogDebug("Ignoring stale navigation path result.");
+                return;
+            }
+
             if (pathStatus == GenerateStatus.Success)
             {
                 List<Waypoint> waypoints = navPath.GetWayPointsFromNavPath();

@@ -19,7 +19,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ
         /// <summary>
         /// Recaller NavGrid properties
         /// </summary>
-        [Slider("Maximum Range (Restart Required)", Tooltip = "Determines the range of the recaller. A high MaxRange and a low DistanceBetweenCells may cause performance issues.", Step = 5, Min = 50, Max = 1000, DefaultValue = 300)]
+        [Slider("Navigation Grid Width (Restart Required)", Tooltip = "Determines the total width of the dock-centred navigation grid. The current recall radius is half this value. A large width and small cells may cause performance issues.", Step = 5, Min = 50, Max = 1000, DefaultValue = 300)]
         public int MaximumRange = 300;
 
         [Slider("Distance Between Cells (Restart Required)", Tooltip = "The lower the value, the more accurate the path finding, but greater the performance and memory impact. ", Step = 1, Min = 5, Max = 50, DefaultValue = 5)]

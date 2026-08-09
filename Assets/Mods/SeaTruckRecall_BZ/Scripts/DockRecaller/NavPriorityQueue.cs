@@ -19,11 +19,14 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
         public T Dequeue()
         {
-            var bestItem = _elements[0].Key;
-            var last = _elements[_elements.Count - 1];
+            T bestItem = _elements[0].Key;
+            KeyValuePair<T, float> last = _elements[_elements.Count - 1];
             _elements[0] = last;
             _elements.RemoveAt(_elements.Count - 1);
-            HeapifyDown(0);
+            if (_elements.Count > 0)
+            {
+                HeapifyDown(0);
+            }
             return bestItem;
         }
 
@@ -32,7 +35,10 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             while (index > 0)
             {
                 int parent = (index - 1) / 2;
-                if (_elements[index].Value >= _elements[parent].Value) break;
+                if (_elements[index].Value >= _elements[parent].Value)
+                {
+                    break;
+                }
                 Swap(index, parent);
                 index = parent;
             }
@@ -48,10 +54,17 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 int smallest = index;
 
                 if (left <= lastIndex && _elements[left].Value < _elements[smallest].Value)
+                {
                     smallest = left;
+                }
                 if (right <= lastIndex && _elements[right].Value < _elements[smallest].Value)
+                {
                     smallest = right;
-                if (smallest == index) break;
+                }
+                if (smallest == index)
+                {
+                    break;
+                }
 
                 Swap(index, smallest);
                 index = smallest;
@@ -60,7 +73,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
         private void Swap(int i, int j)
         {
-            (_elements[i], _elements[j]) = (_elements[j], _elements[i]);
+            KeyValuePair<T, float> temporary = _elements[i];
+            _elements[i] = _elements[j];
+            _elements[j] = temporary;
         }
     }
 }

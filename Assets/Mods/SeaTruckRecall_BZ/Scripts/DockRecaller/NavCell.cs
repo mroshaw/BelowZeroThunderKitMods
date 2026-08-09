@@ -9,13 +9,14 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
     [Serializable]
     internal struct NavCell : IEquatable<NavCell>
     {
+        internal Vector3Int Index;
         internal Vector3 Position;
         internal bool IsTraversable;
         internal string Name;
 
         public bool Equals(NavCell other)
         {
-            return Position.Equals(other.Position);
+            return Index.Equals(other.Index);
         }
 
         public override bool Equals(object obj)
@@ -25,13 +26,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                int hashCode = Position.GetHashCode();
-                hashCode = (hashCode * 397) ^ IsTraversable.GetHashCode();
-                hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
-                return hashCode;
-            }
+            return Index.GetHashCode();
         }
     }
 }

@@ -153,7 +153,6 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                     waypoints[currentWaypointIndex - 1].Position);
                 if (distanceToNextWaypoint < skipWaypointThreshold)
                 {
-                    currentWaypointIndex++;
                     SetNextWaypoint();
                 }
             }
