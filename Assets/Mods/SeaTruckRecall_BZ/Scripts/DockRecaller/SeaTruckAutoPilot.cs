@@ -12,6 +12,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         Initialising,
         Ready,
         Moving,
+        Replanning,
         Aborted,
         Arrived,
         Stuck,
@@ -132,8 +133,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             // If we get stuck, change status and notify listeners
             if (IsStuckCheck())
             {
-                ModDebugLog.LogDebug("AutoPilot is stuck! Aborting!");
-                SetStuck();
+                ModDebugLog.LogDebug("AutoPilot has stopped moving. Requesting a new route.");
+                _seaTruckNavMovement.BlockNavigation();
             }
         }
         
@@ -230,7 +231,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         internal bool StartNavigation(List<Waypoint> waypoints)
         {
             // Abort, if already being recalled
-            if (currentAutoPilotState != AutoPilotState.Ready)
+            if (currentAutoPilotState != AutoPilotState.Ready &&
+                currentAutoPilotState != AutoPilotState.Replanning)
             {
                 // Already being recalled or is already docked
                 ModDebugLog.LogDebug($"AutoPilot BeginNavigation: autopilot is not ready. State is: {currentAutoPilotState}");
@@ -243,15 +245,25 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 #endif
             _totalWaypoints =  waypoints.Count;
             _currentWaypointIndex = 0;
+            _currStuckCheckTimer = 0.0f;
+            _lastPosition = Vector3.zero;
+            _lastRotation = Quaternion.identity;
             
             // Used to calculate remaining distance
             _finalDestination = waypoints[waypoints.Count - 1].Position;
 
             // Start navigation
             ModDebugLog.LogDebug("AutoPilot engaged!");
-            _seaTruckNavMovement.StartNavigation(waypoints);
+            return _seaTruckNavMovement.StartNavigation(waypoints);
+        }
 
-            return true;
+        /// <summary>
+        /// Resets the movement controller so a replacement route can be installed.
+        /// </summary>
+        internal void PrepareForReplan()
+        {
+            StopNavigation();
+            SetAutopilotState(AutoPilotState.Replanning);
         }
         
         internal void StopNavigation()
@@ -271,8 +283,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
         internal void SetStuck()
         {
-            SetAutopilotState(AutoPilotState.Stuck);
-            SetAutopilotState(AutoPilotState.Ready);
+            _seaTruckNavMovement.BlockNavigation();
         }
         
         /// <summary>

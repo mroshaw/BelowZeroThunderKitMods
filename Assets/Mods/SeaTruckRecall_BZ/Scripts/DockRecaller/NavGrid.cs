@@ -47,7 +47,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         private readonly RaycastHit[] _hitCache =  new RaycastHit[10];
         private Vector3 _gridOrigin;
         private float _cellSize;
-        private int _operationVersion;
+        private int _gridOperationVersion;
+        private int _pathOperationVersion;
 
         internal NavGrid()
         {
@@ -60,7 +61,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         /// </summary>
         internal void CancelPathGeneration()
         {
-            _operationVersion++;
+            _pathOperationVersion++;
             SetPathingStatus(GenerateStatus.Idle);
         }
 
@@ -146,7 +147,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             _navGrid = new NavCell[cellsInRow, cellsInRow, cellsInRow];
             _cellSize = distanceBetweenCells;
             _gridOrigin = sourcePosition - Vector3.one * (numCellExtents * distanceBetweenCells);
-            int operationVersion = ++_operationVersion;
+            int operationVersion = ++_gridOperationVersion;
             Vector3 overlapHalfExtents = Vector3.one * Mathf.Max(distanceBetweenCells * 0.45f, vehicleClearance);
 
             int iterations = 0;
@@ -157,7 +158,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 {
                     for (int z = 0; z < cellsInRow; z++)
                     {
-                        if (operationVersion != _operationVersion)
+                        if (operationVersion != _gridOperationVersion)
                         {
                             yield break;
                         }
@@ -287,7 +288,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 yield break;
             }
 
-            int operationVersion = ++_operationVersion;
+            int operationVersion = ++_pathOperationVersion;
             NavPriorityQueue<Vector3Int> openQueue = new NavPriorityQueue<Vector3Int>();
             HashSet<Vector3Int> closedSet = new HashSet<Vector3Int>();
             Dictionary<Vector3Int, Vector3Int> cameFrom = new Dictionary<Vector3Int, Vector3Int>();
@@ -299,7 +300,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             int iterations = 0;
             while (openQueue.Count > 0)
             {
-                if (operationVersion != _operationVersion)
+                if (operationVersion != _pathOperationVersion)
                 {
                     yield break;
                 }

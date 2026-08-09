@@ -20,6 +20,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             {
                 { AutoPilotState.Ready, "READY" },
                 { AutoPilotState.Moving, "MOVING" },
+                { AutoPilotState.Replanning, "REPLANNING" },
                 { AutoPilotState.Arrived, "ARRIVED" },
                 { AutoPilotState.Stuck, "ROUTE BLOCKED!" },
                 { AutoPilotState.Parking, "PARKING" },

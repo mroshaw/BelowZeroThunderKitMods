@@ -21,6 +21,12 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         [SerializeField] private float moveDistanceThreshold = 0.2f;
         [SerializeField] private float skipWaypointThreshold = 1.0f;
         [SerializeField] private float rotateAngleThreshold = 0.1f;
+
+        [Header("Obstacle Monitoring")]
+        [SerializeField] private float obstacleScanInterval = 0.25f;
+        [SerializeField] private float obstacleScanRadius = 3.0f;
+        [SerializeField] private float obstacleScanDistance = 12.0f;
+        [SerializeField] private LayerMask obstacleLayerMask = -5;
         
         [Header("Navigation")]
         [SerializeField] List<Waypoint> waypoints = new List<Waypoint>();
@@ -53,6 +59,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         private bool _mainTruckRigidBodyBackupIsKinematic;
         private CollisionDetectionMode _mainTruckRigidBodyBackupCollisionDetectionMode;
         private RigidbodyInterpolation _mainTruckRigidBodyBackupInterpolation;
+        private readonly RaycastHit[] _obstacleHitCache = new RaycastHit[32];
+        private float _nextObstacleScanTime;
+        private bool _rigidBodiesConfigured;
         private void Awake()
         {
             _motor = GetComponent<SeaTruckMotor>();
@@ -67,6 +76,12 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         {
             if (currentNavState != NavState.Moving)
             {
+                return;
+            }
+
+            if (IsRouteBlocked())
+            {
+                BlockNavigation();
                 return;
             }
             
@@ -169,8 +184,10 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 return false;
             }
             waypoints = newWaypoints;
+            CacheSeaTruckRigidBodyState();
             CacheRigidbodies();
             ConfigureRigidBodies();
+            _rigidBodiesConfigured = true;
             SetNextWaypoint();
             SetNavState(NavState.Moving);
             return true;
@@ -178,7 +195,22 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
         internal void StopNavigation()
         {
+            StopAndRestorePhysics();
             InitialiseNav();
+        }
+
+        /// <summary>
+        /// Stops movement and reports that the active route can no longer be followed safely.
+        /// </summary>
+        internal void BlockNavigation()
+        {
+            if (currentNavState != NavState.Moving)
+            {
+                return;
+            }
+
+            StopAndRestorePhysics();
+            SetNavState(NavState.Blocked);
         }
         
         /// <summary>
@@ -207,11 +239,63 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         /// </summary>
         private void NavComplete()
         {
-            RestoreRigidBodies();
-            RestoreSeaTruckRigidBodyState();
+            StopAndRestorePhysics();
             SetNavState(NavState.Arrived);
             InitialiseNav();
             onDestinationReached.Invoke(currentWaypoint);
+        }
+
+        private bool IsRouteBlocked()
+        {
+            if (!currentWaypoint.MonitorObstacles || Time.time < _nextObstacleScanTime)
+            {
+                return false;
+            }
+
+            _nextObstacleScanTime = Time.time + obstacleScanInterval;
+            Vector3 direction = currentWaypoint.Position - _mainRigidbody.worldCenterOfMass;
+            float distance = Mathf.Min(direction.magnitude, obstacleScanDistance);
+            if (distance <= obstacleScanRadius)
+            {
+                return false;
+            }
+
+            int hitCount = Physics.SphereCastNonAlloc(_mainRigidbody.worldCenterOfMass, obstacleScanRadius,
+                direction.normalized, _obstacleHitCache, distance, obstacleLayerMask,
+                QueryTriggerInteraction.Ignore);
+            for (int hitIndex = 0; hitIndex < hitCount; hitIndex++)
+            {
+                Collider collider = _obstacleHitCache[hitIndex].collider;
+                if (!collider || collider.transform.IsChildOf(transform))
+                {
+                    continue;
+                }
+
+                GameObject entityRoot = UWE.Utils.GetEntityRoot(collider.gameObject);
+                if (entityRoot == gameObject || (entityRoot && entityRoot.GetComponent<Creature>()))
+                {
+                    continue;
+                }
+
+                ModDebugLog.LogDebug($"Route blocked by {collider.gameObject.name} at {_obstacleHitCache[hitIndex].point}.");
+                return true;
+            }
+
+            return false;
+        }
+
+        private void StopAndRestorePhysics()
+        {
+            _mainRigidbody.velocity = Vector3.zero;
+            _mainRigidbody.angularVelocity = Vector3.zero;
+            if (!_rigidBodiesConfigured)
+            {
+                return;
+            }
+
+            RestoreRigidBodies();
+            RestoreSeaTruckRigidBodyState();
+            _rigidBodiesConfigured = false;
         }
         
         /// <summary>

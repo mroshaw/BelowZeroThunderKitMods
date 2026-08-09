@@ -33,6 +33,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         [Header("Settings")]
         [SerializeField] private bool createGridOnStart = true;
         [SerializeField] private bool instantNav = false;
+        [SerializeField] private int maximumReplanAttempts = 3;
         
         [Header("Debug")]
         [SerializeField] private SeaTruckAutoPilot currentAutoPilot;
@@ -56,6 +57,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         private bool _gridReady;
         private NavGridHelper _navGridHelper;
         private int _pathRequestVersion;
+        private int _replanAttemptCount;
+        private bool _replanGridGenerating;
 
         private void OnEnable()
         {
@@ -166,13 +169,22 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 case AutoPilotState.Moving:
                     SetDockState(DockRecallState.Recalling);
                     break;
+                case AutoPilotState.Replanning:
+                    SetDockState(DockRecallState.FindingPath);
+                    break;
                 case AutoPilotState.Aborted:
-                    SetDockState(DockRecallState.Aborted);
-                    SetDockState(DockRecallState.Ready);
+                    if (_currentRecallState != DockRecallState.PathingError &&
+                        _currentRecallState != DockRecallState.Stuck)
+                    {
+                        SetDockState(DockRecallState.Aborted);
+                    }
                     SetAutoPilot(null);
+                    SetDockState(_replanGridGenerating
+                        ? DockRecallState.Initialising
+                        : DockRecallState.Ready);
                     break;
                 case AutoPilotState.Stuck:
-                    SetDockState(DockRecallState.Ready);
+                    BeginReplan();
                     break;
                 case AutoPilotState.Arrived:
                     break;
@@ -239,6 +251,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
             // Recall the SeaTruck
             SetAutoPilot(closestAutoPilot);
+            _replanAttemptCount = 0;
             
 #if UNITY_EDITOR
             if (instantNav)
@@ -288,12 +301,76 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 // waypoints.Add(_startOfDockRunway);
                 waypoints.Add(_endOfDockRunway);
                 waypoints.Add(_dockEngagement);
-                currentAutoPilot.StartNavigation(waypoints);
+                if (!currentAutoPilot.StartNavigation(waypoints))
+                {
+                    FailRecall(DockRecallState.PathingError);
+                }
             }
             else
             {
-                SetDockState(DockRecallState.PathingError);
+                FailRecall(DockRecallState.PathingError);
+            }
+        }
+
+        private void BeginReplan()
+        {
+            if (!currentAutoPilot)
+            {
+                return;
+            }
+
+            if (_replanAttemptCount >= maximumReplanAttempts)
+            {
+                ModDebugLog.LogDebug("Maximum route replanning attempts reached.");
+                FailRecall(DockRecallState.Stuck);
+                return;
+            }
+
+            _replanAttemptCount++;
+            ModDebugLog.LogDebug($"Refreshing navigation grid for replan attempt {_replanAttemptCount} of {maximumReplanAttempts}.");
+            currentAutoPilot.PrepareForReplan();
+            SetDockState(DockRecallState.FindingPath);
+            _replanGridGenerating = true;
+
+            int requestVersion = ++_pathRequestVersion;
+            SeaTruckAutoPilot requestedAutoPilot = currentAutoPilot;
+            _navGridHelper.RefreshNavGrid(_startOfDockRunway.Position,
+                gridStatus => ReplanGridReadyHandler(requestVersion, requestedAutoPilot, gridStatus));
+        }
+
+        private void ReplanGridReadyHandler(int requestVersion, SeaTruckAutoPilot requestedAutoPilot,
+            GenerateStatus gridStatus)
+        {
+            _replanGridGenerating = false;
+            if (requestVersion != _pathRequestVersion || requestedAutoPilot != currentAutoPilot)
+            {
+                if (!currentAutoPilot)
+                {
+                    _gridReady = gridStatus == GenerateStatus.Success;
+                    SetDockState(_gridReady ? DockRecallState.Ready : DockRecallState.PathingError);
+                }
+                return;
+            }
+
+            if (gridStatus != GenerateStatus.Success)
+            {
+                FailRecall(DockRecallState.PathingError);
+                return;
+            }
+
+            _navGridHelper.GenerateNavPath(currentAutoPilot.transform.position, _startOfDockRunway.Position,
+                (pathStatus, navPath) => PathReadyHandler(requestVersion, requestedAutoPilot, pathStatus, navPath));
+        }
+
+        private void FailRecall(DockRecallState failureState)
+        {
+            SetDockState(failureState);
+            if (currentAutoPilot)
+            {
                 currentAutoPilot.AbortNavigation();
+            }
+            else
+            {
                 SetDockState(DockRecallState.Ready);
             }
         }
@@ -307,9 +384,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 ? _dockingManager.bay.transform
                 : gameObject.transform;
 
-            _startOfDockRunway = CreateDockWaypoint(gameObject.transform.position + (new Vector3(0, 0.1f, 0)) + (-gameObject.transform.right * 45.0f), "Docking Runway Start", Color.red);
-            _endOfDockRunway = CreateDockWaypoint(gameObject.transform.position + (new Vector3(0, 0.1f, 0)) + (-gameObject.transform.right * 30.0f), "Docking Runway End", Color.yellow);
-            _dockEngagement = CreateDockWaypoint(dockingTriggerTransform.position, "Dock Engagement", Color.green);
+            _startOfDockRunway = CreateDockWaypoint(gameObject.transform.position + (new Vector3(0, 0.1f, 0)) + (-gameObject.transform.right * 45.0f), "Docking Runway Start", Color.red, true);
+            _endOfDockRunway = CreateDockWaypoint(gameObject.transform.position + (new Vector3(0, 0.1f, 0)) + (-gameObject.transform.right * 30.0f), "Docking Runway End", Color.yellow, true);
+            _dockEngagement = CreateDockWaypoint(dockingTriggerTransform.position, "Dock Engagement", Color.green, false);
             
             _instantNavWaypoints.Add(_endOfDockRunway);
             _instantNavWaypoints.Add(_dockEngagement);
@@ -318,9 +395,11 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         /// <summary>
         /// Create a dock waypoint
         /// </summary>
-        private Waypoint CreateDockWaypoint(Vector3 position, string waypointName, Color debugColor)
+        private Waypoint CreateDockWaypoint(Vector3 position, string waypointName, Color debugColor,
+            bool monitorObstacles)
         {
-            Waypoint newWaypoint = new Waypoint(position, Quaternion.identity, true, true, waypointName);
+            Waypoint newWaypoint = new Waypoint(position, Quaternion.identity, true, true, waypointName,
+                monitorObstacles);
 
             // if (_navGridHelper.NavGridDebug)
             if (true)
@@ -358,7 +437,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             {
                 return true;
             }
-            return !_dockingManager.IsOccupied() && currentAutoPilot == null;
+            return _gridReady && !_dockingManager.IsOccupied() && currentAutoPilot == null;
         }
         
         private void SetDockState(DockRecallState newRecallState)
