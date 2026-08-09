@@ -1,0 +1,17 @@
+{
+    "name": "SeaTruckRecall_BZ.editor",
+    "references": [
+        "GUID:f80da6a1f35cddb46b379ab967f5ad7f"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

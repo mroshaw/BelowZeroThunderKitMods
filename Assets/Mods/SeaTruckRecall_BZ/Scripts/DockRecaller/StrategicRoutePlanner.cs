@@ -23,6 +23,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
             int startNode = FindNearestNode(graph.Nodes, startPosition);
             int destinationNode = FindNearestNode(graph.Nodes, destination);
+            List<int>[] adjacency = BuildAdjacency(graph);
             Dictionary<int, int> cameFrom = new Dictionary<int, int>();
             Dictionary<int, float> costs = new Dictionary<int, float>();
             NavPriorityQueue<int> frontier = new NavPriorityQueue<int>();
@@ -39,7 +40,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                     break;
                 }
 
-                AddConnectedNodes(graph, current, destinationNode, frontier, cameFrom, costs);
+                AddConnectedNodes(graph.Nodes, adjacency[current], current, destinationNode, frontier, cameFrom,
+                    costs);
             }
 
             if (!foundDestination)
@@ -84,28 +86,40 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             return nearestIndex;
         }
 
-        private static void AddConnectedNodes(StrategicNavigationGraph graph, int current, int destination,
-            NavPriorityQueue<int> frontier, Dictionary<int, int> cameFrom, Dictionary<int, float> costs)
+        private static List<int>[] BuildAdjacency(StrategicNavigationGraph graph)
         {
             IReadOnlyList<StrategicNavigationGraph.Node> nodes = graph.Nodes;
-            IReadOnlyList<int> connections = nodes[current].Connections;
-            foreach (int connectedNode in connections)
+            List<int>[] adjacency = new List<int>[nodes.Count];
+            for (int index = 0; index < nodes.Count; index++)
             {
-                TryAddNode(nodes, current, connectedNode, destination, frontier, cameFrom, costs);
-            }
-
-            if (!graph.ConnectionsBidirectional)
-            {
-                return;
+                adjacency[index] = new List<int>();
             }
 
             for (int index = 0; index < nodes.Count; index++)
             {
-                if (index == current || !ContainsConnection(nodes[index].Connections, current))
+                foreach (int connection in nodes[index].Connections)
                 {
-                    continue;
+                    if (connection < 0 || connection >= nodes.Count || connection == index)
+                    {
+                        continue;
+                    }
+                    AddUnique(adjacency[index], connection);
+                    if (graph.ConnectionsBidirectional)
+                    {
+                        AddUnique(adjacency[connection], index);
+                    }
                 }
-                TryAddNode(nodes, current, index, destination, frontier, cameFrom, costs);
+            }
+            return adjacency;
+        }
+
+        private static void AddConnectedNodes(IReadOnlyList<StrategicNavigationGraph.Node> nodes,
+            IReadOnlyList<int> connections, int current, int destination,
+            NavPriorityQueue<int> frontier, Dictionary<int, int> cameFrom, Dictionary<int, float> costs)
+        {
+            foreach (int connectedNode in connections)
+            {
+                TryAddNode(nodes, current, connectedNode, destination, frontier, cameFrom, costs);
             }
         }
 
@@ -131,16 +145,16 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             frontier.Enqueue(connectedNode, newCost + heuristic);
         }
 
-        private static bool ContainsConnection(IReadOnlyList<int> connections, int nodeIndex)
+        private static void AddUnique(List<int> connections, int nodeIndex)
         {
             foreach (int connection in connections)
             {
                 if (connection == nodeIndex)
                 {
-                    return true;
+                    return;
                 }
             }
-            return false;
+            connections.Add(nodeIndex);
         }
     }
 }
