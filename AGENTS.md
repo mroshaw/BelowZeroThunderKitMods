@@ -41,6 +41,24 @@ The project contains multiple "mods" for the Subnautica: Below Zero game. The pr
 - Always wrap blocks in `{}`, even if there is just a single line.
 - Prefer `foreach` iterators over `for (int counter)`
 
+### Additional Commenting Standards
+
+- All public methods should have at least a one-line description in <summary> tags.
+
+- The summary text should be on it's own line(s), like this:
+
+```c#
+  /// <summary>
+  /// This is a summary of my public method
+  /// </summary>
+```
+
+- Comment text can take up more than one line, but the `<summary>` open and close tags should be on their own lines.
+
+- Do not include <param>, <returns> or <exception> detail.
+
+- Comments should contain <see> and <seealso> tags if it's completely appropriate to do so.
+
 ## Unity-Specific Conventions
 
 - **Lifecycle methods:** keep `Awake`, `OnEnable`, `Start`, `Update`, `OnDisable`, `OnDestroy` lean. Delegate real work to dedicated methods.

@@ -97,6 +97,15 @@ namespace DaftAppleGames.ModTools
         }
 
         /// <summary>
+        /// Returns the internal paths of every asset contained in the loaded AssetBundle.
+        /// </summary>
+        public string[] GetAllAssetNames()
+        {
+            LoadAssetBundle();
+            return _assetBundle ? _assetBundle.GetAllAssetNames() : new string[0];
+        }
+
+        /// <summary>
         /// Instantiates an instance of a Prefab taken from the asset bundle
         /// </summary>
         public GameObject GetPrefabInstanceFromAssetBundle(string objectName, bool activeState)
