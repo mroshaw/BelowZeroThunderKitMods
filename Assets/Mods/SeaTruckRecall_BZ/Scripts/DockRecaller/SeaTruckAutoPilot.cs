@@ -32,6 +32,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         [SerializeField] private float stuckCheckTimeThreshold = 10.0f;
         [SerializeField] private float stuckCheckPositionThreshold = 0.1f;
         [SerializeField] private float stuckCheckRotationThreshold = 5.0f;
+        [SerializeField] private float stuckCheckProgressThreshold = 0.5f;
         
         [Header("Waypoints")]
         [SerializeField] private List<Waypoint> currentWaypoints;
@@ -46,14 +47,21 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         
         // Used by the MoonPoolExpansion patches to detect a docking autopilot
         internal bool IsBusy => currentAutoPilotState != AutoPilotState.Ready && currentAutoPilotState != AutoPilotState.Initialising;
+
+        internal bool IsNavigating => currentAutoPilotState == AutoPilotState.Moving;
+
+        internal bool IsRecalling => currentAutoPilotState != AutoPilotState.Initialising &&
+                                     currentAutoPilotState != AutoPilotState.Ready &&
+                                     currentAutoPilotState != AutoPilotState.Aborted &&
+                                     currentAutoPilotState != AutoPilotState.Docked;
         
-        private SeaTruckMotor _motor;
         private Vector3 _finalDestination;
         
         // If the autopilot is active and doesn't "move" for this amount of time and distance, it's considered "stuck"
         private float _currStuckCheckTimer;
         private Vector3 _lastPosition =  Vector3.zero;
         private Quaternion _lastRotation = Quaternion.identity;
+        private float _lastDistanceToWaypoint;
         
         // Component references
         private SeaTruckNavMovement _seaTruckNavMovement;
@@ -96,7 +104,6 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         {
             _seaTruckNavMovement = GetComponent<SeaTruckNavMovement>();
             _rigidBody = GetComponent<Rigidbody>();
-            _motor = GetComponent<SeaTruckMotor>();
             _dockable = GetComponent<Dockable>();
         }
         
@@ -116,20 +123,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             {
                 return;
             }
-            /*
-            // Play motor sounds
-            _motor.engineSound.Play();
-            _motor.engineSound.SetParameterValue(_motor.velocityParamIndex, _motor.useRigidbody.velocity.magnitude);
-            _motor.engineSound.SetParameterValue(_motor.depthParamIndex, base.transform.position.y);
-            _motor.engineSound.SetParameterValue(_motor.rpmParamIndex, (GameInput.GetMoveDirection().z + 1f) * 0.5f);
-            _motor.engineSound.SetParameterValue(_motor.turnParamIndex, Mathf.Clamp(GameInput.GetLookDelta().x * 0.3f, -1f, 1f));
-            _motor.engineSound.SetParameterValue(_motor.upgradeParamIndex, (float)(((_motor.powerEfficiencyFactor < 1f) ? 1 : 0) + (_motor.horsePowerUpgrade ? 2 : 0)));
-            if (_motor.liveMixin)
-            {
-                _motor.engineSound.SetParameterValue(_motor.damagedParamIndex, 1f - _motor.liveMixin.GetHealthFraction());
-            }
-            */
-            
+
             // If we get stuck, change status and notify listeners
             if (IsStuckCheck())
             {
@@ -162,6 +156,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 SetAutopilotState(AutoPilotState.Docked);
                 return;
             }
+            StopNavigation();
             SetAutopilotState(AutoPilotState.Docking);
         }
         
@@ -203,13 +198,31 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             {
                 _lastPosition = transform.position;
                 _lastRotation = transform.rotation;
+                _lastDistanceToWaypoint = _currentWaypoint == null
+                    ? 0.0f
+                    : Vector3.Distance(transform.position, _currentWaypoint.Position);
+                ModDebugLog.LogDebug($"Stuck-check baseline: position {transform.position}, rotation " +
+                                     $"{transform.eulerAngles}, waypoint '{GetCurrentWaypointName()}', distance " +
+                                     $"{_lastDistanceToWaypoint:F2}.");
                 return false;
             }
 
             // Check how far we've travelled and rotated since the last stuck check
             // If we haven't moved since the last check, then we're stuck
-            if (Vector3.Distance(_lastPosition, transform.position) < stuckCheckPositionThreshold &&
-                Quaternion.Angle(_lastRotation, transform.rotation) < stuckCheckRotationThreshold)
+            float positionChange = Vector3.Distance(_lastPosition, transform.position);
+            float rotationChange = Quaternion.Angle(_lastRotation, transform.rotation);
+            float currentDistanceToWaypoint = _currentWaypoint == null
+                ? 0.0f
+                : Vector3.Distance(transform.position, _currentWaypoint.Position);
+            float waypointProgress = _lastDistanceToWaypoint - currentDistanceToWaypoint;
+            ModDebugLog.LogDebug($"Stuck check: position {transform.position}, waypoint " +
+                                 $"'{GetCurrentWaypointName()}', distance {currentDistanceToWaypoint:F2}, " +
+                                 $"progress {waypointProgress:F2}, translation {positionChange:F2}, rotation " +
+                                 $"{rotationChange:F1} degrees, velocity {_rigidBody.velocity}, angular velocity " +
+                                 $"{_rigidBody.angularVelocity}.");
+            if (waypointProgress < stuckCheckProgressThreshold &&
+                (positionChange < stuckCheckPositionThreshold ||
+                 rotationChange < stuckCheckRotationThreshold))
             {
                 return true;
             }
@@ -217,7 +230,13 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             // Reset position
             _lastPosition = transform.position;
             _lastRotation = transform.rotation;
+            _lastDistanceToWaypoint = currentDistanceToWaypoint;
             return false;
+        }
+
+        private string GetCurrentWaypointName()
+        {
+            return _currentWaypoint == null ? "none" : _currentWaypoint.Name;
         }
 
         internal bool IsAvailable()
@@ -248,6 +267,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             _currStuckCheckTimer = 0.0f;
             _lastPosition = Vector3.zero;
             _lastRotation = Quaternion.identity;
+            _lastDistanceToWaypoint = 0.0f;
             
             // Used to calculate remaining distance
             _finalDestination = waypoints[waypoints.Count - 1].Position;
@@ -273,7 +293,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         /// </summary>
         internal void PrepareForReplan()
         {
-            StopNavigation();
+            _seaTruckNavMovement.PauseNavigation();
             SetAutopilotState(AutoPilotState.Replanning);
         }
         
@@ -333,6 +353,10 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             _currentWaypoint = newWaypoint;
             _currentWaypointIndex++;
             float distanceToTarget = Vector3.Distance(transform.position, _finalDestination);
+            _currStuckCheckTimer = 0.0f;
+            _lastPosition = transform.position;
+            _lastRotation = transform.rotation;
+            _lastDistanceToWaypoint = Vector3.Distance(transform.position, newWaypoint.Position);
             ModDebugLog.LogDebug($"AutoPilot NavWaypointChanged: {newWaypoint}");
             onWaypointChanged?.Invoke(newWaypoint, _currentWaypointIndex, _totalWaypoints, distanceToTarget);
         }

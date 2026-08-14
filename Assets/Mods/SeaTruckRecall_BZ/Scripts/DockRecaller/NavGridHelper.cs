@@ -31,12 +31,14 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         internal float LocalPlanningRadius => localPlanningRadius;
         internal float LocalPlanningDistance => Mathf.Max(distanceBetweenCells,
             localPlanningRadius - Mathf.Max(distanceBetweenCells * 2.0f, vehicleClearance * 2.0f));
+        internal int NavGridIncludeLayerMask => navGridIncludeLayerMask;
         
         internal bool NavGridDebug =>
 #if UNITY_EDITOR
             navGridDebug;
 #else
-            ConfigFile.EnableNavGridDebug;
+            // ConfigFile.EnableNavGridDebug;
+        false;
 #endif
 
         internal Transform NavGridDebugContainer => navGridDebugContainer;
@@ -51,7 +53,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         internal IEnumerator RefreshNavGridAsync(Vector3 centerPosition, Action<GenerateStatus> gridCompleteCallBack)
         {
 #if !UNITY_EDITOR
-            navGridDebug = SeaTruckDockRecallPlugin.ConfigFile.EnableNavGridDebug;
+            // navGridDebug = SeaTruckDockRecallPlugin.ConfigFile.EnableNavGridDebug;
+            navGridDebug = false;
             maxRange = SeaTruckDockRecallPlugin.ConfigFile.MaximumRange;
             localPlanningRadius = SeaTruckDockRecallPlugin.ConfigFile.LocalPlanningRadius;
             distanceBetweenCells = SeaTruckDockRecallPlugin.ConfigFile.DistanceBetweenCells;
@@ -73,7 +76,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             GameObject ignoredEntity = null)
         {
 #if !UNITY_EDITOR
-            navGridDebug = SeaTruckDockRecallPlugin.ConfigFile.EnableNavGridDebug;
+            // navGridDebug = SeaTruckDockRecallPlugin.ConfigFile.EnableNavGridDebug;
+            navGridDebug = false;
             maxRange = SeaTruckDockRecallPlugin.ConfigFile.MaximumRange;
             localPlanningRadius = SeaTruckDockRecallPlugin.ConfigFile.LocalPlanningRadius;
             distanceBetweenCells = SeaTruckDockRecallPlugin.ConfigFile.DistanceBetweenCells;
@@ -96,7 +100,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             endPos = gridCenterPosition.position;
 #endif
 #if !UNITY_EDITOR
-            pathDebug = SeaTruckDockRecallPlugin.ConfigFile.EnableNavGridDebug;
+            // pathDebug = SeaTruckDockRecallPlugin.ConfigFile.EnableNavGridDebug;
+            pathDebug = false;
 #endif
             StartCoroutine(_navGrid.GeneratePathAsync(startPos, endPos, pathGenCompleteCallBack, pathDebug, navGridDebugContainer));
         }

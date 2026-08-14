@@ -29,6 +29,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Patches
             seaDockInstance.transform.localScale = Vector3.one;
 
             SeaTruckDockRecaller newDockRecaller = seaDockInstance.GetComponent<SeaTruckDockRecaller>();
+            newDockRecaller.ConfigureStrategicNavigationGraph(LoadedStrategicNavigationGraph);
 
             seaDockInstance.SetActive(true);
             AllSeaTruckDockRecallers.AddInstance(newDockRecaller);

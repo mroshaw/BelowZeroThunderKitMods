@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 using DaftAppleGames.SeaTruckRecall_BZ.DockRecaller;
 using UnityEditor;
 using UnityEngine;
@@ -23,19 +21,15 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Editor
         public override void OnInspectorGUI()
         {
             StrategicNavigationGraph graph = (StrategicNavigationGraph)target;
-            IReadOnlyList<StrategicNavigationGraph.Node> nodes = graph.Nodes;
-            int connectionCount = 0;
-            foreach (StrategicNavigationGraph.Node node in nodes)
-            {
-                connectionCount += node.Connections.Count;
-            }
+            int nodeCount = graph.NodeCount;
+            int connectionCount = graph.StoredConnectionCount;
 
             EditorGUILayout.LabelField("Baked Graph Statistics", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("Nodes", nodes.Count.ToString("N0"));
+            EditorGUILayout.LabelField("Nodes", nodeCount.ToString("N0"));
             EditorGUILayout.LabelField("Stored Connections", connectionCount.ToString("N0"));
             EditorGUILayout.LabelField("Bidirectional", graph.ConnectionsBidirectional ? "Yes" : "No");
             showGraphInScene = EditorGUILayout.Toggle("Show Scene Preview", showGraphInScene);
-            if (nodes.Count > MaximumVisualizedNodes || connectionCount > MaximumVisualizedConnections)
+            if (nodeCount > MaximumVisualizedNodes || connectionCount > MaximumVisualizedConnections)
             {
                 EditorGUILayout.HelpBox(
                     "The Scene preview is capped to protect Editor responsiveness. The complete graph remains baked.",
@@ -43,7 +37,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Editor
             }
 
             EditorGUILayout.Space();
-            if (nodes.Count <= 200)
+            if (nodeCount <= 200)
             {
                 DrawDefaultInspector();
             }
@@ -63,20 +57,20 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Editor
             }
 
             StrategicNavigationGraph graph = (StrategicNavigationGraph)target;
-            IReadOnlyList<StrategicNavigationGraph.Node> nodes = graph.Nodes;
             Handles.color = new Color(0.1f, 0.85f, 1.0f, 0.45f);
             int visualizedConnections = 0;
-            int nodeLimit = Mathf.Min(nodes.Count, MaximumVisualizedNodes);
+            int nodeLimit = Mathf.Min(graph.NodeCount, MaximumVisualizedNodes);
             for (int nodeIndex = 0; nodeIndex < nodeLimit; nodeIndex++)
             {
-                IReadOnlyList<int> connections = nodes[nodeIndex].Connections;
-                foreach (int connection in connections)
+                int connectionCount = graph.GetConnectionCount(nodeIndex);
+                for (int connectionIndex = 0; connectionIndex < connectionCount; connectionIndex++)
                 {
+                    int connection = graph.GetConnectedNode(nodeIndex, connectionIndex);
                     if (connection < 0 || connection >= nodeLimit || connection < nodeIndex)
                     {
                         continue;
                     }
-                    Handles.DrawLine(nodes[nodeIndex].Position, nodes[connection].Position);
+                    Handles.DrawLine(graph.GetNodePosition(nodeIndex), graph.GetNodePosition(connection));
                     visualizedConnections++;
                     if (visualizedConnections >= MaximumVisualizedConnections)
                     {

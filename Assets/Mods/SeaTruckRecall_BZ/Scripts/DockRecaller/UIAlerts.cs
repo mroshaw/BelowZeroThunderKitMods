@@ -35,6 +35,34 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         {
             _canShowAlerts = true;
         }
+
+        private void Update()
+        {
+            float elapsedTime = Time.unscaledDeltaTime;
+            for (int alertIndex = _activeAlerts.Count - 1; alertIndex >= 0; alertIndex--)
+            {
+                AlertInstance alert = _activeAlerts[alertIndex];
+                alert.Age += elapsedTime;
+
+                if (alert.Age < displayDuration)
+                {
+                    continue;
+                }
+
+                float fadeProgress = fadeDuration > 0.0f
+                    ? Mathf.Clamp01((alert.Age - displayDuration) / fadeDuration)
+                    : 1.0f;
+                alert.CanvasGroup.alpha = 1.0f - fadeProgress;
+
+                if (fadeProgress < 1.0f)
+                {
+                    continue;
+                }
+
+                _activeAlerts.RemoveAt(alertIndex);
+                Destroy(alert.AlertGameObjectInstance);
+            }
+        }
         
         /// <summary>
         /// Clean up the UI if disabled
@@ -57,7 +85,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             
             if (alertPrefab == null || alertContainer == null)
             {
-                Debug.LogWarning("UIAlerts: Missing prefab or container.");
+                ModDebugLog.LogWarning("UIAlerts: Missing prefab or container.");
                 return;
             }
 
@@ -68,47 +96,28 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
             if (alertText == null)
             {
-                Debug.LogWarning("UIAlerts: Alert prefab missing TextMeshProUGUI.");
+                ModDebugLog.LogWarning("UIAlerts: Alert prefab missing TextMeshProUGUI.");
                 Destroy(alertGO);
                 return;
             }
 
             alertText.text = newAlert;
+            CanvasGroup canvasGroup = alertGO.GetComponent<CanvasGroup>();
+            if (!canvasGroup)
+            {
+                canvasGroup = alertGO.AddComponent<CanvasGroup>();
+            }
+            canvasGroup.alpha = 1.0f;
 
             AlertInstance instance = new AlertInstance
             {
                 AlertGameObjectInstance = alertGO,
-                AlertText = alertText
+                CanvasGroup = canvasGroup,
+                Age = 0.0f
             };
 
             _activeAlerts.Add(instance);
             StartCoroutine(ScrollToBottomNextFrame());
-            StartCoroutine(HandleAlertLifetime(instance));
-        }
-
-        private IEnumerator HandleAlertLifetime(AlertInstance alert)
-        {
-            // Full visible phase
-            yield return new WaitForSeconds(displayDuration);
-
-            // Fade phase
-            float elapsed = 0f;
-            Color startColor = alert.AlertText.color;
-            while (elapsed < fadeDuration)
-            {
-                elapsed += Time.deltaTime;
-                float t = Mathf.Clamp01(elapsed / fadeDuration);
-
-                Color c = startColor;
-                c.a = Mathf.Lerp(1f, 0f, t);
-                alert.AlertText.color = c;
-
-                yield return null;
-            }
-
-            // Cleanup
-            _activeAlerts.Remove(alert);
-            Destroy(alert.AlertGameObjectInstance);
         }
 
         /// <summary>
@@ -143,7 +152,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         private class AlertInstance
         {
             internal GameObject AlertGameObjectInstance;
-            internal TextMeshProUGUI AlertText;
+            internal CanvasGroup CanvasGroup;
+            internal float Age;
         }
     }
 }

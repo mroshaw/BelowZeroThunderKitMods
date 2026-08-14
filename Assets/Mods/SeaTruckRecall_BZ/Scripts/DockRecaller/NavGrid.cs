@@ -214,12 +214,12 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                             cellVis.CreateOrUpdate(_navGrid[cellXIndex, cellYIndex, cellZIndex], CellType.NavCell, gridDebugContainer);
                             _debugCellVisualisers.Add(_navGrid[cellXIndex, cellYIndex, cellZIndex], cellVis);
                         }
-                    }
 
-                    // Yield every n frames for performance
-                    if (iterations % YieldIterationCount == 0)
-                    {
-                        yield return null;
+                        // Keep each frame's physics-query budget bounded while generating the grid.
+                        if (iterations % YieldIterationCount == 0)
+                        {
+                            yield return null;
+                        }
                     }
                 }
             }
@@ -249,6 +249,11 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 }
 
                 GameObject entityRoot = UWE.Utils.GetEntityRoot(collider.gameObject);
+                if (NavigationObstacleFilter.IsPlayerCollider(collider, entityRoot))
+                {
+                    continue;
+                }
+
                 if (ignoredEntity && entityRoot == ignoredEntity)
                 {
                     continue;

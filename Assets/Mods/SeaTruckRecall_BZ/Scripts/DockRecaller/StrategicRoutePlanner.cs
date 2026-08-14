@@ -13,17 +13,26 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         /// Attempts to calculate a strategic route between two world positions.
         /// </summary>
         internal static bool TryCalculateRoute(StrategicNavigationGraph graph, Vector3 startPosition,
-            Vector3 destination, List<Vector3> route)
+            Vector3 destination, List<Vector3> route, out string failureReason)
         {
             route.Clear();
-            if (!graph || graph.Nodes.Count == 0)
+            failureReason = string.Empty;
+            if (!graph)
             {
+                failureReason = "the graph asset reference is missing at runtime";
+                return false;
+            }
+            if (graph.NodeCount == 0)
+            {
+                failureReason = $"graph '{graph.name}' contains no nodes";
                 return false;
             }
 
-            int startNode = FindNearestNode(graph.Nodes, startPosition);
-            int destinationNode = FindNearestNode(graph.Nodes, destination);
-            IReadOnlyList<int>[] adjacency = BuildAdjacency(graph);
+            int startNode = FindNearestNode(graph, startPosition);
+            int destinationNode = FindNearestNode(graph, destination);
+            List<int>[] expandedAdjacency = graph.ConnectionsBidirectional
+                ? BuildBidirectionalAdjacency(graph)
+                : null;
             Dictionary<int, int> cameFrom = new Dictionary<int, int>();
             Dictionary<int, float> costs = new Dictionary<int, float>();
             NavPriorityQueue<int> frontier = new NavPriorityQueue<int>();
@@ -31,21 +40,30 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             costs[startNode] = 0.0f;
 
             bool foundDestination = false;
+            int visitedNodeCount = 0;
             while (frontier.Count > 0)
             {
                 int current = frontier.Dequeue();
+                visitedNodeCount++;
                 if (current == destinationNode)
                 {
                     foundDestination = true;
                     break;
                 }
 
-                AddConnectedNodes(graph.Nodes, adjacency[current], current, destinationNode, frontier, cameFrom,
-                    costs);
+                AddConnectedNodes(graph, expandedAdjacency, current, destinationNode, frontier, cameFrom, costs);
             }
 
             if (!foundDestination)
             {
+                failureReason = $"graph '{graph.name}' could not connect nearest start node {startNode} " +
+                                $"({graph.GetNodePosition(startNode)}, " +
+                                $"{GetConnectionCount(graph, expandedAdjacency, startNode)} connections) " +
+                                $"to nearest destination node {destinationNode} " +
+                                $"({graph.GetNodePosition(destinationNode)}, " +
+                                $"{GetConnectionCount(graph, expandedAdjacency, destinationNode)} connections); " +
+                                $"visited {visitedNodeCount} " +
+                                $"of {graph.NodeCount} nodes";
                 return false;
             }
 
@@ -57,6 +75,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 if (!cameFrom.TryGetValue(routeNode, out routeNode))
                 {
                     route.Clear();
+                    failureReason = $"route reconstruction failed before reaching start node {startNode}";
                     return false;
                 }
                 reversedRoute.Add(routeNode);
@@ -64,19 +83,19 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
             for (int index = reversedRoute.Count - 1; index >= 0; index--)
             {
-                route.Add(graph.Nodes[reversedRoute[index]].Position);
+                route.Add(graph.GetNodePosition(reversedRoute[index]));
             }
             route.Add(destination);
             return true;
         }
 
-        private static int FindNearestNode(IReadOnlyList<StrategicNavigationGraph.Node> nodes, Vector3 position)
+        private static int FindNearestNode(StrategicNavigationGraph graph, Vector3 position)
         {
             int nearestIndex = 0;
-            float nearestDistance = (nodes[0].Position - position).sqrMagnitude;
-            for (int index = 1; index < nodes.Count; index++)
+            float nearestDistance = (graph.GetNodePosition(0) - position).sqrMagnitude;
+            for (int index = 1; index < graph.NodeCount; index++)
             {
-                float distance = (nodes[index].Position - position).sqrMagnitude;
+                float distance = (graph.GetNodePosition(index) - position).sqrMagnitude;
                 if (distance < nearestDistance)
                 {
                     nearestDistance = distance;
@@ -86,64 +105,71 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             return nearestIndex;
         }
 
-        private static IReadOnlyList<int>[] BuildAdjacency(StrategicNavigationGraph graph)
+        private static List<int>[] BuildBidirectionalAdjacency(StrategicNavigationGraph graph)
         {
-            IReadOnlyList<StrategicNavigationGraph.Node> nodes = graph.Nodes;
-            IReadOnlyList<int>[] adjacency = new IReadOnlyList<int>[nodes.Count];
-            if (!graph.ConnectionsBidirectional)
-            {
-                for (int index = 0; index < nodes.Count; index++)
-                {
-                    adjacency[index] = nodes[index].Connections;
-                }
-                return adjacency;
-            }
-
-            List<int>[] expandedAdjacency = new List<int>[nodes.Count];
-            for (int index = 0; index < nodes.Count; index++)
+            List<int>[] expandedAdjacency = new List<int>[graph.NodeCount];
+            for (int index = 0; index < graph.NodeCount; index++)
             {
                 expandedAdjacency[index] = new List<int>();
-                adjacency[index] = expandedAdjacency[index];
             }
 
-            for (int index = 0; index < nodes.Count; index++)
+            for (int index = 0; index < graph.NodeCount; index++)
             {
-                foreach (int connection in nodes[index].Connections)
+                int connectionCount = graph.GetConnectionCount(index);
+                for (int connectionIndex = 0; connectionIndex < connectionCount; connectionIndex++)
                 {
-                    if (connection < 0 || connection >= nodes.Count || connection == index)
+                    int connection = graph.GetConnectedNode(index, connectionIndex);
+                    if (connection < 0 || connection >= graph.NodeCount || connection == index)
                     {
                         continue;
                     }
                     AddUnique(expandedAdjacency[index], connection);
-                    if (graph.ConnectionsBidirectional)
-                    {
-                        AddUnique(expandedAdjacency[connection], index);
-                    }
+                    AddUnique(expandedAdjacency[connection], index);
                 }
             }
-            return adjacency;
+            return expandedAdjacency;
         }
 
-        private static void AddConnectedNodes(IReadOnlyList<StrategicNavigationGraph.Node> nodes,
-            IReadOnlyList<int> connections, int current, int destination,
+        private static void AddConnectedNodes(StrategicNavigationGraph graph,
+            List<int>[] expandedAdjacency, int current, int destination,
             NavPriorityQueue<int> frontier, Dictionary<int, int> cameFrom, Dictionary<int, float> costs)
         {
-            foreach (int connectedNode in connections)
+            if (expandedAdjacency != null)
             {
-                TryAddNode(nodes, current, connectedNode, destination, frontier, cameFrom, costs);
+                foreach (int connectedNode in expandedAdjacency[current])
+                {
+                    TryAddNode(graph, current, connectedNode, destination, frontier, cameFrom, costs);
+                }
+                return;
+            }
+
+            int connectionCount = graph.GetConnectionCount(current);
+            for (int connectionIndex = 0; connectionIndex < connectionCount; connectionIndex++)
+            {
+                int connectedNode = graph.GetConnectedNode(current, connectionIndex);
+                TryAddNode(graph, current, connectedNode, destination, frontier, cameFrom, costs);
             }
         }
 
-        private static void TryAddNode(IReadOnlyList<StrategicNavigationGraph.Node> nodes, int current,
+        private static int GetConnectionCount(StrategicNavigationGraph graph, List<int>[] expandedAdjacency,
+            int nodeIndex)
+        {
+            return expandedAdjacency == null
+                ? graph.GetConnectionCount(nodeIndex)
+                : expandedAdjacency[nodeIndex].Count;
+        }
+
+        private static void TryAddNode(StrategicNavigationGraph graph, int current,
             int connectedNode, int destination, NavPriorityQueue<int> frontier, Dictionary<int, int> cameFrom,
             Dictionary<int, float> costs)
         {
-            if (connectedNode < 0 || connectedNode >= nodes.Count || connectedNode == current)
+            if (connectedNode < 0 || connectedNode >= graph.NodeCount || connectedNode == current)
             {
                 return;
             }
 
-            float newCost = costs[current] + Vector3.Distance(nodes[current].Position, nodes[connectedNode].Position);
+            float newCost = costs[current] + Vector3.Distance(graph.GetNodePosition(current),
+                graph.GetNodePosition(connectedNode));
             float existingCost;
             if (costs.TryGetValue(connectedNode, out existingCost) && newCost >= existingCost)
             {
@@ -152,7 +178,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
             costs[connectedNode] = newCost;
             cameFrom[connectedNode] = current;
-            float heuristic = Vector3.Distance(nodes[connectedNode].Position, nodes[destination].Position);
+            float heuristic = Vector3.Distance(graph.GetNodePosition(connectedNode),
+                graph.GetNodePosition(destination));
             frontier.Enqueue(connectedNode, newCost + heuristic);
         }
 

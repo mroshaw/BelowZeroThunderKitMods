@@ -35,6 +35,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         [SerializeField] private bool instantNav = false;
         [SerializeField] private int maximumReplanAttempts = 3;
         [SerializeField] private int maximumNoProgressSegments = 3;
+        [SerializeField] private float dockingStagingDistance = 30.0f;
+        [SerializeField] private float dockingTriggerPenetration = 0.5f;
+        [SerializeField] private float maximumDockingStagingDistance = 60.0f;
         [SerializeField] private StrategicNavigationGraph strategicNavigationGraph;
         
         [Header("Debug")]
@@ -45,9 +48,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         [SerializeField] internal AutoPilotChangedEvent onAutoPilotChanged = new AutoPilotChangedEvent();
         [SerializeField]internal DockStateChangedEvent onDockingStateChanged = new DockStateChangedEvent();
         
-        private List<Waypoint> _instantNavWaypoints = new List<Waypoint>();
-        private Waypoint _endOfDockRunway;
-        private Waypoint _startOfDockRunway;
+        private readonly List<Waypoint> _instantNavWaypoints = new List<Waypoint>();
+        private Waypoint _dockStaging;
+        private Waypoint _dockAlignment;
         private Waypoint _dockEngagement;
         
         // Useful internal components
@@ -67,6 +70,35 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         private bool _segmentAdvancePending;
         private float _segmentStartDistanceToStrategicTarget;
         private int _noProgressSegmentCount;
+        private readonly Collider[] _stagingClearanceHits = new Collider[64];
+
+        internal void ConfigureStrategicNavigationGraph(StrategicNavigationGraph directlyLoadedGraph)
+        {
+            string prefabGraphDescription = strategicNavigationGraph
+                ? $"'{strategicNavigationGraph.name}' (instance {strategicNavigationGraph.GetInstanceID()}) with " +
+                  $"{strategicNavigationGraph.NodeCount} nodes and " +
+                  $"{strategicNavigationGraph.StoredConnectionCount} connections"
+                : "no graph";
+            string directGraphDescription = directlyLoadedGraph
+                ? $"'{directlyLoadedGraph.name}' (instance {directlyLoadedGraph.GetInstanceID()}) with " +
+                  $"{directlyLoadedGraph.NodeCount} nodes and " +
+                  $"{directlyLoadedGraph.StoredConnectionCount} connections"
+                : "no graph";
+            bool sameInstance = strategicNavigationGraph && directlyLoadedGraph &&
+                                strategicNavigationGraph == directlyLoadedGraph;
+
+            ModDebugLog.LogDebug($"Strategic graph comparison: prefab reference has {prefabGraphDescription}; " +
+                                 $"direct AssetBundle load has {directGraphDescription}; same instance is " +
+                                 $"{sameInstance}.");
+
+            if (directlyLoadedGraph && directlyLoadedGraph.NodeCount > 0 &&
+                (!strategicNavigationGraph || strategicNavigationGraph.NodeCount == 0))
+            {
+                strategicNavigationGraph = directlyLoadedGraph;
+                ModDebugLog.LogDebug("Replaced the prefab strategic graph reference with the directly loaded " +
+                                     "AssetBundle graph.");
+            }
+        }
 
         private void OnEnable()
         {
@@ -97,7 +129,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 #endif
 
             // Set up the docking waypoints
-            CreateWaypoints();
+            CreateDockApproach();
 
             if (createGridOnStart)
             {
@@ -155,7 +187,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         internal void GenerateNavGrid()
         {
             SetDockState(DockRecallState.Initialising);
-            _navGridHelper.RefreshNavGrid(_startOfDockRunway.Position, GridReadyHandler);
+            _navGridHelper.RefreshNavGrid(_dockStaging.Position, GridReadyHandler);
         }
 
         private void GridReadyHandler(GenerateStatus gridStatus)
@@ -181,6 +213,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                     SetDockState(DockRecallState.FindingPath);
                     break;
                 case AutoPilotState.Aborted:
+                    ShowRecallInterruptedMessage();
                     if (_currentRecallState != DockRecallState.PathingError &&
                         _currentRecallState != DockRecallState.Stuck)
                     {
@@ -192,7 +225,14 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                         : DockRecallState.Ready);
                     break;
                 case AutoPilotState.Stuck:
-                    BeginReplan();
+                    if (_activeSegmentIncludesDockApproach)
+                    {
+                        FailRecall(DockRecallState.Stuck);
+                    }
+                    else
+                    {
+                        BeginReplan();
+                    }
                     break;
                 case AutoPilotState.Arrived:
                     HandleSegmentArrived();
@@ -260,6 +300,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
             // Recall the SeaTruck
             SetAutoPilot(closestAutoPilot);
+            CreateDockApproach(currentAutoPilot);
             _replanAttemptCount = 0;
             _noProgressSegmentCount = 0;
             
@@ -278,15 +319,20 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         }
 
         /// <summary>
-        /// Teleports the SeaTruck to the end of the docking tube, then navigates to the dock point
+        /// Teleports the SeaTruck to the docking staging point, then navigates through the trigger.
         /// </summary>
         private void InstantNav()
         {
             if (currentAutoPilot)
             {
-                currentAutoPilot.transform.position = _startOfDockRunway.Position;
-                currentAutoPilot.transform.LookAt(_endOfDockRunway.Position);
-                currentAutoPilot.StartNavigation(_instantNavWaypoints);
+                currentAutoPilot.transform.position = _dockStaging.Position;
+                currentAutoPilot.transform.rotation = _dockAlignment.Rotation;
+                _activeSegmentIncludesDockApproach = true;
+                if (!currentAutoPilot.StartNavigation(_instantNavWaypoints))
+                {
+                    _activeSegmentIncludesDockApproach = false;
+                    FailRecall(DockRecallState.PathingError);
+                }
             }
         }
         
@@ -302,10 +348,20 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             if (pathStatus == GenerateStatus.Success)
             {
                 List<Waypoint> waypoints = navPath.GetWayPointsFromNavPath();
-                
+                 
                 if (includesDockApproach)
                 {
-                    waypoints.Add(_endOfDockRunway);
+                    // The grid endpoint is a cell near the exact staging position. Replace it instead of
+                    // appending a short return leg that can make a fast SeaTruck overshoot and turn around.
+                    if (waypoints.Count > 0)
+                    {
+                        waypoints[waypoints.Count - 1] = _dockStaging;
+                    }
+                    else
+                    {
+                        waypoints.Add(_dockStaging);
+                    }
+                    waypoints.Add(_dockAlignment);
                     waypoints.Add(_dockEngagement);
                 }
                 _activeSegmentIncludesDockApproach = includesDockApproach;
@@ -317,6 +373,22 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             else
             {
                 FailRecall(DockRecallState.PathingError);
+            }
+        }
+
+        private void ShowRecallInterruptedMessage()
+        {
+            switch (_currentRecallState)
+            {
+                case DockRecallState.PathingError:
+                    ErrorMessage.AddMessage("SeaTruck recall interrupted: no safe route could be found.");
+                    break;
+                case DockRecallState.Stuck:
+                    ErrorMessage.AddMessage("SeaTruck recall interrupted: the SeaTruck is stuck.");
+                    break;
+                default:
+                    ErrorMessage.AddMessage("SeaTruck recall cancelled.");
+                    break;
             }
         }
 
@@ -366,6 +438,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 ? destination
                 : startPosition + destinationOffset.normalized * planningDistance;
 
+            LogSegmentEnvironment(startPosition, destination, segmentDestination, reachesStrategicTarget,
+                includesDockApproach);
+
             SetDockState(DockRecallState.FindingPath);
             _localGridGenerating = true;
             int requestVersion = ++_pathRequestVersion;
@@ -399,6 +474,35 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             _navGridHelper.GenerateNavPath(currentAutoPilot.transform.position, segmentDestination,
                 (pathStatus, navPath) => PathReadyHandler(requestVersion, requestedAutoPilot,
                     includesDockApproach, pathStatus, navPath));
+        }
+
+        private void LogSegmentEnvironment(Vector3 startPosition, Vector3 strategicTarget,
+            Vector3 segmentDestination, bool reachesStrategicTarget, bool includesDockApproach)
+        {
+            Vector3 playerPosition = Player.main ? Player.main.transform.position : Vector3.zero;
+            ModDebugLog.LogDebug($"Segment diagnostics: SeaTruck {startPosition}, player {playerPosition}, " +
+                                 $"player distance {Vector3.Distance(startPosition, playerPosition):F1}, strategic " +
+                                 $"target {_strategicRouteIndex + 1}/{_strategicRoute.Count} at {strategicTarget}, " +
+                                 $"local destination {segmentDestination}, reaches target {reachesStrategicTarget}, " +
+                                 $"includes dock approach {includesDockApproach}.");
+            LogVerticalProbe("SeaTruck", startPosition);
+            LogVerticalProbe("Local destination", segmentDestination);
+        }
+
+        private void LogVerticalProbe(string label, Vector3 position)
+        {
+            RaycastHit hit;
+            bool hitDown = Physics.Raycast(position + Vector3.up, Vector3.down, out hit, 500.0f,
+                _navGridHelper.NavGridIncludeLayerMask, QueryTriggerInteraction.Ignore);
+            string downDescription = hitDown
+                ? $"'{hit.collider.gameObject.name}' at {hit.point}, distance {hit.distance:F1}"
+                : "no hit within 500m";
+            bool hitUp = Physics.Raycast(position + Vector3.down, Vector3.up, out hit, 500.0f,
+                _navGridHelper.NavGridIncludeLayerMask, QueryTriggerInteraction.Ignore);
+            string upDescription = hitUp
+                ? $"'{hit.collider.gameObject.name}' at {hit.point}, distance {hit.distance:F1}"
+                : "no hit within 500m";
+            ModDebugLog.LogDebug($"{label} vertical probes: down {downDescription}; up {upDescription}.");
         }
 
         private void HandleSegmentArrived()
@@ -450,13 +554,15 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         {
             _strategicRouteIndex = 0;
             Vector3 startPosition = currentAutoPilot.transform.position;
-            Vector3 destination = _startOfDockRunway.Position;
+            Vector3 destination = _dockStaging.Position;
+            string routeFailureReason;
             if (!StrategicRoutePlanner.TryCalculateRoute(strategicNavigationGraph, startPosition, destination,
-                    _strategicRoute))
+                    _strategicRoute, out routeFailureReason))
             {
                 _strategicRoute.Clear();
                 _strategicRoute.Add(destination);
-                ModDebugLog.LogDebug("No strategic graph route is available; using direct rolling navigation.");
+                ModDebugLog.LogDebug($"No strategic graph route is available ({routeFailureReason}); " +
+                                     "using direct rolling navigation.");
                 return;
             }
 
@@ -496,30 +602,213 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         }
         
         /// <summary>
-        /// Set up the docking waypoints for this dock
+        /// Creates the proven runway points that place the SeaTruck's nose, rather than its pivot, into the dock.
         /// </summary>
-        private void CreateWaypoints()
+        private void CreateDockApproach(SeaTruckAutoPilot autoPilot = null)
         {
-            Transform dockingTriggerTransform = _dockingManager && _dockingManager.bay
-                ? _dockingManager.bay.transform
-                : gameObject.transform;
+            Transform dockingEnd = _dockingManager && _dockingManager.bay
+                ? _dockingManager.bay.dockingEndPos
+                : null;
+            if (!dockingEnd || !autoPilot)
+            {
+                CreateFallbackDockApproach();
+                return;
+            }
 
-            _startOfDockRunway = CreateDockWaypoint(gameObject.transform.position + (new Vector3(0, 0.1f, 0)) + (-gameObject.transform.right * 45.0f), "Docking Runway Start", Color.red, true);
-            _endOfDockRunway = CreateDockWaypoint(gameObject.transform.position + (new Vector3(0, 0.1f, 0)) + (-gameObject.transform.right * 30.0f), "Docking Runway End", Color.yellow, true);
-            _dockEngagement = CreateDockWaypoint(dockingTriggerTransform.position, "Dock Engagement", Color.green, false);
-            
-            _instantNavWaypoints.Add(_endOfDockRunway);
+            Quaternion dockingRotation = dockingEnd.rotation;
+            Vector3 inwardDirection = dockingRotation * Vector3.forward;
+            Vector3 outwardDirection = -inwardDirection;
+            float firstTriggerPassDistance;
+            if (!TryGetFirstTriggerPassDistance(dockingEnd.position, inwardDirection,
+                    out firstTriggerPassDistance))
+            {
+                CreateFallbackDockApproach();
+                return;
+            }
+
+            Vector3 cabinFrontOffset;
+            float cabinTurnRadius;
+            GetCabinGeometry(autoPilot.transform, out cabinFrontOffset, out cabinTurnRadius);
+            Vector3 engagementPosition = dockingEnd.position +
+                                         inwardDirection * (firstTriggerPassDistance + dockingTriggerPenetration);
+            float stagingDistance = dockingStagingDistance;
+            Vector3 stagingPosition = engagementPosition + outwardDirection * stagingDistance;
+
+            _dockStaging = CreateDockWaypoint(stagingPosition, Quaternion.identity, "Dock Entrance", Color.yellow,
+                true, false, false, true);
+            _dockAlignment = CreateDockWaypoint(stagingPosition, dockingRotation, "Dock Alignment", Color.yellow,
+                false, true, true, false);
+            _dockEngagement = CreateDockWaypoint(engagementPosition, dockingRotation, "Dock Engagement", Color.green,
+                false, false, true, false);
+
+            ModDebugLog.LogDebug($"Derived drive-through dock approach: tube centre {dockingEnd.position}, " +
+                                 $"inward {inwardDirection}, first trigger pass distance " +
+                                 $"{firstTriggerPassDistance:F2}m, penetration {dockingTriggerPenetration:F2}m, " +
+                                 $"observed cabin front offset {cabinFrontOffset}, turn radius " +
+                                 $"{cabinTurnRadius:F1}m, staging distance {stagingDistance:F1}m, " +
+                                 $"staging {stagingPosition}, engagement {engagementPosition}, rotation " +
+                                 $"{dockingRotation.eulerAngles}.");
+
+            _instantNavWaypoints.Clear();
             _instantNavWaypoints.Add(_dockEngagement);
+        }
+
+        private void CreateFallbackDockApproach()
+        {
+            Quaternion dockingRotation = Quaternion.LookRotation(-gameObject.transform.right, Vector3.up);
+            Vector3 stagingPosition = gameObject.transform.position + Vector3.up * 0.1f -
+                                      gameObject.transform.right * dockingStagingDistance;
+            Vector3 engagementPosition = gameObject.transform.position + Vector3.up * 0.8f -
+                                         gameObject.transform.right * 10.0f;
+            _dockStaging = CreateDockWaypoint(stagingPosition, Quaternion.identity, "Dock Entrance", Color.yellow,
+                true, false, false, true);
+            _dockAlignment = CreateDockWaypoint(stagingPosition, dockingRotation, "Dock Alignment", Color.yellow,
+                false, true, true, false);
+            _dockEngagement = CreateDockWaypoint(engagementPosition, dockingRotation, "Dock Engagement", Color.green,
+                false, true, true, false);
+            _instantNavWaypoints.Clear();
+            _instantNavWaypoints.Add(_dockEngagement);
+        }
+
+        private bool TryGetFirstTriggerPassDistance(Vector3 tubeCentre, Vector3 inwardDirection,
+            out float firstTriggerPassDistance)
+        {
+            firstTriggerPassDistance = 0.0f;
+            if (!_dockingManager || !_dockingManager.bay)
+            {
+                return false;
+            }
+
+            BoxCollider[] colliders = _dockingManager.bay.GetComponents<BoxCollider>();
+            float closestNearFaceDistance = float.PositiveInfinity;
+            bool foundTrigger = false;
+            foreach (BoxCollider collider in colliders)
+            {
+                if (!collider.enabled || !collider.isTrigger)
+                {
+                    continue;
+                }
+
+                Vector3 worldCentre = collider.transform.TransformPoint(collider.center);
+                Vector3 worldSize = Vector3.Scale(collider.size, collider.transform.lossyScale);
+                Vector3 halfSize = worldSize * 0.5f;
+                float projectedRadius = Mathf.Abs(Vector3.Dot(collider.transform.right, inwardDirection)) *
+                                        Mathf.Abs(halfSize.x) +
+                                        Mathf.Abs(Vector3.Dot(collider.transform.up, inwardDirection)) *
+                                        Mathf.Abs(halfSize.y) +
+                                        Mathf.Abs(Vector3.Dot(collider.transform.forward, inwardDirection)) *
+                                        Mathf.Abs(halfSize.z);
+                float centreDistance = Vector3.Dot(worldCentre - tubeCentre, inwardDirection);
+                float nearFaceDistance = centreDistance - projectedRadius;
+                float farFaceDistance = centreDistance + projectedRadius;
+                ModDebugLog.LogDebug($"Dock trigger candidate '{collider.name}' ({collider.GetInstanceID()}): " +
+                                     $"local centre {collider.center}, world centre {worldCentre}, size " +
+                                     $"{worldSize}, near face distance {nearFaceDistance:F2}m, centre distance " +
+                                     $"{centreDistance:F2}m, far face distance {farFaceDistance:F2}m along the tube.");
+
+                if (nearFaceDistance < closestNearFaceDistance)
+                {
+                    closestNearFaceDistance = nearFaceDistance;
+                    firstTriggerPassDistance = farFaceDistance;
+                    foundTrigger = true;
+                }
+            }
+
+            return foundTrigger;
+        }
+
+        private static void GetCabinGeometry(Transform seaTruckTransform, out Vector3 frontOffset,
+            out float turnRadius)
+        {
+            Collider[] colliders = seaTruckTransform.GetComponentsInChildren<Collider>(true);
+            SeaTruckSegment headSegment = seaTruckTransform.GetComponent<SeaTruckSegment>();
+            float minimumX = float.PositiveInfinity;
+            float maximumX = float.NegativeInfinity;
+            float minimumY = float.PositiveInfinity;
+            float maximumY = float.NegativeInfinity;
+            float maximumZ = float.NegativeInfinity;
+            turnRadius = 0.0f;
+
+            foreach (Collider collider in colliders)
+            {
+                if (!collider.enabled || collider.isTrigger)
+                {
+                    continue;
+                }
+
+                Bounds bounds = collider.bounds;
+                Vector3 localCentre = seaTruckTransform.InverseTransformPoint(bounds.center);
+                Vector3 localExtents = seaTruckTransform.InverseTransformVector(bounds.extents);
+                localExtents = new Vector3(Mathf.Abs(localExtents.x), Mathf.Abs(localExtents.y),
+                    Mathf.Abs(localExtents.z));
+                turnRadius = Mathf.Max(turnRadius, (localCentre + localExtents).magnitude,
+                    (localCentre - localExtents).magnitude);
+
+                if (collider.GetComponentInParent<SeaTruckSegment>() != headSegment)
+                {
+                    continue;
+                }
+
+                minimumX = Mathf.Min(minimumX, localCentre.x - localExtents.x);
+                maximumX = Mathf.Max(maximumX, localCentre.x + localExtents.x);
+                minimumY = Mathf.Min(minimumY, localCentre.y - localExtents.y);
+                maximumY = Mathf.Max(maximumY, localCentre.y + localExtents.y);
+                maximumZ = Mathf.Max(maximumZ, localCentre.z + localExtents.z);
+            }
+
+            if (float.IsInfinity(maximumZ))
+            {
+                frontOffset = Vector3.forward * 10.0f;
+                turnRadius = 6.0f;
+                return;
+            }
+
+            frontOffset = new Vector3((minimumX + maximumX) * 0.5f,
+                (minimumY + maximumY) * 0.5f, maximumZ);
+            turnRadius += 1.0f;
+        }
+
+        private float FindClearStagingDistance(GameObject ignoredSeaTruck, Vector3 triggerCentre,
+            Vector3 rotatedFrontOffset, Vector3 outwardDirection, float turnRadius)
+        {
+            float stagingDistance = dockingStagingDistance;
+            while (stagingDistance < maximumDockingStagingDistance)
+            {
+                Vector3 candidate = triggerCentre + outwardDirection * stagingDistance - rotatedFrontOffset;
+                int hitCount = Physics.OverlapSphereNonAlloc(candidate, turnRadius, _stagingClearanceHits,
+                    _navGridHelper.NavGridIncludeLayerMask, QueryTriggerInteraction.Ignore);
+                bool blocked = false;
+                for (int hitIndex = 0; hitIndex < hitCount; hitIndex++)
+                {
+                    Collider collider = _stagingClearanceHits[hitIndex];
+                    GameObject entityRoot = collider ? UWE.Utils.GetEntityRoot(collider.gameObject) : null;
+                    if (!collider || entityRoot == ignoredSeaTruck || collider.transform.IsChildOf(ignoredSeaTruck.transform) ||
+                        NavigationObstacleFilter.IsPlayerCollider(collider, entityRoot) ||
+                        (entityRoot && entityRoot.GetComponent<Creature>()))
+                    {
+                        continue;
+                    }
+                    blocked = true;
+                    break;
+                }
+                if (!blocked)
+                {
+                    return stagingDistance;
+                }
+                stagingDistance += 5.0f;
+            }
+            return maximumDockingStagingDistance;
         }
         
         /// <summary>
         /// Create a dock waypoint
         /// </summary>
-        private Waypoint CreateDockWaypoint(Vector3 position, string waypointName, Color debugColor,
-            bool monitorObstacles)
+        private Waypoint CreateDockWaypoint(Vector3 position, Quaternion rotation, string waypointName,
+            Color debugColor, bool monitorObstacles, bool rotateBeforeMoving, bool useFixedRotation,
+            bool allowSkip)
         {
-            Waypoint newWaypoint = new Waypoint(position, Quaternion.identity, true, true, waypointName,
-                monitorObstacles);
+            Waypoint newWaypoint = new Waypoint(position, rotation, rotateBeforeMoving, true, waypointName,
+                monitorObstacles, false, useFixedRotation, allowSkip);
 
             // if (_navGridHelper.NavGridDebug)
             if (true)

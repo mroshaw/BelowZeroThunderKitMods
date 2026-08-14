@@ -27,6 +27,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         // Whether to slow down as we reach the waypoint
         internal bool SlowDownToTarget { get; }
         internal bool MonitorObstacles { get; }
+        internal bool UseSpeedModifier { get; }
+        internal bool UseFixedRotation { get; }
+        internal bool AllowSkip { get; }
         // Waypoint name for useful feedback
         internal string Name { get; }
 
@@ -34,7 +37,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
         /// Default constructor
         /// </summary>
         internal Waypoint(Vector3 position, Quaternion rotation, bool rotateBeforeMoving, bool slowDownToTarget,
-            string name, bool monitorObstacles = true)
+            string name, bool monitorObstacles = true, bool useSpeedModifier = true,
+            bool useFixedRotation = false, bool allowSkip = true)
         {
             Position = position;
             Rotation = rotation;
@@ -42,6 +46,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
             SlowDownToTarget = slowDownToTarget;
             Name = name;
             MonitorObstacles = monitorObstacles;
+            UseSpeedModifier = useSpeedModifier;
+            UseFixedRotation = useFixedRotation;
+            AllowSkip = allowSkip;
         }
 
         public override string ToString()

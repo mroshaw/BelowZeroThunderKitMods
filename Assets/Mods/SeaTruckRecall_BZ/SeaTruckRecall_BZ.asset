@@ -37,6 +37,7 @@ MonoBehaviour:
     assets:
     - {fileID: 824046755542336116, guid: d30660bd1ab749446ad92859954ba7f1, type: 3}
     - {fileID: 6418034312203088039, guid: 123aa9f4a1528564baaa06789d599110, type: 3}
+    - {fileID: 11400000, guid: 48de325076276cb468e3dad70987c33b, type: 2}
 --- !u!114 &5489749723997726442
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -70,5 +71,5 @@ MonoBehaviour:
   Author: Daft Apple Games
   Name: SeaTruckRecall_BZ
   Description: Mod to add autopilot recall function to SeaTruck dock
-  Version: 1.0.0
+  Version: 1.2.1
   Dependencies: []

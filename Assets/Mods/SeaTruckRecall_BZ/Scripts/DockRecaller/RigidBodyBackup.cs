@@ -30,8 +30,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
                 return;
             }
 
-            _rigidBody.drag = 0;
-            _rigidBody.mass = 0;
+            _rigidBody.velocity = Vector3.zero;
+            _rigidBody.angularVelocity = Vector3.zero;
             _rigidBody.interpolation = RigidbodyInterpolation.None;
             _rigidBody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
             _rigidBody.isKinematic = true;
@@ -48,6 +48,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.DockRecaller
 
             _rigidBody.mass = _mass;
             _rigidBody.drag = _drag;
+            _rigidBody.velocity = Vector3.zero;
+            _rigidBody.angularVelocity = Vector3.zero;
             _rigidBody.isKinematic = _isKinematic;
             _rigidBody.collisionDetectionMode = _collisionDetectionMode;
             _rigidBody.interpolation = _interpolation;

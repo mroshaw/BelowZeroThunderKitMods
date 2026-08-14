@@ -13,19 +13,23 @@ namespace DaftAppleGames.SeaTruckRecall_BZ
         /// <summary>
         /// Recall Config
         /// </summary>
-        [Choice("Recall Method", Tooltip="Smooth movement will attempt to drive the Seatruck to the dock. Instance will immediately move it and engage the dock.")]
-        public RecallMoveMethod RecallMoveMethod = RecallMoveMethod.Autopilot;
+        
+        [Choice("Recall Method",  "Teleport", "Autopilot (Physics)", Tooltip="Teleport moves the SeaTruck instantly. Physics directly controls its rigidbody. Input drives it using the vanilla thrust and steering model.")]
+        public RecallMoveMethod RecallMoveMethod = RecallMoveMethod.Physics;
 
         /// <summary>
         /// Recaller NavGrid properties
         /// </summary>
-        [Slider("Maximum Recall Range", Tooltip = "Determines how far away a SeaTruck can be selected for recall.", Step = 5, Min = 50, Max = 1000, DefaultValue = 300)]
-        public int MaximumRange = 300;
+        [Slider("Maximum Recall Range", Tooltip = "Determines how far away a SeaTruck can be selected for recall.", Step = 5, Min = 50, Max = 2000, DefaultValue = 600)]
+        public int MaximumRange = 600;
 
-        [Slider("Local Planning Radius", Tooltip = "Determines the radius of the rolling navigation grid around the recalled SeaTruck. Larger values consider more terrain but cost more memory and generation time.", Step = 5, Min = 25, Max = 100, DefaultValue = 60)]
+        [Slider("Autopilot Speed Modifier", Tooltip = "Determines the movement speed of the SeaTruck Autopilot.", Step = 0.1f, Format = "{0:F1}", Min = 0.5f, Max = 10f, DefaultValue = 1.5f)]
+        public float SeaTruckSpeedModifier = 1.5f;
+        
+        [Slider("Avoidance Accuracy", Tooltip = "Determines the radius of the rolling navigation grid around the recalled SeaTruck. Larger values consider more terrain but cost more memory and generation time.", Step = 5, Min = 25, Max = 100, DefaultValue = 60)]
         public int LocalPlanningRadius = 60;
 
-        [Slider("Distance Between Cells (Restart Required)", Tooltip = "The lower the value, the more accurate the path finding, but greater the performance and memory impact. ", Step = 1, Min = 5, Max = 50, DefaultValue = 5)]
+        [Slider("Path Cell Distance (Restart Required)", Tooltip = "The lower the value, the more accurate the path finding, but greater the performance and memory impact. ", Step = 1, Min = 5, Max = 50, DefaultValue = 5)]
         public int DistanceBetweenCells = 5;
         
         /*
@@ -43,11 +47,14 @@ namespace DaftAppleGames.SeaTruckRecall_BZ
         /// <summary>
         /// Debug stuff
         /// </summary>
+        
+        /*
         [Toggle("NavGrid Debug", Tooltip="If checked, nodes of the NavGrid will be spawned as spheres in game. This will SEVERELY impact performance, and is for debugging only!")]
         public bool EnableNavGridDebug = false;
         
         [Toggle("Path Debug", Tooltip="If checked, nodes of the Path will be spawned as spheres in game. This will SEVERELY impact performance, and is for debugging only!")]
         public bool EnablePathDebug = false;
+        */
         
         [Toggle("Detailed Logging", Tooltip="Only check this if you have a problem and need to see the debug output of the mod in the Player.log file"), OnChange(nameof(DetailedLoggingChangedHandler))]
         public bool DetailedLogging = false;
