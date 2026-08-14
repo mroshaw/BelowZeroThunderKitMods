@@ -41,6 +41,16 @@ namespace DaftAppleGames.Editor
             CancellationToken cancellationToken)
         {
             FileInfo fileInfo = new FileInfo(zipFilePath);
+            string globalModId = null;
+            if (!string.IsNullOrWhiteSpace(options.Changelog))
+            {
+                progress.Report(new NexusUploadProgress(0.01f, "Resolving Nexus mod..."));
+                globalModId = await ResolveGlobalModIdAsync(
+                    options.GameDomain,
+                    options.GameScopedModId,
+                    cancellationToken);
+            }
+
             progress.Report(new NexusUploadProgress(0.02f, "Creating multipart upload..."));
 
             JObject createUploadBody = new JObject
@@ -94,7 +104,7 @@ namespace DaftAppleGames.Editor
             };
             JObject versionResponse = await SendApiRequestAsync(
                 HttpMethod.Post,
-                $"/mod-files/{Uri.EscapeDataString(options.FileId)}/versions",
+                $"/mod-files/{Uri.EscapeDataString(options.FileGroupId)}/versions",
                 createVersionBody,
                 cancellationToken);
             JObject versionData = RequireObject(versionResponse, "data");
@@ -111,13 +121,27 @@ namespace DaftAppleGames.Editor
                 };
                 await SendApiRequestAsync(
                     HttpMethod.Post,
-                    $"/mods/{Uri.EscapeDataString(options.ModId)}/changelogs",
+                    $"/mods/{Uri.EscapeDataString(globalModId)}/changelogs",
                     changelogBody,
                     cancellationToken);
             }
 
             progress.Report(new NexusUploadProgress(1.0f, "Upload complete."));
             return versionId;
+        }
+
+        private async Task<string> ResolveGlobalModIdAsync(
+            string gameDomain,
+            string gameScopedModId,
+            CancellationToken cancellationToken)
+        {
+            JObject response = await SendApiRequestAsync(
+                HttpMethod.Get,
+                $"/games/{Uri.EscapeDataString(gameDomain)}/mods/{Uri.EscapeDataString(gameScopedModId)}",
+                null,
+                cancellationToken);
+            JObject data = RequireObject(response, "data");
+            return RequireString(data, "id");
         }
 
         /// <summary>

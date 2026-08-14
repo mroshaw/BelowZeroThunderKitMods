@@ -13,32 +13,25 @@ MonoBehaviour:
   m_Name: ModVersionSettings
   m_EditorClassIdentifier: 
   mods:
-  - name: Sea Trick Recall BZ
+  - name: Sea Truck Recall BZ
     pluginScript: {fileID: 11500000, guid: a07fc497b8b85274a978683c9039dfe9, type: 3}
     manifest: {fileID: 11400000, guid: 0992aa66287801f48afb27f505e08195, type: 2}
     version:
       major: 1
       minor: 2
-      patch: 0
+      patch: 1
     nexusMods:
-      fileId: 1912
-      modId: 381
+      fileGroupId: 1238917
+      gameScopedModId: 381
+      gameDomain: subnauticabelowzero
       displayName: SeaTruckDockRecall_BZ
-      description: Major changes to basic navigation and docking
-      changelog: 'Distant navigation now uses a baked node map, generated using the
-        base game terrain map.
-
-        Local node navigation is now centered on
-        the SeaTruck, and is used for local avoidance.
-
-        Final docking is
-        improved, and a bug fixed where the SeaTruck would enter the dock tube but
-        not complete docking.'
+      description: 
+      changelog: 
       fileCategory: main
       archiveExistingVersion: 1
       updateModVersion: 1
       primaryModManagerDownload: 0
-      allowModManagerDownload: 1
+      allowModManagerDownload: 0
       showRequirementsPopup: 0
   - name: Subnautica Pets BZ
     pluginScript: {fileID: 11500000, guid: f25f6695796b40d438cf3822dcceb811, type: 3}
@@ -48,8 +41,9 @@ MonoBehaviour:
       minor: 15
       patch: 0
     nexusMods:
-      fileId: 2229
-      modId: 228
+      fileGroupId: 1058311
+      gameScopedModId: 228
+      gameDomain: subnauticabelowzero
       displayName: SubnauticaPets_BZ
       description: 
       changelog: 

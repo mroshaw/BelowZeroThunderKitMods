@@ -250,7 +250,7 @@ namespace DaftAppleGames.Editor
             string generatedZipPath = GetGeneratedZipPath(entry);
             bool confirmed = EditorUtility.DisplayDialog(
                 "Publish to Nexus Mods",
-                $"Are you sure?\n\nUpload '{generatedZipPath}' as version {version} of Nexus file {entry.NexusMods.FileId}?\n\nThe description and changelog will be cleared after a successful publish.",
+                $"Are you sure?\n\nUpload '{generatedZipPath}' as version {version} of Nexus file group {entry.NexusMods.FileGroupId}?\n\nThe description and changelog will be cleared after a successful publish.",
                 "Yes, Publish",
                 "Cancel");
             if (!confirmed)
@@ -332,9 +332,9 @@ namespace DaftAppleGames.Editor
                 return false;
             }
 
-            if (entry.NexusMods == null || string.IsNullOrWhiteSpace(entry.NexusMods.FileId))
+            if (entry.NexusMods == null || string.IsNullOrWhiteSpace(entry.NexusMods.FileGroupId))
             {
-                error = "Enter the Nexus file ID for this mod.";
+                error = "Enter the Nexus file Group ID shown in the file's API Info dialog.";
                 return false;
             }
 
@@ -353,9 +353,16 @@ namespace DaftAppleGames.Editor
             }
 
             if (!string.IsNullOrWhiteSpace(entry.NexusMods.Changelog) &&
-                string.IsNullOrWhiteSpace(entry.NexusMods.ModId))
+                string.IsNullOrWhiteSpace(entry.NexusMods.GameScopedModId))
             {
-                error = "Enter the Nexus mod ID when providing a changelog.";
+                error = "Enter the Nexus game-scoped mod ID from the mod page URL when providing a changelog.";
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(entry.NexusMods.Changelog) &&
+                string.IsNullOrWhiteSpace(entry.NexusMods.GameDomain))
+            {
+                error = "Enter the Nexus game domain when providing a changelog.";
                 return false;
             }
 

@@ -1,13 +1,17 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace DaftAppleGames.Editor
 {
     [Serializable]
     public sealed class NexusModsUploadOptions
     {
-        [SerializeField] private string fileId;
-        [SerializeField] private string modId;
+        [FormerlySerializedAs("fileId")]
+        [SerializeField] private string fileGroupId;
+        [FormerlySerializedAs("modId")]
+        [SerializeField] private string gameScopedModId;
+        [SerializeField] private string gameDomain = "subnauticabelowzero";
         [SerializeField] private string displayName;
         [TextArea(3, 8)]
         [SerializeField] private string description;
@@ -20,8 +24,9 @@ namespace DaftAppleGames.Editor
         [SerializeField] private bool allowModManagerDownload = true;
         [SerializeField] private bool showRequirementsPopup;
 
-        public string FileId => fileId;
-        public string ModId => modId;
+        public string FileGroupId => fileGroupId;
+        public string GameScopedModId => gameScopedModId;
+        public string GameDomain => gameDomain;
         public string DisplayName => displayName;
         public string Description => description;
         public string Changelog => changelog;
