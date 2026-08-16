@@ -46,8 +46,8 @@ namespace DaftAppleGames.MoreAquariums
         [BoxGroup("Object References")] [SerializeField] private GameObject rocksObject;
         [BoxGroup("Object References")] [SerializeField] private GameObject colliderObject;
 
-        [BoxGroup("Sky Applier")] [SerializeField] private Renderer[] objectRenderers;
-        [BoxGroup("Sky Applier")] [SerializeField] private Renderer[] glassRenderers;
+        [BoxGroup("Sky Applier")] [SerializeField] private GameObject[] newNonGlassGameObjects;
+        [BoxGroup("Sky Applier")] [SerializeField] private GameObject[] newGlassGameObjects;
         
         [BoxGroup("Constructable")] [SerializeField] private GameObject constructableBoundsObject;
         
@@ -73,6 +73,8 @@ namespace DaftAppleGames.MoreAquariums
         internal void ConfigureAquariumPrefab(GameObject vanillaAquariumGo, Action<GameObject> postConfigAction)
         {
             ModDebugLog.LogDebug($"Configuring aquarium prefab: {vanillaAquariumGo}");
+            Dictionary<GameObject, GameObject> instantiatedObjects =
+                new Dictionary<GameObject, GameObject>();
 
             // Get vanilla references
             Aquarium vanillaAquarium = vanillaAquariumGo.GetComponent<Aquarium>();
@@ -84,13 +86,13 @@ namespace DaftAppleGames.MoreAquariums
             ConfigureStorageContainer(vanillaAquariumGo, storageWidth, storageHeight);
             
             // Replace the model meshes
-            ConfigureMeshes(vanillaAquariumGo, aquariumModel);
+            ConfigureMeshes(vanillaAquariumGo, aquariumModel, instantiatedObjects);
             
             // Duplicate and reposition coral
             ConfigureCoral(aquariumModel);
 
             // Configure rocks
-            ConfigureRocks(vanillaAquariumGo);
+            ConfigureRocks(vanillaAquariumGo, instantiatedObjects);
             
             // Duplicate and reposition bubbles
             ConfigureBubbles(vanillaAquariumGo);
@@ -104,6 +106,9 @@ namespace DaftAppleGames.MoreAquariums
             
             // Reposition tracks and add new
             ConfigureTracks(vanillaAquariumGo);
+
+            // Rebuild both renderer collections after all cloning is complete.
+            ConfigureSkyAppliers(vanillaAquariumGo, instantiatedObjects);
 
             // Add the new component
             AddAquariumComponent(vanillaAquariumGo);
@@ -148,22 +153,24 @@ namespace DaftAppleGames.MoreAquariums
         /// <summary>
         /// Configure the storage container size
         /// </summary>
-        private void ConfigureStorageContainer(GameObject vanillaAquariumGo, int storageWidth, int storageHeight)
+        private void ConfigureStorageContainer(GameObject vanillaAquariumGo, int newStorageWidth, int newStorageHeight)
         {
             ModDebugLog.LogDebug($"Configuring storage container...");
             StorageContainer storageContainer = vanillaAquariumGo.GetComponentInChildren<StorageContainer>(true);
-            storageContainer.height = storageHeight;
-            storageContainer.width = storageWidth;
+            storageContainer.height = newStorageHeight;
+            storageContainer.width = newStorageWidth;
         }
         
         /// <summary>
         /// Apply appropriate changes to meshes or game model 
         /// </summary>
-        private void ConfigureMeshes(GameObject vanillaAquariumGo, GameObject aquariumModel)
+        private void ConfigureMeshes(GameObject vanillaAquariumGo, GameObject aquariumModel,
+            Dictionary<GameObject, GameObject> instantiatedObjects)
         {
             if (replaceExistingModel)
             {
-                ReplaceModel(vanillaAquariumGo, aquariumModel);
+                GameObject replacementModel = ReplaceModel(vanillaAquariumGo, aquariumModel);
+                instantiatedObjects.Add(newAquariumModel, replacementModel);
             }
             else
             {
@@ -199,7 +206,7 @@ namespace DaftAppleGames.MoreAquariums
         /// <summary>
         /// Replace the entire model
         /// </summary>
-        private void ReplaceModel(GameObject vanillaAquariumGo, GameObject aquariumModel)
+        private GameObject ReplaceModel(GameObject vanillaAquariumGo, GameObject aquariumModel)
         {
             // Disable the exist geometry
             GameObject animatorGo1 = aquariumModel.transform.Find("Aquarium_animation2").gameObject;
@@ -221,6 +228,7 @@ namespace DaftAppleGames.MoreAquariums
             MaterialUtils.ApplySNShaders(newModel);
             Constructable constructable = vanillaAquariumGo.GetComponent<Constructable>();
             constructable.model = newModel;
+            return newModel;
         }
         
         /// <summary>
@@ -267,7 +275,7 @@ namespace DaftAppleGames.MoreAquariums
         /// <summary>
         /// Position and scale the target coral from the source
         /// </summary>
-        private void ConfigureIndividualCoral(Transform[] sourceCoralTransforms, GameObject targetCoralGo, float waveScale)
+        private void ConfigureIndividualCoral(Transform[] sourceCoralTransforms, GameObject targetCoralGo, float newWaveScale)
         {
             // Iterate through each coral game object, find it and reposition it
             foreach (Transform coralTransform in sourceCoralTransforms)
@@ -287,9 +295,9 @@ namespace DaftAppleGames.MoreAquariums
                 origCoral.transform.localScale = coralTransform.localScale;
                 origCoral.SetActive(coralTransform.gameObject.activeSelf);
 
-                if (waveScale < 1.0f)
+                if (newWaveScale < 1.0f)
                 {
-                    ConfigureCoralMaterials(targetCoralGo, waveScale);
+                    ConfigureCoralMaterials(targetCoralGo, newWaveScale);
                 }
             }
         }
@@ -326,7 +334,8 @@ namespace DaftAppleGames.MoreAquariums
         /// <summary>
         /// Copy and reposition the rocks from our new model
         /// </summary>
-        private void ConfigureRocks(GameObject vanillaAquariumGo)
+        private void ConfigureRocks(GameObject vanillaAquariumGo,
+            Dictionary<GameObject, GameObject> instantiatedObjects)
         {
             if (!rocksObject)
             {
@@ -339,24 +348,165 @@ namespace DaftAppleGames.MoreAquariums
             GameObject newRocks = Instantiate(rocksObject, vanillaAquariumGo.transform, true);
             newRocks.transform.localPosition = rocksObject.transform.localPosition;
             newRocks.transform.localScale = Vector3.one;
-            
-            ModDebugLog.LogDebug("Updating SkyAppliers...");
-            SkyApplier[] skyAppliers = vanillaAquariumGo.GetComponentsInChildren<SkyApplier>();
+            instantiatedObjects.Add(rocksObject, newRocks);
+        }
+
+        /// <summary>
+        /// Rebuilds the glass and non-glass SkyApplier renderer collections.
+        /// </summary>
+        private void ConfigureSkyAppliers(GameObject vanillaAquariumGo,
+            Dictionary<GameObject, GameObject> instantiatedObjects)
+        {
+            ModDebugLog.LogDebug("Configuring SkyAppliers...");
+            SkyApplier[] skyAppliers =
+                vanillaAquariumGo.GetComponentsInChildren<SkyApplier>(true);
+            SkyApplier glassSkyApplier = null;
+            SkyApplier nonGlassSkyApplier = null;
+
             foreach (SkyApplier skyApplier in skyAppliers)
             {
                 if (skyApplier.anchorSky == Skies.BaseGlass)
                 {
-                    ModDebugLog.LogDebug("Setting glass SkyApplier...");
-                    skyApplier.renderers = glassRenderers;
+                    glassSkyApplier = skyApplier;
                 }
                 else
                 {
-                    ModDebugLog.LogDebug("Setting object SkyApplier...");
-                    skyApplier.renderers = objectRenderers;
+                    nonGlassSkyApplier = skyApplier;
+                }
+            }
+
+            if (!glassSkyApplier || !nonGlassSkyApplier)
+            {
+                ModDebugLog.LogError(
+                    "Could not find both glass and non-glass Aquarium SkyAppliers.");
+                return;
+            }
+
+            HashSet<Renderer> glassRenderers = new HashSet<Renderer>();
+            AddRenderers(glassRenderers, glassSkyApplier.renderers);
+            AddMappedRenderers(glassRenderers, newGlassGameObjects, instantiatedObjects);
+
+            HashSet<Renderer> explicitNonGlassRenderers = new HashSet<Renderer>();
+            AddMappedRenderers(explicitNonGlassRenderers, newNonGlassGameObjects,
+                instantiatedObjects);
+            foreach (Renderer renderer in explicitNonGlassRenderers)
+            {
+                glassRenderers.Remove(renderer);
+            }
+
+            List<Renderer> nonGlassRenderers = new List<Renderer>();
+            Renderer[] allRenderers =
+                vanillaAquariumGo.GetComponentsInChildren<Renderer>(true);
+            foreach (Renderer renderer in allRenderers)
+            {
+                if (renderer && !glassRenderers.Contains(renderer))
+                {
+                    nonGlassRenderers.Add(renderer);
+                }
+            }
+
+            glassSkyApplier.renderers = ToRendererArray(glassRenderers);
+            nonGlassSkyApplier.renderers = nonGlassRenderers.ToArray();
+
+            ModDebugLog.LogDebug(
+                $"Configured {nonGlassSkyApplier.renderers.Length} non-glass and " +
+                $"{glassSkyApplier.renderers.Length} glass SkyApplier renderers.");
+        }
+
+        private static void AddMappedRenderers(HashSet<Renderer> renderers,
+            GameObject[] sourceObjects,
+            Dictionary<GameObject, GameObject> instantiatedObjects)
+        {
+            if (sourceObjects == null)
+            {
+                return;
+            }
+
+            foreach (GameObject sourceObject in sourceObjects)
+            {
+                GameObject instantiatedObject =
+                    FindInstantiatedObject(sourceObject, instantiatedObjects);
+                if (!instantiatedObject)
+                {
+                    string sourceName = sourceObject ? sourceObject.name : "null";
+                    ModDebugLog.LogError(
+                        $"Could not map SkyApplier object '{sourceName}'.");
+                    continue;
+                }
+
+                AddRenderers(renderers,
+                    instantiatedObject.GetComponentsInChildren<Renderer>(true));
+            }
+        }
+
+        private static GameObject FindInstantiatedObject(GameObject sourceObject,
+            Dictionary<GameObject, GameObject> instantiatedObjects)
+        {
+            if (!sourceObject)
+            {
+                return null;
+            }
+
+            foreach (KeyValuePair<GameObject, GameObject> instantiatedObject in
+                     instantiatedObjects)
+            {
+                GameObject sourceRoot = instantiatedObject.Key;
+                if (sourceObject == sourceRoot)
+                {
+                    return instantiatedObject.Value;
+                }
+
+                if (!sourceObject.transform.IsChildOf(sourceRoot.transform))
+                {
+                    continue;
+                }
+
+                string relativePath = GetRelativePath(
+                    sourceRoot.transform, sourceObject.transform);
+                Transform mappedTransform = instantiatedObject.Value.transform.Find(relativePath);
+                return mappedTransform ? mappedTransform.gameObject : null;
+            }
+
+            return null;
+        }
+
+        private static string GetRelativePath(Transform root, Transform child)
+        {
+            List<string> pathParts = new List<string>();
+            Transform current = child;
+            while (current && current != root)
+            {
+                pathParts.Add(current.name);
+                current = current.parent;
+            }
+
+            pathParts.Reverse();
+            return string.Join("/", pathParts.ToArray());
+        }
+
+        private static void AddRenderers(HashSet<Renderer> target, Renderer[] renderers)
+        {
+            if (renderers == null)
+            {
+                return;
+            }
+
+            foreach (Renderer renderer in renderers)
+            {
+                if (renderer)
+                {
+                    target.Add(renderer);
                 }
             }
         }
 
+        private static Renderer[] ToRendererArray(HashSet<Renderer> renderers)
+        {
+            Renderer[] result = new Renderer[renderers.Count];
+            renderers.CopyTo(result);
+            return result;
+        }
+        
         /// <summary>
         /// Copy and reposition and second set of bubbles
         /// </summary>
