@@ -37,12 +37,13 @@ namespace DaftAppleGames.Editor
             NexusModsUploadOptions options,
             string zipFilePath,
             string version,
+            string changelog,
             IProgress<NexusUploadProgress> progress,
             CancellationToken cancellationToken)
         {
             FileInfo fileInfo = new FileInfo(zipFilePath);
             string globalModId = null;
-            if (!string.IsNullOrWhiteSpace(options.Changelog))
+            if (!string.IsNullOrWhiteSpace(changelog))
             {
                 progress.Report(new NexusUploadProgress(0.01f, "Resolving Nexus mod..."));
                 globalModId = await ResolveGlobalModIdAsync(
@@ -111,13 +112,13 @@ namespace DaftAppleGames.Editor
             JObject versionObject = RequireObject(versionData, "version");
             string versionId = RequireString(versionObject, "id");
 
-            if (!string.IsNullOrWhiteSpace(options.Changelog))
+            if (!string.IsNullOrWhiteSpace(changelog))
             {
                 progress.Report(new NexusUploadProgress(0.97f, "Adding changelog..."));
                 JObject changelogBody = new JObject
                 {
                     ["version"] = version,
-                    ["changelog"] = options.Changelog
+                    ["changelog"] = changelog
                 };
                 await SendApiRequestAsync(
                     HttpMethod.Post,

@@ -15,8 +15,6 @@ namespace DaftAppleGames.Editor
         [SerializeField] private string displayName;
         [TextArea(3, 8)]
         [SerializeField] private string description;
-        [TextArea(3, 8)]
-        [SerializeField] private string changelog;
         [SerializeField] private string fileCategory = "main";
         [SerializeField] private bool archiveExistingVersion = true;
         [SerializeField] private bool updateModVersion = true;
@@ -29,7 +27,6 @@ namespace DaftAppleGames.Editor
         public string GameDomain => gameDomain;
         public string DisplayName => displayName;
         public string Description => description;
-        public string Changelog => changelog;
         public string FileCategory => fileCategory;
         public bool ArchiveExistingVersion => archiveExistingVersion;
         public bool UpdateModVersion => updateModVersion;

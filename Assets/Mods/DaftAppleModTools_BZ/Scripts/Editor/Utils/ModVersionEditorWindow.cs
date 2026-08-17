@@ -25,11 +25,14 @@ namespace DaftAppleGames.Editor
         private const float EditorLabelWidth = 230.0f;
         private const string VersionConstantPattern =
             "(?<prefix>\\b(?:private|internal|public|protected)\\s+const\\s+string\\s+VersionString\\s*=\\s*\")(?<version>[^\"]*)(?<suffix>\"\\s*;)";
+        private const string BaseUnityPluginClassPattern =
+            "\\bclass\\s+[A-Za-z_][A-Za-z0-9_]*\\s*:\\s*[^\\{;]*\\bBaseUnityPlugin\\b";
 
         private SerializedObject settingsObject;
         private SerializedProperty modsProperty;
         private Vector2 scrollPosition;
         private string nexusApiKey;
+        private string nexusChangelog = string.Empty;
         private int uploadingModIndex = -1;
         private float uploadProgress;
         private string uploadStatus;
@@ -38,7 +41,7 @@ namespace DaftAppleGames.Editor
         private bool apiKeySavePending;
         private double persistenceDueTime;
 
-        [MenuItem("Tools/Daft Apple Games/Mod Versions")]
+        [MenuItem("Tools/Mod Versions")]
         public static void ShowWindow()
         {
             ModVersionEditorWindow window = GetWindow<ModVersionEditorWindow>();
@@ -82,6 +85,8 @@ namespace DaftAppleGames.Editor
             EditorGUILayout.PropertyField(modsProperty, true);
             ApplySettingsChanges();
             EditorGUILayout.Space();
+            DrawNexusChangelog();
+            EditorGUILayout.Space();
 
             for (int index = 0; index < modsProperty.arraySize; index++)
             {
@@ -105,7 +110,8 @@ namespace DaftAppleGames.Editor
                 : nameProperty.stringValue;
             string version = GetVersionString(versionProperty);
 
-            EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField($"{displayName}  v{version}", EditorStyles.boldLabel, GUILayout.MinWidth(180.0f));
 
             if (GUILayout.Button("Major +", GUILayout.Width(90.0f)))
@@ -126,6 +132,21 @@ namespace DaftAppleGames.Editor
             EditorGUILayout.EndHorizontal();
 
             DrawNexusButtons(index, displayName, version);
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
+        }
+
+        private void DrawNexusChangelog()
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Change Log for Next Publish", EditorStyles.boldLabel);
+            nexusChangelog = EditorGUILayout.TextArea(
+                nexusChangelog,
+                GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 3.0f));
+            EditorGUILayout.HelpBox(
+                "This change log is used by the next successful publish, then cleared.",
+                MessageType.None);
+            EditorGUILayout.EndVertical();
         }
 
         private void DrawNexusApiKey()
@@ -184,8 +205,6 @@ namespace DaftAppleGames.Editor
                     uploadCancellation.Cancel();
                 }
             }
-
-            EditorGUILayout.Space();
         }
 
         private void ApplySettingsChanges()
@@ -250,7 +269,7 @@ namespace DaftAppleGames.Editor
             string generatedZipPath = GetGeneratedZipPath(entry);
             bool confirmed = EditorUtility.DisplayDialog(
                 "Publish to Nexus Mods",
-                $"Are you sure?\n\nUpload '{generatedZipPath}' as version {version} of Nexus file group {entry.NexusMods.FileGroupId}?\n\nThe description and changelog will be cleared after a successful publish.",
+                $"Are you sure?\n\nUpload '{generatedZipPath}' as version {version} of Nexus file group {entry.NexusMods.FileGroupId}?\n\nThe change log will be cleared after a successful publish.",
                 "Yes, Publish",
                 "Cancel");
             if (!confirmed)
@@ -273,9 +292,10 @@ namespace DaftAppleGames.Editor
                         entry.NexusMods,
                         generatedZipPath,
                         version,
+                        nexusChangelog,
                         progress,
                         cancellation.Token);
-                    ClearPublishedReleaseText(index);
+                    nexusChangelog = string.Empty;
                     EditorUtility.DisplayDialog(
                         WindowTitle,
                         $"Published {entry.Name} {version} successfully. Nexus version ID: {versionId}",
@@ -302,18 +322,6 @@ namespace DaftAppleGames.Editor
                 uploadingModIndex = -1;
                 Repaint();
             }
-        }
-
-        private void ClearPublishedReleaseText(int index)
-        {
-            settingsObject.Update();
-            SerializedProperty entryProperty = modsProperty.GetArrayElementAtIndex(index);
-            SerializedProperty nexusProperty = entryProperty.FindPropertyRelative("nexusMods");
-            nexusProperty.FindPropertyRelative("description").stringValue = string.Empty;
-            nexusProperty.FindPropertyRelative("changelog").stringValue = string.Empty;
-            settingsObject.ApplyModifiedProperties();
-            EditorUtility.SetDirty(ModVersionSettings.Instance);
-            SchedulePersistence(true, false);
         }
 
         private void UpdateUploadProgress(NexusUploadProgress progress)
@@ -352,14 +360,14 @@ namespace DaftAppleGames.Editor
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(entry.NexusMods.Changelog) &&
+            if (!string.IsNullOrWhiteSpace(nexusChangelog) &&
                 string.IsNullOrWhiteSpace(entry.NexusMods.GameScopedModId))
             {
                 error = "Enter the Nexus game-scoped mod ID from the mod page URL when providing a changelog.";
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(entry.NexusMods.Changelog) &&
+            if (!string.IsNullOrWhiteSpace(nexusChangelog) &&
                 string.IsNullOrWhiteSpace(entry.NexusMods.GameDomain))
             {
                 error = "Enter the Nexus game domain when providing a changelog.";
@@ -423,8 +431,15 @@ namespace DaftAppleGames.Editor
                 return false;
             }
 
+            string assetPath = AssetDatabase.GetAssetPath(entry.PluginScript);
+            pluginPath = Path.GetFullPath(assetPath);
+            string source = File.ReadAllText(pluginPath);
             Type pluginType = entry.PluginScript.GetClass();
-            if (pluginType == null || !InheritsFromBaseUnityPlugin(pluginType))
+            bool isBaseUnityPlugin = pluginType != null && InheritsFromBaseUnityPlugin(pluginType);
+            if (!isBaseUnityPlugin && !Regex.IsMatch(
+                    source,
+                    BaseUnityPluginClassPattern,
+                    RegexOptions.CultureInvariant))
             {
                 error = "The assigned script must contain a class derived from BaseUnityPlugin.";
                 return false;
@@ -436,9 +451,6 @@ namespace DaftAppleGames.Editor
                 return false;
             }
 
-            string assetPath = AssetDatabase.GetAssetPath(entry.PluginScript);
-            pluginPath = Path.GetFullPath(assetPath);
-            string source = File.ReadAllText(pluginPath);
             MatchCollection matches = Regex.Matches(source, VersionConstantPattern, RegexOptions.CultureInvariant);
             if (matches.Count != 1)
             {

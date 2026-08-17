@@ -25,8 +25,7 @@ MonoBehaviour:
       gameScopedModId: 381
       gameDomain: subnauticabelowzero
       displayName: SeaTruckDockRecall_BZ
-      description: 
-      changelog: 
+      description: Main mod file
       fileCategory: main
       archiveExistingVersion: 1
       updateModVersion: 1
@@ -38,18 +37,36 @@ MonoBehaviour:
     manifest: {fileID: 11400000, guid: 1046126c490d7384799f2de26323218c, type: 2}
     version:
       major: 2
-      minor: 15
-      patch: 0
+      minor: 13
+      patch: 1
     nexusMods:
       fileGroupId: 1058311
       gameScopedModId: 228
       gameDomain: subnauticabelowzero
       displayName: SubnauticaPets_BZ
-      description: 
-      changelog: 
+      description: Main mod file
       fileCategory: main
       archiveExistingVersion: 1
       updateModVersion: 1
-      primaryModManagerDownload: 0
+      primaryModManagerDownload: 1
       allowModManagerDownload: 1
-      showRequirementsPopup: 0
+      showRequirementsPopup: 1
+  - name: More Aquariums BZ
+    pluginScript: {fileID: 11500000, guid: fb5ed69f47c501b4fbb5ac7df2c07fc1, type: 3}
+    manifest: {fileID: 11400000, guid: 87fefca873535b841bb06e2482f7d0a4, type: 2}
+    version:
+      major: 1
+      minor: 3
+      patch: 1
+    nexusMods:
+      fileGroupId: 1459612
+      gameScopedModId: 596
+      gameDomain: subnauticabelowzero
+      displayName: BiggerAquariums_BZ
+      description: Main mod file
+      fileCategory: main
+      archiveExistingVersion: 1
+      updateModVersion: 1
+      primaryModManagerDownload: 1
+      allowModManagerDownload: 1
+      showRequirementsPopup: 1
