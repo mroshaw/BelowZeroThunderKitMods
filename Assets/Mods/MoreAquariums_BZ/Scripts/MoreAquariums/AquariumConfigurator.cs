@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using DaftAppleGames.ModTools;
-using DaftAppleGames.ModUtils;
 using Nautilus.Utility;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -9,24 +8,16 @@ using static DaftAppleGames.MoreAquariums.MoreAquariumsPlugin;
 
 namespace DaftAppleGames.MoreAquariums
 {
-    public enum AquariumType
-    {
-        Double,
-        Corner,
-        Curved,
-        LShaped,
-        Desk,
-        Spherical
-    }
-
     /// <summary>
     /// Component to allow switching out the new aquarium models on existing prefabs
     /// </summary>
     public class AquariumConfigurator : MonoBehaviour
     {
+        private const int VanillaTrackCount = 8;
+        private const int MaximumTrackCount = 16;
+
         [BoxGroup("Aquarium")] [SerializeField] private int storageHeight;
         [BoxGroup("Aquarium")] [SerializeField] private int storageWidth;
-        [BoxGroup("Aquarium")] [SerializeField] [InlineEditor] private RecipePreset recipe;
         [BoxGroup("Aquarium")] [SerializeField] private bool useCustomMovement;
         [BoxGroup("Aquarium")] [SerializeField] private bool allowConstructionOnConstructables;
         [BoxGroup("Aquarium")] [SerializeField] private float waveScale;
@@ -73,6 +64,13 @@ namespace DaftAppleGames.MoreAquariums
         internal void ConfigureAquariumPrefab(GameObject vanillaAquariumGo, Action<GameObject> postConfigAction)
         {
             ModDebugLog.LogDebug($"Configuring aquarium prefab: {vanillaAquariumGo}");
+
+            if (!ValidateConfiguration())
+            {
+                ModDebugLog.LogError("Aquarium configuration is invalid. Aborting prefab configuration.");
+                return;
+            }
+
             Dictionary<GameObject, GameObject> instantiatedObjects =
                 new Dictionary<GameObject, GameObject>();
 
@@ -107,14 +105,14 @@ namespace DaftAppleGames.MoreAquariums
             // Reposition tracks and add new
             ConfigureTracks(vanillaAquariumGo);
 
-            // Rebuild both renderer collections after all cloning is complete.
-            ConfigureSkyAppliers(vanillaAquariumGo, instantiatedObjects);
-
             // Add the new component
             AddAquariumComponent(vanillaAquariumGo);
             
             // Call post-prefab config action
             postConfigAction?.Invoke(vanillaAquariumGo);
+
+            // Rebuild both renderer collections after all configuration is complete.
+            ConfigureSkyAppliers(vanillaAquariumGo, instantiatedObjects);
             
             ModDebugLog.LogDebug("Done configuring prefab!");
         }
@@ -170,7 +168,10 @@ namespace DaftAppleGames.MoreAquariums
             if (replaceExistingModel)
             {
                 GameObject replacementModel = ReplaceModel(vanillaAquariumGo, aquariumModel);
-                instantiatedObjects.Add(newAquariumModel, replacementModel);
+                if (replacementModel)
+                {
+                    instantiatedObjects.Add(newAquariumModel, replacementModel);
+                }
             }
             else
             {
@@ -209,12 +210,30 @@ namespace DaftAppleGames.MoreAquariums
         private GameObject ReplaceModel(GameObject vanillaAquariumGo, GameObject aquariumModel)
         {
             // Disable the exist geometry
-            GameObject animatorGo1 = aquariumModel.transform.Find("Aquarium_animation2").gameObject;
-            GameObject animatorGo2 = aquariumModel.transform.Find("Aquarium_animation").gameObject;
+            Transform animatorTransform1 = FindRequiredTransform(
+                aquariumModel.transform, "Aquarium_animation2");
+            Transform animatorTransform2 = FindRequiredTransform(
+                aquariumModel.transform, "Aquarium_animation");
+            if (!animatorTransform1 || !animatorTransform2)
+            {
+                return null;
+            }
+
+            GameObject animatorGo1 = animatorTransform1.gameObject;
+            GameObject animatorGo2 = animatorTransform2.gameObject;
             
             ModDebugLog.LogDebug($"Finding geometry...");
-            GameObject geometry1 = animatorGo1.transform.Find("Aquarium_geo").gameObject;
-            GameObject geometry2 = animatorGo2.transform.Find("Aquarium_geo").gameObject;
+            Transform geometryTransform1 = FindRequiredTransform(
+                animatorGo1.transform, "Aquarium_geo");
+            Transform geometryTransform2 = FindRequiredTransform(
+                animatorGo2.transform, "Aquarium_geo");
+            if (!geometryTransform1 || !geometryTransform2)
+            {
+                return null;
+            }
+
+            GameObject geometry1 = geometryTransform1.gameObject;
+            GameObject geometry2 = geometryTransform2.gameObject;
 
             ModDebugLog.LogDebug($"Disable geometry...");
             geometry1.SetActive(false);
@@ -281,13 +300,14 @@ namespace DaftAppleGames.MoreAquariums
             foreach (Transform coralTransform in sourceCoralTransforms)
             {
                 ModDebugLog.LogDebug($"Setting new position of: {coralTransform.gameObject.name}");
-                GameObject origCoral = targetCoralGo.transform.Find(coralTransform.gameObject.name).gameObject;
-                if (!origCoral)
+                Transform originalCoralTransform = FindRequiredTransform(
+                    targetCoralGo.transform, coralTransform.gameObject.name);
+                if (!originalCoralTransform)
                 {
-                    ModDebugLog.LogError(
-                        $"Could not find coral gameobject named: {coralTransform.gameObject.name}! Aborting!");
                     return;
                 }
+
+                GameObject origCoral = originalCoralTransform.gameObject;
 
                 // Reposition to the new position
                 origCoral.transform.localPosition = coralTransform.localPosition;
@@ -295,19 +315,20 @@ namespace DaftAppleGames.MoreAquariums
                 origCoral.transform.localScale = coralTransform.localScale;
                 origCoral.SetActive(coralTransform.gameObject.activeSelf);
 
-                if (newWaveScale < 1.0f)
-                {
-                    ConfigureCoralMaterials(targetCoralGo, newWaveScale);
-                }
+            }
+
+            if (newWaveScale < 1.0f)
+            {
+                ConfigureCoralMaterials(targetCoralGo, newWaveScale);
             }
         }
 
         /// <summary>
         /// Configures animated "waving" by applying a scale factor
         /// </summary> m>
-        private void ConfigureCoralMaterials(GameObject coralGo, float waveScale)
+        private void ConfigureCoralMaterials(GameObject coralGo, float newWaveScale)
         {
-            ModDebugLog.LogDebug($"Configuring coral materials... Using waveScale: {waveScale}");
+            ModDebugLog.LogDebug($"Configuring coral materials... Using waveScale: {newWaveScale}");
             Renderer[] coralRenderers = coralGo.GetComponentsInChildren<Renderer>(true);
             foreach (Renderer coralRenderer in coralRenderers)
             {
@@ -318,15 +339,15 @@ namespace DaftAppleGames.MoreAquariums
                     // coralMaterial.SetFloat(WaveUpMinParam, 1.0f);
                     
                     Vector4 currScale = coralMaterial.GetVector(ScaleParam);
-                    Vector4 newScale = currScale * waveScale;
+                    Vector4 newScale = currScale * newWaveScale;
                     // ModDebugLog.LogDebug($"Setting scale of: {coralMaterial.name} from {currScale.ToString("F3")} to {newScale.ToString("F3")}");
                     coralMaterial.SetVector(ScaleParam, newScale);
                     Vector4 currFrequency = coralMaterial.GetVector(FrequencyParam);
                     // ModDebugLog.LogDebug($"Setting new frequency of: {coralMaterial.name} to {currFrequency * waveScale}");
-                    coralMaterial.SetVector(FrequencyParam, currFrequency * waveScale);
+                    coralMaterial.SetVector(FrequencyParam, currFrequency * newWaveScale);
                     Vector2 currSpeed = coralMaterial.GetVector(SpeedParam);
                     // ModDebugLog.LogDebug($"Setting new speed of: {coralMaterial.name} to {currSpeed * waveScale}");
-                    coralMaterial.SetVector(SpeedParam, currSpeed * waveScale);
+                    coralMaterial.SetVector(SpeedParam, currSpeed * newWaveScale);
                 }
             }
         }
@@ -347,7 +368,8 @@ namespace DaftAppleGames.MoreAquariums
             // Add the rocks
             GameObject newRocks = Instantiate(rocksObject, vanillaAquariumGo.transform, true);
             newRocks.transform.localPosition = rocksObject.transform.localPosition;
-            newRocks.transform.localScale = Vector3.one;
+            newRocks.transform.localRotation = rocksObject.transform.localRotation;
+            newRocks.transform.localScale = rocksObject.transform.localScale;
             instantiatedObjects.Add(rocksObject, newRocks);
         }
 
@@ -389,19 +411,19 @@ namespace DaftAppleGames.MoreAquariums
             HashSet<Renderer> explicitNonGlassRenderers = new HashSet<Renderer>();
             AddMappedRenderers(explicitNonGlassRenderers, newNonGlassGameObjects,
                 instantiatedObjects);
-            foreach (Renderer renderer in explicitNonGlassRenderers)
+            foreach (Renderer currRenderer in explicitNonGlassRenderers)
             {
-                glassRenderers.Remove(renderer);
+                glassRenderers.Remove(currRenderer);
             }
 
             List<Renderer> nonGlassRenderers = new List<Renderer>();
             Renderer[] allRenderers =
                 vanillaAquariumGo.GetComponentsInChildren<Renderer>(true);
-            foreach (Renderer renderer in allRenderers)
+            foreach (Renderer currRenderer in allRenderers)
             {
-                if (renderer && !glassRenderers.Contains(renderer))
+                if (currRenderer && !glassRenderers.Contains(currRenderer))
                 {
-                    nonGlassRenderers.Add(renderer);
+                    nonGlassRenderers.Add(currRenderer);
                 }
             }
 
@@ -591,30 +613,51 @@ namespace DaftAppleGames.MoreAquariums
         private void ConfigureTracks(GameObject vanillaAquariumGo)
         {
             // We'll use this to reset the trackObjects on the Aquarium component
-            int trackArrayLength = newTrackObjects == null || newTrackObjects.Length > 0 ? 16 : 8;
+            int trackArrayLength = storageWidth * storageHeight;
             ModDebugLog.LogDebug($"Creating new track array of {trackArrayLength} objects...");
             GameObject[] updatedTrackObjects = new GameObject[trackArrayLength];
 
-            // If using custom movement, we'll need a FishManager on the Game Object with some settings
-            if (useCustomMovement)
-            {
-                ConfigureCustomMovement(vanillaAquariumGo);
-            }
-            
             // Reconfigure the existing 8 tracks
             Aquarium vanillaAquarium = vanillaAquariumGo.GetComponent<Aquarium>();
 
             ModDebugLog.LogDebug($"Finding animators...");
-            GameObject animatorGo1 = vanillaAquariumGo.transform.Find("model/Aquarium_animation2").gameObject;
-            GameObject animatorGo2 = vanillaAquariumGo.transform.Find("model/Aquarium_animation").gameObject;
+            Transform animatorTransform1 = FindRequiredTransform(
+                vanillaAquariumGo.transform, "model/Aquarium_animation2");
+            Transform animatorTransform2 = FindRequiredTransform(
+                vanillaAquariumGo.transform, "model/Aquarium_animation");
+            if (!animatorTransform1 || !animatorTransform2)
+            {
+                return;
+            }
+
+            GameObject animatorGo1 = animatorTransform1.gameObject;
+            GameObject animatorGo2 = animatorTransform2.gameObject;
             
             ModDebugLog.LogDebug($"Finding track roots...");
-            GameObject trackRoot1To4 = animatorGo1.transform.Find("root").gameObject;
-            GameObject trackRoot5To8 = animatorGo2.transform.Find("root").gameObject;
+            Transform trackRootTransform1To4 = FindRequiredTransform(
+                animatorGo1.transform, "root");
+            Transform trackRootTransform5To8 = FindRequiredTransform(
+                animatorGo2.transform, "root");
+            if (!trackRootTransform1To4 || !trackRootTransform5To8)
+            {
+                return;
+            }
+
+            GameObject trackRoot1To4 = trackRootTransform1To4.gameObject;
+            GameObject trackRoot5To8 = trackRootTransform5To8.gameObject;
 
             ModDebugLog.LogDebug($"Finding geometry...");
-            GameObject geometry1 = animatorGo1.transform.Find("Aquarium_geo").gameObject;
-            GameObject geometry2 = animatorGo2.transform.Find("Aquarium_geo").gameObject;
+            Transform geometryTransform1 = FindRequiredTransform(
+                animatorGo1.transform, "Aquarium_geo");
+            Transform geometryTransform2 = FindRequiredTransform(
+                animatorGo2.transform, "Aquarium_geo");
+            if (!geometryTransform1 || !geometryTransform2)
+            {
+                return;
+            }
+
+            GameObject geometry1 = geometryTransform1.gameObject;
+            GameObject geometry2 = geometryTransform2.gameObject;
 
             // Update the animators
             // Move the animator gameobject, unparent/reparent children to avoid move
@@ -643,24 +686,31 @@ namespace DaftAppleGames.MoreAquariums
                 GameObject trackRoot = currTrackIndex < 4 ? trackRoot1To4 : trackRoot5To8;
 
                 ModDebugLog.LogDebug($"Looking for track in root: {existingTrack.name}");
-                GameObject existingTrackGo = trackRoot.transform.Find(existingTrack.name).gameObject;
+                Transform existingTrackTransform = FindRequiredTransform(
+                    trackRoot.transform, existingTrack.name);
+                if (!existingTrackTransform)
+                {
+                    return;
+                }
+
+                GameObject existingTrackGo = existingTrackTransform.gameObject;
                 existingTrackGo.transform.localPosition = existingTrack.transform.localPosition;
                 existingTrackGo.transform.localRotation = useCustomMovement ? Quaternion.identity : existingTrack.transform.localRotation;
                 existingTrackGo.transform.localScale = existingTrack.transform.localScale;
                 
                 ModDebugLog.LogDebug($"Looking for attach in track: {existingAttach.name}");
-                GameObject existingAttachGo = existingTrackGo.transform.Find(existingAttach.name).gameObject;
+                Transform existingAttachTransform = FindRequiredTransform(
+                    existingTrackGo.transform, existingAttach.name);
+                if (!existingAttachTransform)
+                {
+                    return;
+                }
+
+                GameObject existingAttachGo = existingAttachTransform.gameObject;
 
                 existingAttachGo.transform.localPosition = existingAttach.transform.localPosition;
                 existingAttachGo.transform.localRotation = existingAttach.transform.localRotation;
 
-                if (useCustomMovement)
-                {
-                    // Add custom movement component
-                    ModDebugLog.LogDebug("Adding custom movement script...");
-                    existingTrackGo.AddComponent<AquariumFishExt>();
-                }
-                
                 updatedTrackObjects[currTrackIndex] = existingAttachGo;
                 currTrackIndex++;
             }
@@ -673,6 +723,7 @@ namespace DaftAppleGames.MoreAquariums
             else
             {
                 ModDebugLog.LogDebug($"Creating new tracks...");
+                int newTrackStartIndex = existingTrackObjects.Length;
                 currTrackIndex = 0;
                 foreach (GameObject newTrack in newTrackObjects)
                 {
@@ -685,20 +736,23 @@ namespace DaftAppleGames.MoreAquariums
                     GameObject newAttachGo = new GameObject(newAttach.name);
 
                     newTrackGo.transform.localPosition = newTrack.transform.localPosition;
+                    newTrackGo.transform.localRotation = newTrack.transform.localRotation;
+                    newTrackGo.transform.localScale = newTrack.transform.localScale;
                     newAttachGo.transform.SetParent(newTrackGo.transform);
                     newAttachGo.transform.localPosition = newAttach.transform.localPosition;
+                    newAttachGo.transform.localRotation = newAttach.transform.localRotation;
+                    newAttachGo.transform.localScale = newAttach.transform.localScale;
                     ModDebugLog.LogDebug($"Track created successfully");
 
-                    if (useCustomMovement)
-                    {
-                        // Add custom movement component
-                        ModDebugLog.LogDebug("Adding customer movement script...");
-                        newTrackGo.AddComponent<AquariumFishExt>();
-                    }
-
-                    updatedTrackObjects[currTrackIndex + 8] = newAttachGo;
+                    updatedTrackObjects[newTrackStartIndex + currTrackIndex] = newAttachGo;
                     currTrackIndex++;
                 }
+            }
+
+            // Add and configure the manager that owns runtime fish movement.
+            if (useCustomMovement)
+            {
+                ConfigureCustomMovement(vanillaAquariumGo);
             }
 
             // Now set the trackObjects on the Aquarium component
@@ -723,6 +777,161 @@ namespace DaftAppleGames.MoreAquariums
             ModDebugLog.LogDebug($"Done configuring new aquarium!");
         }
 
+        /// <summary>
+        /// Validates that configured fish tracks match the aquarium storage capacity.
+        /// </summary>
+        private bool ValidateTrackConfiguration()
+        {
+            if (storageWidth <= 0 || storageHeight <= 0)
+            {
+                ModDebugLog.LogError(
+                    $"Storage dimensions must be positive. Configured dimensions: " +
+                    $"{storageWidth}x{storageHeight}.");
+                return false;
+            }
+
+            long requiredTrackCount = (long)storageWidth * storageHeight;
+            if (requiredTrackCount > MaximumTrackCount)
+            {
+                ModDebugLog.LogError(
+                    $"Aquarium requires {requiredTrackCount} tracks, but the current " +
+                    $"track implementation supports at most {MaximumTrackCount}.");
+                return false;
+            }
+
+            int existingTrackCount = existingTrackObjects?.Length ?? 0;
+            int existingAttachCount = existingAttachObjects?.Length ?? 0;
+            int newTrackCount = newTrackObjects?.Length ?? 0;
+            int newAttachCount = newAttachObjects?.Length ?? 0;
+
+            if (existingTrackCount > VanillaTrackCount)
+            {
+                ModDebugLog.LogError(
+                    $"Only {VanillaTrackCount} existing vanilla tracks are available, " +
+                    $"but {existingTrackCount} were configured.");
+                return false;
+            }
+
+            if (existingTrackCount != existingAttachCount)
+            {
+                ModDebugLog.LogError(
+                    $"Existing track count ({existingTrackCount}) does not match " +
+                    $"existing attach count ({existingAttachCount}).");
+                return false;
+            }
+
+            if (newTrackCount != newAttachCount)
+            {
+                ModDebugLog.LogError(
+                    $"New track count ({newTrackCount}) does not match " +
+                    $"new attach count ({newAttachCount}).");
+                return false;
+            }
+
+            if (existingTrackCount + newTrackCount != requiredTrackCount)
+            {
+                ModDebugLog.LogError(
+                    $"Storage dimensions require {requiredTrackCount} fish tracks, " +
+                    $"but {existingTrackCount} existing and {newTrackCount} new tracks " +
+                    "were configured.");
+                return false;
+            }
+
+            if (ContainsNullEntry(existingTrackObjects, "existing track") ||
+                ContainsNullEntry(existingAttachObjects, "existing attach") ||
+                ContainsNullEntry(newTrackObjects, "new track") ||
+                ContainsNullEntry(newAttachObjects, "new attach"))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Validates the complete aquarium authoring configuration.
+        /// </summary>
+        private bool ValidateConfiguration()
+        {
+            if (!ValidateTrackConfiguration())
+            {
+                return false;
+            }
+
+            if (!useCustomMovement)
+            {
+                return true;
+            }
+
+            if (!fishSettings)
+            {
+                ModDebugLog.LogError(
+                    "Custom fish movement is enabled, but no FishSettings asset is configured.");
+                return false;
+            }
+
+            if (movementColliderObjects == null || movementColliderObjects.Length == 0)
+            {
+                ModDebugLog.LogError(
+                    "Custom fish movement is enabled, but no movement collider objects are configured.");
+                return false;
+            }
+
+            foreach (GameObject movementColliderObject in movementColliderObjects)
+            {
+                if (!movementColliderObject)
+                {
+                    ModDebugLog.LogError(
+                        "The movement collider array contains a missing GameObject reference.");
+                    return false;
+                }
+
+                Collider[] colliders = movementColliderObject.GetComponents<Collider>();
+                bool hasSupportedCollider = false;
+                foreach (Collider currCollider in colliders)
+                {
+                    if (currCollider is BoxCollider || currCollider is SphereCollider)
+                    {
+                        hasSupportedCollider = true;
+                        break;
+                    }
+                }
+
+                if (!hasSupportedCollider)
+                {
+                    ModDebugLog.LogError(
+                        $"Movement collider object '{movementColliderObject.name}' must have " +
+                        "a BoxCollider or SphereCollider component.");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Reports whether a configured GameObject array contains a missing reference.
+        /// </summary>
+        private static bool ContainsNullEntry(GameObject[] objects, string entryDescription)
+        {
+            if (objects == null)
+            {
+                return false;
+            }
+
+            foreach (GameObject configuredObject in objects)
+            {
+                if (!configuredObject)
+                {
+                    ModDebugLog.LogError(
+                        $"The {entryDescription} array contains a missing GameObject reference.");
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        
         /// <summary>
         /// Configure components necessary for custom procedural movement
         /// </summary>
@@ -755,7 +964,17 @@ namespace DaftAppleGames.MoreAquariums
                 newColliderObject.transform.localRotation = movementColliderObject.transform.localRotation;
                 newColliderObject.transform.localScale = movementColliderObject.transform.localScale;
 
-                newMovementColliders.Add(newColliderObject.GetComponent<Collider>());
+                Collider[] objectColliders = newColliderObject.GetComponents<Collider>();
+                foreach (Collider currCollider in objectColliders)
+                {
+                    if (currCollider is BoxCollider || currCollider is SphereCollider)
+                    {
+                        newMovementColliders.Add(currCollider);
+                    }
+                }
+
+                ModDebugLog.LogDebug(
+                    $"Added supported colliders from {movementColliderObject.name}");
             }
 
             return newMovementColliders;
@@ -767,6 +986,25 @@ namespace DaftAppleGames.MoreAquariums
         private void AddAquariumComponent(GameObject vanillaAquariumGo)
         {
             vanillaAquariumGo.AddComponent<CustomAquarium>();
+        }
+
+        private static Transform FindRequiredTransform(Transform parent, string path)
+        {
+            if (!parent)
+            {
+                ModDebugLog.LogError(
+                    $"Cannot find required transform '{path}' because its parent is null.");
+                return null;
+            }
+
+            Transform result = parent.Find(path);
+            if (!result)
+            {
+                ModDebugLog.LogError(
+                    $"Could not find required transform '{parent.name}/{path}'.");
+            }
+
+            return result;
         }
     }
 }

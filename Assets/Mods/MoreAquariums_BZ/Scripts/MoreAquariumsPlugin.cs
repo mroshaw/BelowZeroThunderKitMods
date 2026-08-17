@@ -25,22 +25,20 @@ namespace DaftAppleGames.MoreAquariums
         private static readonly Harmony Harmony = new Harmony(MyGuid);
 #if !UNITY_EDITOR
         internal static readonly ModConfigFile ConfigFile = OptionsPanelHandler.RegisterModOptions<ModConfigFile>();
+        internal static ModLog ModDebugLog;
 #else
         internal static readonly ModConfigFile ConfigFile;
+        internal static ModLog ModDebugLog = new ModLog(null, true);
 #endif
-        internal static ModLog ModDebugLog;
 
         private void Awake()
         {
             // Set up logging and asset bundle
-#if UNITY_EDITOR
-            ModDebugLog =  new ModLog(Logger, true);
-#else
             ModDebugLog =  new ModLog(Logger, ConfigFile.DetailedLogging);            
             ModAssetUtils = new ModAssetBundleUtils(AssetBundleName, Assembly.GetExecutingAssembly(),true, ModDebugLog);
             // Register custom sounds
             RegisterCustomSounds();
-#endif
+
             // Register our prefabs
             DoubleAquariumPrefab.Register();
             CornerAquariumPrefab.Register();
@@ -60,6 +58,13 @@ namespace DaftAppleGames.MoreAquariums
             ModDebugLog.LogDebug("Registering FMOD asset...");
             ModAudioUtils.RegisterSound(BubblesAudioClipName, AudioUtils.BusPaths.PlayerSFXs, ModAssetUtils, ModDebugLog, 1.0f, 10.0f, 0, true);
             BubblesFMODAsset = AudioUtils.GetFmodAsset(BubblesAudioClipName);
+            if (!BubblesFMODAsset)
+            {
+                ModDebugLog.LogError(
+                    $"Could not retrieve registered FMOD asset '{BubblesAudioClipName}'.");
+                return;
+            }
+
             ModDebugLog.LogDebug($"Registered FMOD Asset: {BubblesFMODAsset.name}");
         }
     }

@@ -19619,6 +19619,7 @@ MonoBehaviour:
   fishSettings: {fileID: 11400000, guid: c88806ab8db3ca94ea92c98cd8dabeb9, type: 2}
   movementColliders:
   - {fileID: 952433094}
+  fishList: []
 --- !u!4 &1163825637
 Transform:
   m_ObjectHideFlags: 0
@@ -19978,6 +19979,7 @@ MonoBehaviour:
   fishSettings: {fileID: 11400000, guid: c88806ab8db3ca94ea92c98cd8dabeb9, type: 2}
   movementColliders:
   - {fileID: 287695703}
+  fishList: []
 --- !u!114 &1241506573
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19992,7 +19994,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   storageHeight: 0
   storageWidth: 0
-  recipe: {fileID: 0}
   useCustomMovement: 0
   allowConstructionOnConstructables: 0
   waveScale: 0
@@ -20020,6 +20021,7 @@ MonoBehaviour:
   newAttachObjects: []
   fishSettings: {fileID: 0}
   movementColliderObjects: []
+  cullingFrameInterval: 10
 --- !u!4 &1241506574
 Transform:
   m_ObjectHideFlags: 0
@@ -29901,6 +29903,7 @@ MonoBehaviour:
   movementColliders:
   - {fileID: 90240319}
   - {fileID: 1630404226}
+  fishList: []
 --- !u!114 &1797840484
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29915,7 +29918,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   storageHeight: 0
   storageWidth: 0
-  recipe: {fileID: 0}
   useCustomMovement: 0
   allowConstructionOnConstructables: 0
   waveScale: 0
@@ -29943,6 +29945,7 @@ MonoBehaviour:
   newAttachObjects: []
   fishSettings: {fileID: 0}
   movementColliderObjects: []
+  cullingFrameInterval: 10
 --- !u!1001 &1798286442
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -38714,67 +38717,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4db648c0b9094e541994e488513cc8e7, type: 3}
---- !u!23 &139641524459807658 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 7399097074396075220, guid: 4db648c0b9094e541994e488513cc8e7,
-    type: 3}
-  m_PrefabInstance: {fileID: 139641524459807657}
-  m_PrefabAsset: {fileID: 0}
---- !u!23 &139641524459807659 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 7895781908437560730, guid: 4db648c0b9094e541994e488513cc8e7,
-    type: 3}
-  m_PrefabInstance: {fileID: 139641524459807657}
-  m_PrefabAsset: {fileID: 0}
---- !u!23 &139641524459807660 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 2834120667586290687, guid: 4db648c0b9094e541994e488513cc8e7,
-    type: 3}
-  m_PrefabInstance: {fileID: 139641524459807657}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &139641524459807661 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8819208004853766676, guid: 4db648c0b9094e541994e488513cc8e7,
-    type: 3}
-  m_PrefabInstance: {fileID: 139641524459807657}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &139641524459807662
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 139641524459807661}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1536540201, guid: 06dd3d5416bf43ea368cc39ff96e6d5a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  anchorSky: 4
-  customSkyPrefab: {fileID: 0}
-  dynamic: 0
-  emissiveFromPower: 0
-  renderers:
-  - {fileID: 139641524459807658}
---- !u!114 &139641524459807663
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 139641524459807661}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1536540201, guid: 06dd3d5416bf43ea368cc39ff96e6d5a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  anchorSky: 0
-  customSkyPrefab: {fileID: 0}
-  dynamic: 0
-  emissiveFromPower: 0
-  renderers:
-  - {fileID: 139641524459807660}
-  - {fileID: 139641524459807659}
 --- !u!33 &143470169453382098
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -58099,6 +58041,7 @@ MonoBehaviour:
   fishSettings: {fileID: 11400000, guid: c88806ab8db3ca94ea92c98cd8dabeb9, type: 2}
   movementColliders:
   - {fileID: 2218585716267829639}
+  fishList: []
 --- !u!1 &3435690942804987142
 GameObject:
   m_ObjectHideFlags: 0
@@ -58379,6 +58322,7 @@ MonoBehaviour:
   - {fileID: 2770931830260068045}
   - {fileID: 8564825477996535647}
   - {fileID: 380442591}
+  fishList: []
 --- !u!1 &3595382124863786576
 GameObject:
   m_ObjectHideFlags: 0
@@ -59434,7 +59378,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   storageHeight: 0
   storageWidth: 0
-  recipe: {fileID: 0}
   useCustomMovement: 0
   allowConstructionOnConstructables: 0
   waveScale: 0
@@ -59505,6 +59448,7 @@ MonoBehaviour:
   - {fileID: 7694562488501670995}
   fishSettings: {fileID: 0}
   movementColliderObjects: []
+  cullingFrameInterval: 10
 --- !u!4 &4131096648316855766
 Transform:
   m_ObjectHideFlags: 0
@@ -62811,7 +62755,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   storageHeight: 0
   storageWidth: 0
-  recipe: {fileID: 0}
   useCustomMovement: 0
   allowConstructionOnConstructables: 0
   waveScale: 0
@@ -62883,6 +62826,7 @@ MonoBehaviour:
   fishSettings: {fileID: 0}
   movementColliderObjects:
   - {fileID: 3754173759178903420}
+  cullingFrameInterval: 10
 --- !u!1 &5847012821085001902
 GameObject:
   m_ObjectHideFlags: 0
@@ -70846,7 +70790,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   storageHeight: 0
   storageWidth: 0
-  recipe: {fileID: 0}
   useCustomMovement: 0
   allowConstructionOnConstructables: 0
   waveScale: 0
@@ -70919,6 +70862,7 @@ MonoBehaviour:
   movementColliderObjects:
   - {fileID: 61334623689734344}
   - {fileID: 1654963024472999854}
+  cullingFrameInterval: 10
 --- !u!33 &9170899733721864961
 MeshFilter:
   m_ObjectHideFlags: 0

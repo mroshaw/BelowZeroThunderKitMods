@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using static DaftAppleGames.MoreAquariums.MoreAquariumsPlugin;
+﻿using UnityEngine;
 
 namespace DaftAppleGames.MoreAquariums
 {
@@ -12,7 +10,6 @@ namespace DaftAppleGames.MoreAquariums
         [SerializeField] internal float randomSpeedModifier = 0.1f;
         [SerializeField] internal float turnSpeed = 3.0f;
         [SerializeField] internal float arrivalDistance = 0.2f;
-        [SerializeField] internal bool stopRoll;
         [SerializeField] internal bool limitPitch = true;
         [SerializeField] internal float pitchScaling = 60.0f;
         [SerializeField] internal float minPitch = -45.0f;
@@ -44,5 +41,6 @@ namespace DaftAppleGames.MoreAquariums
         [Header("Culling")]
         [SerializeField] internal bool culling = true;
         [SerializeField] internal float cullingDistanceFromPlayer = 20.0f;
+        [SerializeField] internal int cullingFrameInterval = 10;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Nautilus.Assets;
 using Nautilus.Crafting;
 using UnityEngine;
 using static DaftAppleGames.MoreAquariums.MoreAquariumsPlugin;
@@ -10,6 +11,8 @@ namespace DaftAppleGames.MoreAquariums
     /// </summary>
     public class DeskAquariumPrefab : AquariumPrefab
     {
+        public static PrefabInfo PrefabInfo { get; private set; }
+
         /// Properties of the aquarium
         private const string ClassId = "DeskAquarium";
         private const string DisplayName = "Desk Aquarium";
@@ -23,14 +26,14 @@ namespace DaftAppleGames.MoreAquariums
             new Ingredient(TechType.Glass, 1));
             
         // Register the prefab
-        public static void Register() => RegisterInternal(ClassId, DisplayName, Description, IconAssetName, PrefabAssetName, Recipe, ResizeBubbleParticles);
+        public static void Register() => PrefabInfo = RegisterInternal(ClassId, DisplayName, Description, IconAssetName, PrefabAssetName, Recipe, ResizeBubbleParticles);
         
         /// <summary>
         /// Perform aquarium type specific post configuration of the new prefab
         /// </summary>
         private static void ResizeBubbleParticles(GameObject newPrefabGo)
         {
-            ModDebugLog.LogError("Running PostConfigAction for DeskAquarium...");
+            ModDebugLog.LogDebug("Running PostConfigAction for DeskAquarium...");
             Transform mainBubblesTransform = newPrefabGo.transform.Find("Bubbles/xBubbles");
             if (!mainBubblesTransform)
             {

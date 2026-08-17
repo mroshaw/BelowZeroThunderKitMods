@@ -1337,8 +1337,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 89515520166003587}
+  m_Children: []
   m_Father: {fileID: 241501259293297278}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1678,8 +1677,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 8355259827656891785}
+  m_Children: []
   m_Father: {fileID: 241501260391756238}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2085,7 +2083,6 @@ GameObject:
   m_Component:
   - component: {fileID: 241501260581000165}
   - component: {fileID: 241501260581000167}
-  - component: {fileID: 241501260581000166}
   m_Layer: 0
   m_Name: DeskAquariumPrefab
   m_TagString: Untagged
@@ -2130,7 +2127,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   storageHeight: 1
   storageWidth: 2
-  recipe: {fileID: 11400000, guid: e3574bb41dd6a1a43af7320932bb1ae2, type: 2}
   useCustomMovement: 1
   allowConstructionOnConstructables: 1
   waveScale: 0.9
@@ -2158,6 +2154,8 @@ MonoBehaviour:
   newCoralTransforms: []
   rocksObject: {fileID: 0}
   colliderObject: {fileID: 241501259644603087}
+  newNonGlassGameObjects: []
+  newGlassGameObjects: []
   constructableBoundsObject: {fileID: 6097142514611223049}
   animator1: {fileID: 241501258695018844}
   animator2: {fileID: 241501260791035067}
@@ -2172,21 +2170,6 @@ MonoBehaviour:
   fishSettings: {fileID: 11400000, guid: 1ecce7df1d0cb7848bb7e84f792d1dd1, type: 2}
   movementColliderObjects:
   - {fileID: 241501260273444273}
---- !u!114 &241501260581000166
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 241501260581000164}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 89101f5ecc2429540b6aa0b4baeb13fd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  fishSettings: {fileID: 11400000, guid: 1ecce7df1d0cb7848bb7e84f792d1dd1, type: 2}
-  movementColliders:
-  - {fileID: 241501260273444275}
 --- !u!1 &241501260600673383
 GameObject:
   m_ObjectHideFlags: 0
@@ -12656,6 +12639,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: Test Fish
       objectReference: {fileID: 0}
+    - target: {fileID: 9201709333523695737, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
+        type: 3}
+      propertyPath: fishSettings
+      value: 
+      objectReference: {fileID: 11400000, guid: 1ecce7df1d0cb7848bb7e84f792d1dd1,
+        type: 2}
+    - target: {fileID: 9201709333523695737, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
+        type: 3}
+      propertyPath: movementColliders.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9201709333523695737, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
+        type: 3}
+      propertyPath: movementColliders.Array.data[0]
+      value: 
+      objectReference: {fileID: 241501260273444275}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b, type: 3}
 --- !u!4 &2596612961531527867 stripped
@@ -12731,6 +12730,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: Test Fish
       objectReference: {fileID: 0}
+    - target: {fileID: 9201709333523695737, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
+        type: 3}
+      propertyPath: fishSettings
+      value: 
+      objectReference: {fileID: 11400000, guid: 1ecce7df1d0cb7848bb7e84f792d1dd1,
+        type: 2}
+    - target: {fileID: 9201709333523695737, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
+        type: 3}
+      propertyPath: movementColliders.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9201709333523695737, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
+        type: 3}
+      propertyPath: movementColliders.Array.data[0]
+      value: 
+      objectReference: {fileID: 241501260273444275}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b, type: 3}
 --- !u!4 &54349933352196092 stripped
@@ -12738,154 +12753,4 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
     type: 3}
   m_PrefabInstance: {fileID: 3333121414419276017}
-  m_PrefabAsset: {fileID: 0}
---- !u!1001 &3440384362637587598
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 241501259844352420}
-    m_Modifications:
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601230, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_Name
-      value: Test Fish
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b, type: 3}
---- !u!4 &89515520166003587 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-    type: 3}
-  m_PrefabInstance: {fileID: 3440384362637587598}
-  m_PrefabAsset: {fileID: 0}
---- !u!1001 &6733847046813903492
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 241501260150097444}
-    m_Modifications:
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3350879048794601230, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-        type: 3}
-      propertyPath: m_Name
-      value: Test Fish
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b, type: 3}
---- !u!4 &8355259827656891785 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 3350879048794601229, guid: eb6a0f7a27bbd1a42a56a3d56f8dc46b,
-    type: 3}
-  m_PrefabInstance: {fileID: 6733847046813903492}
   m_PrefabAsset: {fileID: 0}

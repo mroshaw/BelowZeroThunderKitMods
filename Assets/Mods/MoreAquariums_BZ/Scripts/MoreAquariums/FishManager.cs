@@ -8,13 +8,13 @@ namespace DaftAppleGames.MoreAquariums
     {
         [SerializeField] private FishSettings fishSettings;
         [SerializeField] private List<Collider> movementColliders;
-
-        internal FishSettings FishSettings => fishSettings;
-        internal List<Collider> MovementColliders => movementColliders;
-        internal List<AquariumFishExt> ActiveFishList => _activeFishList;
+        [SerializeField] private List<AquariumFishExt> fishList = new List<AquariumFishExt>();
         
-        private readonly List<AquariumFishExt> _fishList = new List<AquariumFishExt>();
-        private readonly List<AquariumFishExt> _activeFishList = new List<AquariumFishExt>();
+        internal List<AquariumFishExt> FishList => fishList;
+        
+        private int cullingFrameOffset;
+        private int cullingFrameInterval;
+        
         private bool _isCulled;
         
         /// <summary>
@@ -22,13 +22,9 @@ namespace DaftAppleGames.MoreAquariums
         /// </summary>
         private void Awake()
         {
-            ModDebugLog.LogDebug("FishManager is refreshing attached fish...");
-            // Refresh attached fish
-            foreach (AquariumFishExt fish in GetComponentsInChildren<AquariumFishExt>(true))
-            {
-                ModDebugLog.LogDebug($"Updating {fish.name}...");
-                fish.SetFishManager(this);
-            }
+            // Derives a small, varied offset for each Fish Manager
+            // to avoid all managers checking culling in the same frame
+            cullingFrameOffset = (GetInstanceID() & int.MaxValue) % cullingFrameInterval;
         }
 
         /// <summary>
@@ -37,6 +33,7 @@ namespace DaftAppleGames.MoreAquariums
         internal void SetFishSettings(FishSettings newFishSettings)
         {
             fishSettings = newFishSettings;
+            cullingFrameInterval = Mathf.Max(1, fishSettings.cullingFrameInterval);
         }
 
         /// <summary>
@@ -48,40 +45,66 @@ namespace DaftAppleGames.MoreAquariums
         }
         
         /// <summary>
-        /// Add a new fish to the manager
+        /// Adds procedural movement to an occupied aquarium track.
         /// </summary>
-        /// <param name="newFishExt"></param>
-        internal void AddActiveFish(AquariumFishExt newFishExt)
+        internal void AddFish(Aquarium.FishTrack fishTrack)
         {
-            if (!_fishList.Contains(newFishExt))
+            if (fishTrack == null || !fishTrack.track || !fishTrack.track.transform.parent)
             {
-                _fishList.Add(newFishExt);
+                ModDebugLog.LogError(
+                    "Cannot add custom fish movement because the fish track is invalid.");
+                return;
             }
 
-            if (!_activeFishList.Contains(newFishExt))
+            GameObject trackObject = fishTrack.track.transform.parent.gameObject;
+            AquariumFishExt fishMovement = trackObject.GetComponent<AquariumFishExt>();
+            if (!fishMovement)
             {
-                _activeFishList.Add(newFishExt);
+                fishMovement = trackObject.AddComponent<AquariumFishExt>();
+                fishMovement.Initialize(this, fishSettings, movementColliders);
+                fishList.Add(fishMovement);
             }
-            
+            else if (!fishList.Contains(fishMovement))
+            {
+                fishMovement.Initialize(this, fishSettings, movementColliders);
+                fishList.Add(fishMovement);
+            }
+
+            fishMovement.ActivateMovement();
+
+            if (_isCulled)
+            {
+                trackObject.SetActive(false);
+            }
         }
 
         /// <summary>
-        /// Remove a fish from the manager
+        /// Disables procedural movement on a vacated aquarium track.
         /// </summary>
-        internal void RemoveActiveFish(AquariumFishExt fishExtToRemove)
+        internal void RemoveFish(Aquarium.FishTrack fishTrack)
         {
-            if (_fishList.Contains(fishExtToRemove))
+            if (fishTrack == null || !fishTrack.track || !fishTrack.track.transform.parent)
             {
-                _activeFishList.Remove(fishExtToRemove);
+                return;
+            }
+
+            AquariumFishExt fishMovement =
+                fishTrack.track.transform.parent.GetComponent<AquariumFishExt>();
+            if (fishMovement)
+            {
+                fishMovement.DeactivateMovement();
             }
         }
-
+        
         /// <summary>
         /// Cull / enable fish based on player distance to avoid unnecessary overhead
         /// </summary>
         private void Update()
         {
-            if (!fishSettings.culling)
+            if (!fishSettings ||
+                !fishSettings.culling ||
+                !Player.main ||
+                (Time.frameCount + cullingFrameOffset) % cullingFrameInterval != 0)
             {
                 return;
             }
@@ -107,9 +130,12 @@ namespace DaftAppleGames.MoreAquariums
         /// </summary>
         private void SetFishActiveState(bool state)
         {
-            foreach (AquariumFishExt fish in _fishList)
+            foreach (AquariumFishExt fish in fishList)
             {
-                fish.gameObject.SetActive(state);
+                if (fish)
+                {
+                    fish.gameObject.SetActive(state);
+                }
             }
         }
     }

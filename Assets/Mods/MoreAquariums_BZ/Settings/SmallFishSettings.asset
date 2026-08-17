@@ -16,7 +16,6 @@ MonoBehaviour:
   randomSpeedModifier: 0.01
   turnSpeed: 1.3
   arrivalDistance: 0.015
-  stopRoll: 0
   limitPitch: 1
   pitchScaling: 30
   minPitch: -15
@@ -37,4 +36,5 @@ MonoBehaviour:
   boundaryMargin: 0.005
   boundarySteerStrength: 0.5
   culling: 1
-  cullingDistanceFromPlayer: 25
+  cullingDistanceFromPlayer: 15
+  cullingFrameInterval: 10

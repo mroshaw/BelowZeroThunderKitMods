@@ -68,6 +68,45 @@ The project contains multiple "mods" for the Subnautica: Below Zero game. The pr
 - **Folder structure**: follow the official Unity guidelines in their "[Organising your project](https://unity.com/how-to/organizing-your-project)" pages.
 - **Editor inspector**: use Odin Inspector attributes for editor inspector facing serialised class properties.
 
+Harmony Patch Conventions
+
+All patch classes should live in `Scripts\Patches`
+
+Harmony patches should have a patch class for each game class patched, named for the class followed by "Patches".
+
+For example: `AquariumPatches` contain all patched methods for the `Aquarium` class.
+
+Patch methods should follow this structure:
+
+```c#
+/// <summary>
+/// Description of patch, including reason for patching and desired outcome
+/// </summary>
+[HarmonyPatch(nameof(<Class>.<Method>))]
+<[HarmonyPostfix]/[HarmonyPrefix]>
+private static void <Method>_<Postfix/Prefix>(<Class> __instance, <Params>)
+```
+
+For example, `AquariumPatches.cs`:
+
+```c#
+/// <summary>
+/// Patches for the Aquarium class. 
+/// </summary>
+[HarmonyPatch(typeof(Aquarium))]
+internal class AquariumPatches
+{
+    /// <summary>
+    /// Adds a bubble Custom Emitter to the vanilla Aquarium if selected in mod config 
+    /// </summary>
+    [HarmonyPatch(nameof(Aquarium.Start))]
+    [HarmonyPostfix]
+    private static void Start_Postfix(Aquarium __instance)
+    {
+    }
+}
+```
+
 ## Project Structure
 
 The project structure is as below. Each "mod" has it's own subfolder in "Mods". The "GameFiles~" folder, invisible to the Unity editor due to the tilda extension, is a full export of the Subnautica game files, created using "Asset Ripper". Files within this folder should be considered "read only", and are for reference only, or for use in generating code and assets that reference "vanilla" game entities:

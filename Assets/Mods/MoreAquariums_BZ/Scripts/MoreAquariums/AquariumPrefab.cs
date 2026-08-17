@@ -11,28 +11,15 @@ namespace DaftAppleGames.MoreAquariums
     public abstract class AquariumPrefab
     {
         // Aquarium prefab properties
-        internal struct PrefabData
-        {
-            public string ClassId;
-            public string DisplayName;
-            public string Description;
-            public string IconAssetName;
-            public string PrefabAssetName;
-            public RecipeData Recipe;
-            
-            public Action<GameObject> PostConfigAction;
-        }
-
-        public static PrefabInfo Info;
         private const TechType CloneTechType = TechType.Aquarium;
         
-        internal static void RegisterInternal(string classId, string displayName, string description,
+        internal static PrefabInfo RegisterInternal(string classId, string displayName, string description,
             string iconAssetName, string prefabAssetName, RecipeData recipeData, Action<GameObject> postConfigAction = null)
         {
-            Info = PrefabInfo
+            PrefabInfo info = PrefabInfo
                 .WithTechType(classId, displayName, description, unlockAtStart: true)
                 .WithIcon(ModAssetUtils.GetObjectFromAssetBundle<Sprite>(iconAssetName) as Sprite);
-            CustomPrefab aquariumPrefab = new CustomPrefab(Info);
+            CustomPrefab aquariumPrefab = new CustomPrefab(info);
             
             // Clone the existing Aquarium
             PrefabTemplate aquariumTemplate = new CloneTemplate(aquariumPrefab.Info, CloneTechType)
@@ -48,6 +35,8 @@ namespace DaftAppleGames.MoreAquariums
                 .WithPdaGroupCategory(TechGroup.InteriorModules, TechCategory.InteriorModule);
             aquariumPrefab.Register();
             ModDebugLog.LogDebug($"{displayName} registered successfully!");
+
+            return info;
         }
 
         /// <summary>
@@ -56,12 +45,35 @@ namespace DaftAppleGames.MoreAquariums
         private static void ConfigurePrefab(GameObject prefabGameObject, string prefabAssetName, Action<GameObject> postConfigAction = null)
         {
             // Get new model from the asset bundle
-            GameObject newModelInstance =
+            GameObject configurationInstance =
                 ModAssetUtils.GetPrefabInstanceFromAssetBundle(prefabAssetName, false);
-            
-            // Call the helper to replace and reconfigure the prefab
-            AquariumConfigurator configurator = newModelInstance.GetComponent<AquariumConfigurator>();
-            configurator.ConfigureAquariumPrefab(prefabGameObject, postConfigAction);
+
+            if (!configurationInstance)
+            {
+                ModDebugLog.LogError(
+                    $"Could not load Aquarium configuration prefab '{prefabAssetName}'.");
+                return;
+            }
+
+            try
+            {
+                // Call the helper to replace and reconfigure the prefab.
+                AquariumConfigurator configurator =
+                    configurationInstance.GetComponent<AquariumConfigurator>();
+                if (!configurator)
+                {
+                    ModDebugLog.LogError(
+                        $"Aquarium configuration prefab '{prefabAssetName}' has no " +
+                        $"AquariumConfigurator component.");
+                    return;
+                }
+
+                configurator.ConfigureAquariumPrefab(prefabGameObject, postConfigAction);
+            }
+            finally
+            {
+                UnityEngine.Object.Destroy(configurationInstance);
+            }
         }
     }
 }

@@ -18,6 +18,7 @@ namespace DaftAppleGames.MoreAquariums
         [Header("Debug")]
         [SerializeField]  private Vector3 currentDirection;
         [SerializeField]  private float currentSpeed;
+        [SerializeField] private float normalSpeed;
         [SerializeField]  private Vector3 targetPosition =  Vector3.zero;
         [SerializeField] private Vector3 directionToTargetRaw;
         [SerializeField] private Vector3 directionToTargetModified;
@@ -28,55 +29,43 @@ namespace DaftAppleGames.MoreAquariums
         [SerializeField]  private bool atInitialisePosition;
         
         private float _noiseOffsetX, _noiseOffsetY, _noiseOffsetZ;
-
-        private bool _fishManagerSet;
         
         /// <summary>
-        /// Register with the FishManager
+        /// Initializes this procedural movement component.
         /// </summary>
-        private void OnEnable()
+        internal void Initialize(FishManager newFishManager, FishSettings newFishSettings,
+            List<Collider> newMovementColliders)
         {
-            if (fishManager)
+            if (!newFishManager || !newFishSettings || newMovementColliders == null ||
+                newMovementColliders.Count == 0)
             {
-                fishManager.AddActiveFish(this);
+                ModDebugLog.LogError("Cannot initialize fish movement with invalid settings.");
+                DisableOnError();
+                return;
             }
+
+            fishManager = newFishManager;
+            fishSettings = newFishSettings;
+            movementColliders = newMovementColliders;
+            enabled = false;
         }
 
         /// <summary>
-        /// Unregister if disabled. Won't be considered for fish/fish collision detection
+        /// Activates and resets procedural movement for an occupied track.
         /// </summary>
-        private void OnDisable()
+        internal void ActivateMovement()
         {
-            if (fishManager)
+            if (!fishManager || !fishSettings || movementColliders == null ||
+                movementColliders.Count == 0)
             {
-                fishManager.RemoveActiveFish(this);
-            }
-        }
-        
-        /// <summary>
-        /// Set the initial position and pick a target
-        /// </summary>
-        private void Start()
-        {
-            if (!fishManager)
-            {
+                ModDebugLog.LogError("Cannot activate fish movement before it is initialized.");
+                DisableOnError();
                 return;
             }
-            
-            if (!fishSettings)
-            {
-                ModDebugLog.LogError("Fish has no fish settings!");
-                return;
-            }
-            
-            if (movementColliders == null || movementColliders.Count == 0)
-            {
-                ModDebugLog.LogError("Fish has no movement colliders!");
-                return;
-            }
-           
+
             currentDirection = Random.onUnitSphere;
-            currentSpeed = fishSettings.baseSpeed + (Random.Range(0, fishSettings.randomSpeedModifier));
+            normalSpeed = fishSettings.baseSpeed + Random.Range(0f, fishSettings.randomSpeedModifier);
+            currentSpeed = normalSpeed;
 
             _noiseOffsetX = Random.value * 100f;
             _noiseOffsetY = Random.value * 100f;
@@ -84,8 +73,28 @@ namespace DaftAppleGames.MoreAquariums
             
             PickNewTarget();
             ScheduleNextDart();
+            enabled = true;
         }
 
+        /// <summary>
+        /// Disables procedural movement for an empty track.
+        /// </summary>
+        internal void DeactivateMovement()
+        {
+            enabled = false;
+        }
+
+        /// <summary>
+        /// Disables the component, used when there is an initialisation failure
+        /// </summary>
+        private void DisableOnError()
+        {
+            fishManager = null;
+            fishSettings = null;
+            movementColliders = null;
+            enabled = false;
+        }
+        
         /// <summary>
         /// Handle movement and collision detection every frame
         /// </summary>
@@ -159,24 +168,6 @@ namespace DaftAppleGames.MoreAquariums
             {
                 PickNewTarget();
             }
-        }
-        
-        /// <summary>
-        /// Public setter for Fish Manager
-        /// </summary>
-        public void SetFishManager(FishManager newFishManager)
-        {
-            if (!newFishManager)
-            {
-                ModDebugLog.LogError("SetFishManager: newFishManager is null!");
-            }
-            
-            ModDebugLog.LogDebug($"Setting fish manager on {gameObject.name}...");
-            fishManager = newFishManager;
-            fishSettings = newFishManager.FishSettings;
-            movementColliders = newFishManager.MovementColliders;
-            _fishManagerSet = true;
-            ModDebugLog.LogDebug($"Fish manager set to {newFishManager}");
         }
         
         private void PickNewTarget()
@@ -330,15 +321,22 @@ namespace DaftAppleGames.MoreAquariums
             if (col is BoxCollider box)
             {
                 Vector3 localPos = box.transform.InverseTransformPoint(transform.position);
+                Vector3 offsetFromCenter = localPos - box.center;
                 Vector3 halfSize = box.size * 0.5f;
                 Vector3 steer = Vector3.zero;
 
-                if (Mathf.Abs(localPos.x) > halfSize.x - fishSettings.boundaryMargin)
-                    steer.x = -Mathf.Sign(localPos.x);
-                if (Mathf.Abs(localPos.y) > halfSize.y - fishSettings.boundaryMargin)
-                    steer.y = -Mathf.Sign(localPos.y);
-                if (Mathf.Abs(localPos.z) > halfSize.z - fishSettings.boundaryMargin)
-                    steer.z = -Mathf.Sign(localPos.z);
+                if (Mathf.Abs(offsetFromCenter.x) > halfSize.x - fishSettings.boundaryMargin)
+                {
+                    steer.x = -Mathf.Sign(offsetFromCenter.x);
+                }
+                if (Mathf.Abs(offsetFromCenter.y) > halfSize.y - fishSettings.boundaryMargin)
+                {
+                    steer.y = -Mathf.Sign(offsetFromCenter.y);
+                }
+                if (Mathf.Abs(offsetFromCenter.z) > halfSize.z - fishSettings.boundaryMargin)
+                {
+                    steer.z = -Mathf.Sign(offsetFromCenter.z);
+                }
 
                 return box.transform.TransformDirection(steer);
             }
@@ -379,14 +377,19 @@ namespace DaftAppleGames.MoreAquariums
             
             int count = 0;
 
-            foreach (AquariumFishExt fish in fishManager.ActiveFishList)
+            foreach (AquariumFishExt fish in fishManager.FishList)
             {
-                // Don't avoid self
-                if (fish == this)
+                // Don't avoid self or disabled fish
+                if (!fish || fish == this || !fish.enabled || !fish.gameObject.activeInHierarchy)
                 {
                     continue;
                 }
                 float dist = Vector3.Distance(transform.position, fish.transform.position);
+                if (dist <= 0.0001f)
+                {
+                    continue;
+                }
+
                 if (dist < fishSettings.avoidanceRadius)
                 {
                     avoidance += (transform.position - fish.transform.position).normalized / dist;
@@ -403,94 +406,6 @@ namespace DaftAppleGames.MoreAquariums
         }
 
         /// <summary>
-        /// Returns a direction Vector away from the boundary
-        /// </summary>
-        private Vector3 GetBoundsDirection(Collider boundsCollider)
-        {
-            if (boundsCollider is BoxCollider box)
-            {
-                Vector3 localPos = box.transform.InverseTransformPoint(transform.position);
-                Vector3 halfSize = box.size * 0.5f;
-                Vector3 steer = Vector3.zero;
-
-                // Gradually steer back when approaching walls
-                if (Mathf.Abs(localPos.x) > halfSize.x - fishSettings.boundaryMargin)
-                    steer.x = -Mathf.Sign(localPos.x);
-                if (Mathf.Abs(localPos.y) > halfSize.y - fishSettings.boundaryMargin)
-                    steer.y = -Mathf.Sign(localPos.y);
-                if (Mathf.Abs(localPos.z) > halfSize.z - fishSettings.boundaryMargin)
-                    steer.z = -Mathf.Sign(localPos.z);
-
-                return box.transform.TransformDirection(steer.normalized * fishSettings.boundarySteerStrength);
-            }
-
-            if (boundsCollider is SphereCollider sphere)
-            {
-                Vector3 center = sphere.transform.TransformPoint(sphere.center);
-                float radius = sphere.radius * Mathf.Max(
-                    sphere.transform.lossyScale.x,
-                    sphere.transform.lossyScale.y,
-                    sphere.transform.lossyScale.z
-                );
-
-                Vector3 toCenter = center - transform.position;
-                float dist = toCenter.magnitude;
-                if (dist > radius - fishSettings.boundaryMargin)
-                {
-                    float strength = Mathf.InverseLerp(radius, radius - fishSettings.boundaryMargin, dist);
-                    return toCenter.normalized * (strength * fishSettings.boundarySteerStrength);
-                }
-            }
-
-            return Vector3.zero;
-        }
-
-        /*
-        
-        /// <summary>
-        /// Returns a clamped position on the collider bounds
-        /// </summary>
-        private Vector3 GetBoundaryClampPosition(Vector3 pos)
-        {
-            if (aquariumBounds is BoxCollider box)
-            {
-                // Convert to local collider space
-                Vector3 local = box.transform.InverseTransformPoint(pos);
-                Vector3 half = box.size * 0.5f;
-                Vector3 center = box.center;
-
-                // Clamp relative to collider's local center
-                local.x = Mathf.Clamp(local.x, center.x - half.x, center.x + half.x);
-                local.y = Mathf.Clamp(local.y, center.y - half.y, center.y + half.y);
-                local.z = Mathf.Clamp(local.z, center.z - half.z, center.z + half.z);
-
-                // Convert back to world space
-                return box.transform.TransformPoint(local);
-            }
-            else if (aquariumBounds is SphereCollider sphere)
-            {
-                Vector3 center = sphere.transform.TransformPoint(sphere.center);
-                float radius = sphere.radius * Mathf.Max(
-                    sphere.transform.lossyScale.x,
-                    sphere.transform.lossyScale.y,
-                    sphere.transform.lossyScale.z
-                );
-
-                Vector3 dir = pos - center;
-                float dist = dir.magnitude;
-
-                if (dist > radius)
-                    return center + dir.normalized * (radius - 0.01f);
-
-                return pos;
-            }
-
-            return pos;
-        }
-
-        */
-
-        /// <summary>
         /// Random darting behaviour
         /// </summary>
         private void HandleDarting()
@@ -503,13 +418,13 @@ namespace DaftAppleGames.MoreAquariums
             if (isDarting && Time.time > dartEndTime)
             {
                 isDarting = false;
-                currentSpeed = fishSettings.baseSpeed;
+                currentSpeed = normalSpeed;
                 ScheduleNextDart();
             }
             else if (!isDarting && Time.time > nextDartTime)
             {
                 isDarting = true;
-                currentSpeed = fishSettings.baseSpeed * fishSettings.dartSpeedMultiplier;
+                currentSpeed = normalSpeed * fishSettings.dartSpeedMultiplier;
                 dartEndTime = Time.time + fishSettings.dartDuration;
             }
         }
