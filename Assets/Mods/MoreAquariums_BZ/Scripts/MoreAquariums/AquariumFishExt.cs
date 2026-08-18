@@ -26,8 +26,6 @@ namespace DaftAppleGames.MoreAquariums
         [SerializeField]  private bool isDarting;
         [SerializeField]  private float dartEndTime;
         [SerializeField]  private float nextDartTime;
-        [SerializeField]  private bool atInitialisePosition;
-        
         private float _noiseOffsetX, _noiseOffsetY, _noiseOffsetZ;
         
         /// <summary>
@@ -181,13 +179,6 @@ namespace DaftAppleGames.MoreAquariums
 
                 if (IsPathContained(transform.position, candidate))
                 {
-                    if (!atInitialisePosition)
-                    {
-                        transform.position = candidate;
-                        atInitialisePosition = true;
-                        continue;
-                    }
-
                     targetPosition = candidate;
                     return;
                 }

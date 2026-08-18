@@ -58,13 +58,13 @@ namespace DaftAppleGames.MoreAquariums
             try
             {
                 // Call the helper to replace and reconfigure the prefab.
-                AquariumConfigurator configurator =
-                    configurationInstance.GetComponent<AquariumConfigurator>();
+                RoomAquariumConfigurator configurator =
+                    configurationInstance.GetComponent<RoomAquariumConfigurator>();
                 if (!configurator)
                 {
                     ModDebugLog.LogError(
                         $"Aquarium configuration prefab '{prefabAssetName}' has no " +
-                        $"AquariumConfigurator component.");
+                        $"RoomAquariumConfigurator component.");
                     return;
                 }
 
