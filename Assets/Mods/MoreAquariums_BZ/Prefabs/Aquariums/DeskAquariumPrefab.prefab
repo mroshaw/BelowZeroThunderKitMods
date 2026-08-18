@@ -2129,7 +2129,7 @@ MonoBehaviour:
   storageWidth: 2
   useCustomMovement: 1
   allowConstructionOnConstructables: 1
-  waveScale: 0.9
+  waveScale: 0.1
   replaceExistingModel: 0
   addBubbleAudio: 0
   aquariumMesh: {fileID: 6188589237992672409}
