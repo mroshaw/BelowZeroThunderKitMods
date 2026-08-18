@@ -56,8 +56,8 @@ MonoBehaviour:
     manifest: {fileID: 11400000, guid: 87fefca873535b841bb06e2482f7d0a4, type: 2}
     version:
       major: 1
-      minor: 3
-      patch: 1
+      minor: 5
+      patch: 0
     nexusMods:
       fileGroupId: 1459612
       gameScopedModId: 596

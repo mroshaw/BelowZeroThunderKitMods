@@ -243,7 +243,6 @@ MonoBehaviour:
   isDarting: 0
   dartEndTime: 0
   nextDartTime: 0
-  atInitialisePosition: 0
 --- !u!1 &4262433054886462002
 GameObject:
   m_ObjectHideFlags: 0
