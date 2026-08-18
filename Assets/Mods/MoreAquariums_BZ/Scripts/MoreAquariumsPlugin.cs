@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using BepInEx;
 using DaftAppleGames.ModTools;
 using HarmonyLib;
@@ -12,7 +12,7 @@ namespace DaftAppleGames.MoreAquariums
     {
         private const string MyGuid = "com.mroshaw.biggeraquariumsbz";
         private const string PluginName = "More Aquariums BZ";
-        private const string VersionString = "1.3.0";
+        private const string VersionString = "1.5.0";
 
         private const string AssetBundleName = "biggeraquariumsassetbundle";
         
@@ -36,6 +36,7 @@ namespace DaftAppleGames.MoreAquariums
             // Set up logging and asset bundle
             ModDebugLog =  new ModLog(Logger, ConfigFile.DetailedLogging);            
             ModAssetUtils = new ModAssetBundleUtils(AssetBundleName, Assembly.GetExecutingAssembly(),true, ModDebugLog);
+            BaseAquariumPersistence.Initialize();
             // Register custom sounds
             RegisterCustomSounds();
 
@@ -44,6 +45,7 @@ namespace DaftAppleGames.MoreAquariums
             CornerAquariumPrefab.Register();
             DeskAquariumPrefab.Register();
             SphericalAquariumPrefab.Register();
+            ObservatoryAquariumPrefab.Register();
             
             // Patch in our MOD
             Harmony.PatchAll();
