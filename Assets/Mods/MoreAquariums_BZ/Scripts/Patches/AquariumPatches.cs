@@ -11,6 +11,24 @@ namespace DaftAppleGames.MoreAquariums.Patches
     internal class AquariumPatches
     {
             /// <summary>
+            /// Defers activation while a dynamically created Aquarium is being configured.
+            /// </summary>
+            [HarmonyPatch(nameof(Aquarium.OnEnable))]
+            [HarmonyPrefix]
+            private static bool OnEnable_Prefix(Aquarium __instance)
+            {
+                if (__instance.storageContainer)
+                {
+                    return true;
+                }
+
+                ModDebugLog.LogDebug(
+                    $"Deferring Aquarium.OnEnable for '{__instance.name}' until its " +
+                    $"storage container has been assigned.");
+                return false;
+            }
+
+            /// <summary>
             /// Adds a bubble Custom Emitter to the vanilla Aquarium if selected in mod config 
             /// </summary>
             [HarmonyPatch(nameof(Aquarium.Start))]
