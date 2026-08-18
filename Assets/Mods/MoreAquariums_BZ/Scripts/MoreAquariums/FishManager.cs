@@ -13,7 +13,7 @@ namespace DaftAppleGames.MoreAquariums
         internal List<AquariumFishExt> FishList => fishList;
         
         private int cullingFrameOffset;
-        private int cullingFrameInterval;
+        private int cullingFrameInterval = 1;
         
         private bool _isCulled;
         
@@ -22,9 +22,7 @@ namespace DaftAppleGames.MoreAquariums
         /// </summary>
         private void Awake()
         {
-            // Derives a small, varied offset for each Fish Manager
-            // to avoid all managers checking culling in the same frame
-            cullingFrameOffset = (GetInstanceID() & int.MaxValue) % cullingFrameInterval;
+            UpdateCullingFrameOffset();
         }
 
         /// <summary>
@@ -33,7 +31,17 @@ namespace DaftAppleGames.MoreAquariums
         internal void SetFishSettings(FishSettings newFishSettings)
         {
             fishSettings = newFishSettings;
-            cullingFrameInterval = Mathf.Max(1, fishSettings.cullingFrameInterval);
+            cullingFrameInterval = fishSettings
+                ? Mathf.Max(1, fishSettings.cullingFrameInterval)
+                : 1;
+            UpdateCullingFrameOffset();
+        }
+
+        private void UpdateCullingFrameOffset()
+        {
+            // Derives a small, varied offset for each Fish Manager
+            // to avoid all managers checking culling in the same frame
+            cullingFrameOffset = (GetInstanceID() & int.MaxValue) % cullingFrameInterval;
         }
 
         /// <summary>
@@ -70,6 +78,10 @@ namespace DaftAppleGames.MoreAquariums
                 fishList.Add(fishMovement);
             }
 
+            ModDebugLog.LogDebug(
+                $"Activating fish movement on track '{trackObject.name}' at " +
+                $"local {trackObject.transform.localPosition:F3}, world " +
+                $"{trackObject.transform.position:F3}.");
             fishMovement.ActivateMovement();
 
             if (_isCulled)
