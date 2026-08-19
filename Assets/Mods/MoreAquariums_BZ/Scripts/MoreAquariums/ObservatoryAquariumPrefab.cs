@@ -15,7 +15,8 @@ namespace DaftAppleGames.MoreAquariums
             "A prototype aquarium base piece built from an Observatory.";
         private const string ConfigurationPrefabAssetName =
             "ObservatoryAquariumPrefab.prefab";
-
+        private const string IconAssetName = "ObservatoryAquariumIcon.png";
+        
         private static readonly RecipeData Recipe = new RecipeData(
             new Ingredient(TechType.Titanium, 2),
             new Ingredient(TechType.EnameledGlass, 2));
@@ -28,7 +29,7 @@ namespace DaftAppleGames.MoreAquariums
         public static void Register()
         {
             PrefabInfo = RegisterInternal(
-                ClassId, DisplayName, Description, Recipe);
+                ClassId, DisplayName, Description, IconAssetName, Recipe);
         }
 
         /// <summary>

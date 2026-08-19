@@ -18,11 +18,11 @@ namespace DaftAppleGames.MoreAquariums
         /// Registers an unchanged Observatory clone as a custom base piece.
         /// </summary>
         internal static PrefabInfo RegisterInternal(string classId, string displayName,
-            string description, RecipeData recipeData)
+            string description, string iconAssetName, RecipeData recipeData)
         {
             PrefabInfo info = PrefabInfo
                 .WithTechType(classId, displayName, description, unlockAtStart: true)
-                .WithIcon(SpriteManager.Get(CloneTechType));
+                .WithIcon(ModAssetUtils.GetObjectFromAssetBundle<Sprite>(iconAssetName) as Sprite);
             CustomPrefab baseAquariumPrefab = new CustomPrefab(info);
 
             CloneTemplate observatoryTemplate = new CloneTemplate(
