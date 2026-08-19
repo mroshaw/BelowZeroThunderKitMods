@@ -53,35 +53,6 @@ namespace DaftAppleGames.MoreAquariums.Patches
         }
 
         /// <summary>
-        /// Prevents an Observatory Aquarium from being deconstructed while it contains fish.
-        /// </summary>
-        [HarmonyPatch(nameof(BaseDeconstructable.DeconstructionAllowed))]
-        [HarmonyPrefix]
-        private static bool DeconstructionAllowed_Prefix(
-            BaseDeconstructable __instance, ref bool __result, ref string reason)
-        {
-            if (__instance.recipe != ObservatoryAquariumPrefab.PrefabInfo.TechType)
-            {
-                return true;
-            }
-
-            Aquarium aquarium = __instance.GetComponent<Aquarium>();
-            if (!aquarium || !aquarium.storageContainer ||
-                aquarium.storageContainer.container == null ||
-                aquarium.storageContainer.IsEmpty())
-            {
-                return true;
-            }
-
-            reason = Language.main.Get("DeconstructNonEmptyStorageContainerError");
-            __result = false;
-            ModDebugLog.LogDebug(
-                $"Prevented Observatory Aquarium deconstruction at " +
-                $"{__instance.transform.position} because it contains fish.");
-            return false;
-        }
-
-        /// <summary>
         /// Removes persisted aquarium identity when its generated base cell is deconstructed.
         /// </summary>
         [HarmonyPatch(nameof(BaseDeconstructable.Deconstruct))]

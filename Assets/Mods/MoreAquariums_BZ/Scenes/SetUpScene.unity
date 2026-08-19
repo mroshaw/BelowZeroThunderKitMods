@@ -14926,50 +14926,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 5.28, y: 1.37, z: 0.5}
   m_Center: {x: 0, y: 1.13, z: 0}
---- !u!1 &688275981
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 688275982}
-  - component: {fileID: 688275983}
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &688275982
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 688275981}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1579154895}
-  m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &688275983
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 688275981}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 2.73
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &692813106
 GameObject:
   m_ObjectHideFlags: 0
@@ -19737,6 +19693,7 @@ MonoBehaviour:
   fishSettings: {fileID: 11400000, guid: c88806ab8db3ca94ea92c98cd8dabeb9, type: 2}
   movementColliders:
   - {fileID: 952433094}
+  exclusionColliders: []
   fishList: []
 --- !u!4 &1163825637
 Transform:
@@ -20097,6 +20054,7 @@ MonoBehaviour:
   fishSettings: {fileID: 11400000, guid: c88806ab8db3ca94ea92c98cd8dabeb9, type: 2}
   movementColliders:
   - {fileID: 287695703}
+  exclusionColliders: []
   fishList: []
 --- !u!114 &1241506573
 MonoBehaviour:
@@ -20125,6 +20083,7 @@ MonoBehaviour:
   rocksObject: {fileID: 0}
   fishSettings: {fileID: 0}
   movementColliderObjects: []
+  exclusionColliderObjects: []
   existingTrackObjects: []
   existingAttachObjects: []
   newTrackObjects: []
@@ -24161,10 +24120,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1000955326284023, guid: 5be526ebb43f5414caad601bbf424be6, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 1709254077376921, guid: 5be526ebb43f5414caad601bbf424be6, type: 3}
       propertyPath: m_Name
       value: BaseObservatory
@@ -24179,15 +24134,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4043919389829319, guid: 5be526ebb43f5414caad601bbf424be6, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 6.9717875
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4043919389829319, guid: 5be526ebb43f5414caad601bbf424be6, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 6.11543
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4043919389829319, guid: 5be526ebb43f5414caad601bbf424be6, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -16.6053
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4043919389829319, guid: 5be526ebb43f5414caad601bbf424be6, type: 3}
       propertyPath: m_LocalRotation.w
@@ -24219,12 +24174,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5be526ebb43f5414caad601bbf424be6, type: 3}
---- !u!4 &1579154895 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4043919389829319, guid: 5be526ebb43f5414caad601bbf424be6,
-    type: 3}
-  m_PrefabInstance: {fileID: 1579154894}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1581726177
 GameObject:
   m_ObjectHideFlags: 0
@@ -30063,6 +30012,7 @@ MonoBehaviour:
   movementColliders:
   - {fileID: 90240319}
   - {fileID: 1630404226}
+  exclusionColliders: []
   fishList: []
 --- !u!114 &1797840484
 MonoBehaviour:
@@ -30091,6 +30041,7 @@ MonoBehaviour:
   rocksObject: {fileID: 0}
   fishSettings: {fileID: 0}
   movementColliderObjects: []
+  exclusionColliderObjects: []
   existingTrackObjects: []
   existingAttachObjects: []
   newTrackObjects: []
@@ -69557,6 +69508,7 @@ MonoBehaviour:
   fishSettings: {fileID: 11400000, guid: c88806ab8db3ca94ea92c98cd8dabeb9, type: 2}
   movementColliders:
   - {fileID: 2218585716267829639}
+  exclusionColliders: []
   fishList: []
 --- !u!1 &3435690942804987142
 GameObject:
@@ -69838,6 +69790,7 @@ MonoBehaviour:
   - {fileID: 2770931830260068045}
   - {fileID: 8564825477996535647}
   - {fileID: 380442591}
+  exclusionColliders: []
   fishList: []
 --- !u!1 &3595382124863786576
 GameObject:
@@ -70923,6 +70876,7 @@ MonoBehaviour:
   rocksObject: {fileID: 7694562487599991946}
   fishSettings: {fileID: 0}
   movementColliderObjects: []
+  exclusionColliderObjects: []
   existingTrackObjects:
   - {fileID: 170261185366299522}
   - {fileID: 4193648048553917929}
@@ -74046,6 +74000,7 @@ MonoBehaviour:
   fishSettings: {fileID: 0}
   movementColliderObjects:
   - {fileID: 3754173759178903420}
+  exclusionColliderObjects: []
   existingTrackObjects:
   - {fileID: 3875245333566733115}
   - {fileID: 8067709082837197199}
@@ -82081,6 +82036,7 @@ MonoBehaviour:
   movementColliderObjects:
   - {fileID: 61334623689734344}
   - {fileID: 1654963024472999854}
+  exclusionColliderObjects: []
   existingTrackObjects:
   - {fileID: 7150458896419160549}
   - {fileID: 5092699634970569073}

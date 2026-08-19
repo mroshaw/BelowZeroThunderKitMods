@@ -44,7 +44,7 @@ MonoBehaviour:
   Author: Daft Apple Games
   Name: BiggerAquariums_BZ
   Description: Adds several new aquariums to the builder
-  Version: 1.5.0
+  Version: 1.5.1
   Dependencies: []
 --- !u!114 &11400000
 MonoBehaviour:

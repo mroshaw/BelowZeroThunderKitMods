@@ -11,6 +11,8 @@ namespace DaftAppleGames.MoreAquariums
     public class BaseAquariumConfigurator : AquariumConfigurator
     {
         private const string FishTrackContainerName = "FishTracks";
+        private const string FloodVisualObjectName = "Flood_BaseObservatory";
+        private const string VanillaModelObjectName = "Room_Observatory";
         private const string StorageObjectName = "AquariumStorage";
         private const string StorageRootName = "StorageRoot";
         private const int AquariumCapacity = 20;
@@ -109,6 +111,7 @@ namespace DaftAppleGames.MoreAquariums
                 basePieceGameObject, interactionMarker, interactionBounds);
             runtimeModel = ConfigureModel(
                 basePieceGameObject, newAquariumModel.transform);
+            ConfigurePermanentWaterVisual(basePieceGameObject);
             instantiatedObjects =
                 new Dictionary<GameObject, GameObject>();
             instantiatedObjects.Add(newAquariumModel, runtimeModel);
@@ -175,11 +178,32 @@ namespace DaftAppleGames.MoreAquariums
         private static GameObject ConfigureModel(GameObject basePieceGameObject,
             Transform newModelMarker)
         {
+            Transform vanillaModelTransform =
+                basePieceGameObject.transform.Find(VanillaModelObjectName);
+            Transform floodVisualTransform =
+                basePieceGameObject.transform.Find(FloodVisualObjectName);
             Renderer[] existingRenderers =
                 basePieceGameObject.GetComponentsInChildren<Renderer>(true);
             foreach (Renderer existingRenderer in existingRenderers)
             {
+                if (floodVisualTransform &&
+                    existingRenderer.transform.IsChildOf(floodVisualTransform))
+                {
+                    continue;
+                }
+
                 existingRenderer.enabled = false;
+            }
+
+            if (vanillaModelTransform)
+            {
+                vanillaModelTransform.gameObject.SetActive(false);
+            }
+            else
+            {
+                ModDebugLog.LogError(
+                    $"Could not find vanilla model '{VanillaModelObjectName}' " +
+                    "on the Observatory Aquarium.");
             }
 
             GameObject newModel = Instantiate(newModelMarker.gameObject,
@@ -187,6 +211,23 @@ namespace DaftAppleGames.MoreAquariums
             newModel.name = newModelMarker.name;
             CopyLocalTransform(newModelMarker, newModel.transform);
             return newModel;
+        }
+
+        private static void ConfigurePermanentWaterVisual(
+            GameObject basePieceGameObject)
+        {
+            Transform floodVisualTransform =
+                basePieceGameObject.transform.Find(FloodVisualObjectName);
+            if (!floodVisualTransform)
+            {
+                ModDebugLog.LogError(
+                    $"Could not find '{FloodVisualObjectName}' on the Observatory Aquarium.");
+                return;
+            }
+
+            PermanentBaseWaterVisual waterVisual =
+                basePieceGameObject.AddComponent<PermanentBaseWaterVisual>();
+            waterVisual.Initialize(floodVisualTransform);
         }
 
         /// <summary>
@@ -222,6 +263,9 @@ namespace DaftAppleGames.MoreAquariums
             storageContainer.storageLabel = "Aquarium";
             storageContainer.storageRoot = storageRoot;
             storageContainer.preventDeconstructionIfNotEmpty = true;
+            StorageObstacle storageObstacle =
+                storageGameObject.AddComponent<StorageObstacle>();
+            storageObstacle.storageContainer = storageContainer;
             storageGameObject.SetActive(true);
             return storageContainer;
         }

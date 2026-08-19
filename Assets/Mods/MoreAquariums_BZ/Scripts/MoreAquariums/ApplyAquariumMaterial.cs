@@ -17,6 +17,10 @@ namespace DaftAppleGames.MoreAquariums
             "UWE/GlassExteriorWaterFix";
         private const string VanillaAquariumGlassMaterialName =
             "Aquarium_glass";
+        private const string ObservatoryExteriorGlassMaterialName =
+            "Base_exterior_Room_Observatory_glass";
+        private const string ObservatoryInteriorGlassMaterialName =
+            "Base_interior_Room_Observatory_glass";
 
         /// <summary>
         /// Defines where the configured material is applied.
@@ -34,7 +38,9 @@ namespace DaftAppleGames.MoreAquariums
         public enum MaterialType
         {
             ExteriorGlassWaterFix,
-            VanillaAquariumGlass
+            VanillaAquariumGlass,
+            ObservatoryGlassExterior,
+            ObservatoryGlassInterior
         }
 
         [BoxGroup("Material")]
@@ -62,6 +68,8 @@ namespace DaftAppleGames.MoreAquariums
 
         private static Material exteriorGlassWaterFixMaterial;
         private static Material vanillaAquariumGlassMaterial;
+        private static Material observatoryExteriorGlassMaterial;
+        private static Material observatoryInteriorGlassMaterial;
 
         private bool IsSingleRendererMode =>
             materialSetMode == MaterialSetMode.SingleRenderer;
@@ -172,6 +180,16 @@ namespace DaftAppleGames.MoreAquariums
                 case MaterialType.VanillaAquariumGlass:
                     yield return GetVanillaAquariumGlassMaterialAsync(result);
                     yield break;
+                case MaterialType.ObservatoryGlassExterior:
+                    result(GetLoadedMaterialByName(
+                        ObservatoryExteriorGlassMaterialName,
+                        ref observatoryExteriorGlassMaterial));
+                    yield break;
+                case MaterialType.ObservatoryGlassInterior:
+                    result(GetLoadedMaterialByName(
+                        ObservatoryInteriorGlassMaterialName,
+                        ref observatoryInteriorGlassMaterial));
+                    yield break;
                 default:
                     result(null);
                     yield break;
@@ -234,6 +252,36 @@ namespace DaftAppleGames.MoreAquariums
         {
             return material.name == expectedName ||
                    material.name == expectedName + " (Instance)";
+        }
+
+        private static Material GetLoadedMaterialByName(string materialName,
+            ref Material cachedMaterial)
+        {
+            if (cachedMaterial)
+            {
+                return cachedMaterial;
+            }
+
+            Material[] loadedMaterials =
+                Resources.FindObjectsOfTypeAll<Material>();
+            foreach (Material loadedMaterial in loadedMaterials)
+            {
+                if (!loadedMaterial ||
+                    !IsNamedMaterial(loadedMaterial, materialName))
+                {
+                    continue;
+                }
+
+                cachedMaterial = new Material(loadedMaterial)
+                {
+                    name = materialName
+                };
+                return cachedMaterial;
+            }
+
+            ModDebugLog.LogError(
+                $"Could not find loaded material '{materialName}'.");
+            return null;
         }
 
         private static Material GetExteriorGlassWaterFixMaterial()
