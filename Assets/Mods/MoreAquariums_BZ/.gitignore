@@ -1,0 +1,9 @@
+# Don't check in game reference assets
+/GameRefAssets/
+/GameRefAssets.meta
+/Materials/Reference/
+/Materials/Reference.meta
+/Models/Reference/
+/Models/Reference.meta
+/Textures/Icons/Reference/
+/Textures/Icons/Reference.meta
