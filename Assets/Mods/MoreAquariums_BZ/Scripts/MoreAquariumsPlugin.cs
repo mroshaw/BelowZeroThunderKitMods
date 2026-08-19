@@ -37,6 +37,7 @@ namespace DaftAppleGames.MoreAquariums
             ModDebugLog =  new ModLog(Logger, ConfigFile.DetailedLogging);            
             ModAssetUtils = new ModAssetBundleUtils(AssetBundleName, Assembly.GetExecutingAssembly(),true, ModDebugLog);
             BaseAquariumPersistence.Initialize();
+            
             // Register custom sounds
             RegisterCustomSounds();
 

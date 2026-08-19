@@ -8,6 +8,7 @@ namespace DaftAppleGames.MoreAquariums
     {
         [SerializeField] private FishSettings fishSettings;
         [SerializeField] private List<Collider> movementColliders;
+        [SerializeField] private List<Collider> exclusionColliders;
         [SerializeField] private List<AquariumFishExt> fishList = new List<AquariumFishExt>();
         
         internal List<AquariumFishExt> FishList => fishList;
@@ -51,6 +52,14 @@ namespace DaftAppleGames.MoreAquariums
         {
             movementColliders = newMovementColliders;
         }
+
+        /// <summary>
+        /// Sets the volumes that fish must not enter.
+        /// </summary>
+        internal void SetExclusionColliders(List<Collider> newExclusionColliders)
+        {
+            exclusionColliders = newExclusionColliders;
+        }
         
         /// <summary>
         /// Adds procedural movement to an occupied aquarium track.
@@ -69,12 +78,14 @@ namespace DaftAppleGames.MoreAquariums
             if (!fishMovement)
             {
                 fishMovement = trackObject.AddComponent<AquariumFishExt>();
-                fishMovement.Initialize(this, fishSettings, movementColliders);
+                fishMovement.Initialize(this, fishSettings, movementColliders,
+                    exclusionColliders);
                 fishList.Add(fishMovement);
             }
             else if (!fishList.Contains(fishMovement))
             {
-                fishMovement.Initialize(this, fishSettings, movementColliders);
+                fishMovement.Initialize(this, fishSettings, movementColliders,
+                    exclusionColliders);
                 fishList.Add(fishMovement);
             }
 

@@ -12,6 +12,7 @@ namespace DaftAppleGames.MoreAquariums
     {
         [Header("Settings")]
         [SerializeField] private List<Collider> movementColliders = new List<Collider>();
+        [SerializeField] private List<Collider> exclusionColliders = new List<Collider>();
         [SerializeField] private FishManager fishManager;
         [SerializeField] private FishSettings fishSettings;
         
@@ -32,7 +33,8 @@ namespace DaftAppleGames.MoreAquariums
         /// Initializes this procedural movement component.
         /// </summary>
         internal void Initialize(FishManager newFishManager, FishSettings newFishSettings,
-            List<Collider> newMovementColliders)
+            List<Collider> newMovementColliders,
+            List<Collider> newExclusionColliders)
         {
             if (!newFishManager || !newFishSettings || newMovementColliders == null ||
                 newMovementColliders.Count == 0)
@@ -45,6 +47,7 @@ namespace DaftAppleGames.MoreAquariums
             fishManager = newFishManager;
             fishSettings = newFishSettings;
             movementColliders = newMovementColliders;
+            exclusionColliders = newExclusionColliders ?? new List<Collider>();
             enabled = false;
         }
 
@@ -90,6 +93,7 @@ namespace DaftAppleGames.MoreAquariums
             fishManager = null;
             fishSettings = null;
             movementColliders = null;
+            exclusionColliders = null;
             enabled = false;
         }
         
@@ -107,9 +111,9 @@ namespace DaftAppleGames.MoreAquariums
             directionToTargetRaw = (targetPosition - transform.position).normalized;
             if (directionToTargetRaw.sqrMagnitude < 0.0001f)
             {
-                // Too close to compute a valid direction; just keep moving forward
-                transform.position += currentDirection * (currentSpeed * Time.deltaTime);
-                return;
+                PickNewTarget();
+                directionToTargetRaw =
+                    (targetPosition - transform.position).normalized;
             }
             
             // Combine influences
@@ -161,6 +165,13 @@ namespace DaftAppleGames.MoreAquariums
                 transform.position = GetNearestValidPoint(transform.position);
             }
 
+            Vector3 correctedPosition = transform.position;
+            if (PushOutsideExclusions(ref correctedPosition))
+            {
+                transform.position = correctedPosition;
+                PickNewTarget();
+            }
+
             // Select new target if needed
             if (Vector3.Distance(transform.position, targetPosition) < fishSettings.arrivalDistance)
             {
@@ -188,14 +199,16 @@ namespace DaftAppleGames.MoreAquariums
             targetPosition = GetNearestValidPoint(transform.position);
         }
 
-                private bool IsPathContained(Vector3 from, Vector3 to)
+        private bool IsPathContained(Vector3 from, Vector3 to)
         {
             const int steps = 10;
             for (int i = 0; i <= steps; i++)
             {
                 Vector3 p = Vector3.Lerp(from, to, i / (float)steps);
-                if (!IsPointInsideAnyCollider(p))
+                if (!IsPointInsideAnyCollider(p) || IsPointInsideExclusion(p))
+                {
                     return false;
+                }
             }
             return true;
         }
@@ -207,6 +220,127 @@ namespace DaftAppleGames.MoreAquariums
                     return true;
 
             return false;
+        }
+
+        private bool IsPointInsideExclusion(Vector3 pos)
+        {
+            foreach (Collider col in exclusionColliders)
+            {
+                if (IsPointInsideCollider(col, pos))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool PushOutsideExclusions(ref Vector3 pos)
+        {
+            bool positionChanged = false;
+            foreach (Collider col in exclusionColliders)
+            {
+                if (!IsPointInsideCollider(col, pos))
+                {
+                    continue;
+                }
+
+                pos = GetNearestPointOutsideCollider(col, pos);
+                positionChanged = true;
+            }
+
+            return positionChanged;
+        }
+
+        private Vector3 GetNearestPointOutsideCollider(Collider col, Vector3 pos)
+        {
+            const float surfaceOffset = 0.01f;
+
+            BoxCollider box = col as BoxCollider;
+            if (box)
+            {
+                Vector3 local = box.transform.InverseTransformPoint(pos);
+                Vector3 minimum = box.center - box.size * 0.5f;
+                Vector3 maximum = box.center + box.size * 0.5f;
+                float nearestDistance = local.x - minimum.x;
+                int nearestFace = 0;
+
+                float distance = maximum.x - local.x;
+                if (distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                    nearestFace = 1;
+                }
+
+                distance = local.y - minimum.y;
+                if (distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                    nearestFace = 2;
+                }
+
+                distance = maximum.y - local.y;
+                if (distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                    nearestFace = 3;
+                }
+
+                distance = local.z - minimum.z;
+                if (distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                    nearestFace = 4;
+                }
+
+                if (maximum.z - local.z < nearestDistance)
+                {
+                    nearestFace = 5;
+                }
+
+                switch (nearestFace)
+                {
+                    case 0:
+                        local.x = minimum.x - surfaceOffset;
+                        break;
+                    case 1:
+                        local.x = maximum.x + surfaceOffset;
+                        break;
+                    case 2:
+                        local.y = minimum.y - surfaceOffset;
+                        break;
+                    case 3:
+                        local.y = maximum.y + surfaceOffset;
+                        break;
+                    case 4:
+                        local.z = minimum.z - surfaceOffset;
+                        break;
+                    case 5:
+                        local.z = maximum.z + surfaceOffset;
+                        break;
+                }
+
+                return box.transform.TransformPoint(local);
+            }
+
+            SphereCollider sphere = col as SphereCollider;
+            if (sphere)
+            {
+                Vector3 center = sphere.transform.TransformPoint(sphere.center);
+                float radius = sphere.radius * Mathf.Max(
+                    sphere.transform.lossyScale.x,
+                    sphere.transform.lossyScale.y,
+                    sphere.transform.lossyScale.z);
+                Vector3 direction = pos - center;
+                if (direction.sqrMagnitude < 0.0001f)
+                {
+                    direction = Vector3.up;
+                }
+
+                return center + direction.normalized * (radius + surfaceOffset);
+            }
+
+            return pos;
         }
 
         private bool IsPointInsideCollider(Collider col, Vector3 worldPos)
