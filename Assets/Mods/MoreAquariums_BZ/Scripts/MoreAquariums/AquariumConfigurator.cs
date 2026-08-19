@@ -12,6 +12,7 @@ namespace DaftAppleGames.MoreAquariums
     public abstract class AquariumConfigurator : MonoBehaviour
     {
         private const string MovementColliderContainerName = "MovementColliders";
+        private const string ExclusionColliderContainerName = "ExclusionColliders";
 
         [BoxGroup("Aquarium")] [SerializeField] protected int storageHeight;
         [BoxGroup("Aquarium")] [SerializeField] protected int storageWidth;
@@ -28,6 +29,7 @@ namespace DaftAppleGames.MoreAquariums
         [BoxGroup("Object References")] [SerializeField] protected GameObject rocksObject;
         [BoxGroup("Custom Fish")] [SerializeField] protected FishSettings fishSettings;
         [BoxGroup("Custom Fish")] [SerializeField] protected GameObject[] movementColliderObjects;
+        [BoxGroup("Custom Fish")] [SerializeField] protected GameObject[] exclusionColliderObjects;
         [BoxGroup("Fish")] [SerializeField] protected GameObject[] existingTrackObjects;
         [BoxGroup("Fish")] [SerializeField] protected GameObject[] existingAttachObjects;
         [BoxGroup("Fish")] [SerializeField] protected GameObject[] newTrackObjects;
@@ -309,6 +311,8 @@ namespace DaftAppleGames.MoreAquariums
             fishManager.SetFishSettings(fishSettings);
             fishManager.SetMovementColliders(
                 ConfigureMovementColliders(aquariumGameObject));
+            fishManager.SetExclusionColliders(
+                ConfigureExclusionColliders(aquariumGameObject));
         }
 
         /// <summary>
@@ -345,6 +349,48 @@ namespace DaftAppleGames.MoreAquariums
             }
 
             return movementColliders;
+        }
+
+        private List<Collider> ConfigureExclusionColliders(
+            GameObject aquariumGameObject)
+        {
+            List<Collider> exclusionColliders = new List<Collider>();
+            if (exclusionColliderObjects == null ||
+                exclusionColliderObjects.Length == 0)
+            {
+                return exclusionColliders;
+            }
+
+            GameObject exclusionColliderContainer =
+                new GameObject(ExclusionColliderContainerName);
+            exclusionColliderContainer.transform.SetParent(aquariumGameObject.transform);
+            exclusionColliderContainer.transform.localPosition = Vector3.zero;
+            exclusionColliderContainer.transform.localRotation = Quaternion.identity;
+            exclusionColliderContainer.transform.localScale = Vector3.one;
+
+            foreach (GameObject exclusionColliderObject in exclusionColliderObjects)
+            {
+                if (!exclusionColliderObject)
+                {
+                    continue;
+                }
+
+                GameObject newColliderObject = Instantiate(
+                    exclusionColliderObject, exclusionColliderContainer.transform);
+                CopyLocalTransform(
+                    exclusionColliderObject.transform, newColliderObject.transform);
+
+                Collider[] objectColliders = newColliderObject.GetComponents<Collider>();
+                foreach (Collider currentCollider in objectColliders)
+                {
+                    if (currentCollider is BoxCollider || currentCollider is SphereCollider)
+                    {
+                        exclusionColliders.Add(currentCollider);
+                    }
+                }
+            }
+
+            return exclusionColliders;
         }
 
         /// <summary>
@@ -395,6 +441,40 @@ namespace DaftAppleGames.MoreAquariums
                 {
                     ModDebugLog.LogError(
                         $"Movement collider object '{movementColliderObject.name}' must " +
+                        "have a BoxCollider or SphereCollider component.");
+                    return false;
+                }
+            }
+
+            if (exclusionColliderObjects == null)
+            {
+                return true;
+            }
+
+            foreach (GameObject exclusionColliderObject in exclusionColliderObjects)
+            {
+                if (!exclusionColliderObject)
+                {
+                    ModDebugLog.LogError(
+                        "The exclusion collider array contains a missing GameObject reference.");
+                    return false;
+                }
+
+                Collider[] colliders = exclusionColliderObject.GetComponents<Collider>();
+                bool hasSupportedCollider = false;
+                foreach (Collider currentCollider in colliders)
+                {
+                    if (currentCollider is BoxCollider || currentCollider is SphereCollider)
+                    {
+                        hasSupportedCollider = true;
+                        break;
+                    }
+                }
+
+                if (!hasSupportedCollider)
+                {
+                    ModDebugLog.LogError(
+                        $"Exclusion collider object '{exclusionColliderObject.name}' must " +
                         "have a BoxCollider or SphereCollider component.");
                     return false;
                 }

@@ -1,3 +1,4 @@
+using System.Collections;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using static DaftAppleGames.MoreAquariums.MoreAquariumsPlugin;
@@ -14,6 +15,8 @@ namespace DaftAppleGames.MoreAquariums
             "GlassExteriorWaterFix";
         private const string ExteriorGlassWaterFixShaderName =
             "UWE/GlassExteriorWaterFix";
+        private const string VanillaAquariumGlassMaterialName =
+            "Aquarium_glass";
 
         /// <summary>
         /// Defines where the configured material is applied.
@@ -30,7 +33,8 @@ namespace DaftAppleGames.MoreAquariums
         /// </summary>
         public enum MaterialType
         {
-            ExteriorGlassWaterFix
+            ExteriorGlassWaterFix,
+            VanillaAquariumGlass
         }
 
         [BoxGroup("Material")]
@@ -57,6 +61,7 @@ namespace DaftAppleGames.MoreAquariums
         private int[] materialIndices = { 0 };
 
         private static Material exteriorGlassWaterFixMaterial;
+        private static Material vanillaAquariumGlassMaterial;
 
         private bool IsSingleRendererMode =>
             materialSetMode == MaterialSetMode.SingleRenderer;
@@ -82,10 +87,17 @@ namespace DaftAppleGames.MoreAquariums
         /// </summary>
         public void AssignMaterials()
         {
-            Material material = GetMaterial(materialType);
+            UWE.CoroutineHost.StartCoroutine(AssignMaterialsAsync());
+        }
+
+        private IEnumerator AssignMaterialsAsync()
+        {
+            Material material = null;
+            yield return GetMaterialAsync(materialType,
+                loadedMaterial => material = loadedMaterial);
             if (!material)
             {
-                return;
+                yield break;
             }
 
             switch (materialSetMode)
@@ -148,15 +160,80 @@ namespace DaftAppleGames.MoreAquariums
             }
         }
 
-        private static Material GetMaterial(MaterialType requestedMaterialType)
+        private static IEnumerator GetMaterialAsync(
+            MaterialType requestedMaterialType,
+            System.Action<Material> result)
         {
             switch (requestedMaterialType)
             {
                 case MaterialType.ExteriorGlassWaterFix:
-                    return GetExteriorGlassWaterFixMaterial();
+                    result(GetExteriorGlassWaterFixMaterial());
+                    yield break;
+                case MaterialType.VanillaAquariumGlass:
+                    yield return GetVanillaAquariumGlassMaterialAsync(result);
+                    yield break;
                 default:
-                    return null;
+                    result(null);
+                    yield break;
             }
+        }
+
+        private static IEnumerator GetVanillaAquariumGlassMaterialAsync(
+            System.Action<Material> result)
+        {
+            if (vanillaAquariumGlassMaterial)
+            {
+                result(vanillaAquariumGlassMaterial);
+                yield break;
+            }
+
+            CoroutineTask<GameObject> prefabTask =
+                CraftData.GetPrefabForTechTypeAsync(TechType.Aquarium);
+            yield return prefabTask;
+
+            GameObject aquariumPrefab = prefabTask.GetResult();
+            if (!aquariumPrefab)
+            {
+                ModDebugLog.LogError(
+                    "Could not load the vanilla Aquarium prefab for its glass material.");
+                result(null);
+                yield break;
+            }
+
+            Renderer[] renderers =
+                aquariumPrefab.GetComponentsInChildren<Renderer>(true);
+            foreach (Renderer sourceRenderer in renderers)
+            {
+                Material[] sourceMaterials = sourceRenderer.sharedMaterials;
+                foreach (Material sourceMaterial in sourceMaterials)
+                {
+                    if (!sourceMaterial ||
+                        !IsNamedMaterial(sourceMaterial,
+                            VanillaAquariumGlassMaterialName))
+                    {
+                        continue;
+                    }
+
+                    vanillaAquariumGlassMaterial = new Material(sourceMaterial)
+                    {
+                        name = VanillaAquariumGlassMaterialName
+                    };
+                    result(vanillaAquariumGlassMaterial);
+                    yield break;
+                }
+            }
+
+            ModDebugLog.LogError(
+                $"Could not find material '{VanillaAquariumGlassMaterialName}' " +
+                "on the vanilla Aquarium prefab.");
+            result(null);
+        }
+
+        private static bool IsNamedMaterial(Material material,
+            string expectedName)
+        {
+            return material.name == expectedName ||
+                   material.name == expectedName + " (Instance)";
         }
 
         private static Material GetExteriorGlassWaterFixMaterial()
