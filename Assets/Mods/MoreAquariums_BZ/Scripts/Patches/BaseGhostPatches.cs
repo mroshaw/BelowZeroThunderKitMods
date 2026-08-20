@@ -50,7 +50,8 @@ namespace DaftAppleGames.MoreAquariums.Patches
 
             if (!aquariumPlacementPending ||
                 recipe != TechType.BaseObservatory ||
-                generatedBase != pendingBase)
+                generatedBase != pendingBase ||
+                !ContainsCell(bounds, pendingCell))
             {
                 return false;
             }
@@ -61,6 +62,13 @@ namespace DaftAppleGames.MoreAquariums.Patches
                 $"Matched generated Observatory cell {bounds} to the pending " +
                 $"Observatory Aquarium placement at {pendingCell}.");
             return true;
+        }
+
+        private static bool ContainsCell(Int3.Bounds bounds, Int3 cell)
+        {
+            return cell.x >= bounds.mins.x && cell.x <= bounds.maxs.x &&
+                   cell.y >= bounds.mins.y && cell.y <= bounds.maxs.y &&
+                   cell.z >= bounds.mins.z && cell.z <= bounds.maxs.z;
         }
 
         /// <summary>

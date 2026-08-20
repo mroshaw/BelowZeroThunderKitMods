@@ -96,15 +96,31 @@ namespace DaftAppleGames.MoreAquariums
                 Object.FindObjectsOfType<BaseAquariumInventory>();
             foreach (BaseAquariumInventory inventory in inventories)
             {
-                BaseAquariumLocation location = GetLocation(inventory.transform.position);
-                if (location != null)
-                {
-                    location.StoredItems = inventory.CaptureInventory();
-                    ModDebugLog.LogInfo(
-                        $"Captured {location.StoredItems.Count} Observatory Aquarium items " +
-                        $"at {inventory.transform.position}.");
-                }
+                CaptureInventory(inventory);
             }
+        }
+
+        /// <summary>
+        /// Updates an existing aquarium record from a live generated inventory.
+        /// </summary>
+        internal static void CaptureInventory(BaseAquariumInventory inventory)
+        {
+            if (!inventory)
+            {
+                return;
+            }
+
+            BaseAquariumLocation location =
+                GetLocation(inventory.transform.position);
+            if (location == null)
+            {
+                return;
+            }
+
+            location.StoredItems = inventory.CaptureInventory();
+            ModDebugLog.LogInfo(
+                $"Captured {location.StoredItems.Count} Observatory Aquarium items " +
+                $"at {inventory.transform.position}.");
         }
 
         /// <summary>

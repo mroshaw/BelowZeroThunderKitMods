@@ -22,6 +22,14 @@ namespace DaftAppleGames.MoreAquariums
             StartCoroutine(RestoreInventory());
         }
 
+        private void OnDestroy()
+        {
+            if (storageContainer && storageContainer.container != null)
+            {
+                BaseAquariumPersistence.CaptureInventory(this);
+            }
+        }
+
         /// <summary>
         /// Returns item records for the current storage contents.
         /// </summary>
@@ -85,7 +93,16 @@ namespace DaftAppleGames.MoreAquariums
 
                 GameObject itemGameObject = Instantiate(prefab);
                 Pickupable pickupable = itemGameObject.GetComponent<Pickupable>();
-                if (!pickupable || storageContainer.container.AddItem(pickupable) == null)
+                if (!pickupable)
+                {
+                    ModDebugLog.LogError(
+                        $"Restored aquarium item '{storedItem.ClassId}' is not pickupable.");
+                    Destroy(itemGameObject);
+                    continue;
+                }
+
+                pickupable.Pickup(false);
+                if (storageContainer.container.AddItem(pickupable) == null)
                 {
                     ModDebugLog.LogError(
                         $"Could not add restored aquarium item '{storedItem.ClassId}'.");

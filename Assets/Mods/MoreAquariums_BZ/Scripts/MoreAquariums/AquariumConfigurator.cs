@@ -13,6 +13,8 @@ namespace DaftAppleGames.MoreAquariums
     {
         private const string MovementColliderContainerName = "MovementColliders";
         private const string ExclusionColliderContainerName = "ExclusionColliders";
+        private const string ObservatoryGlassRendererName =
+            "BaseRoomObservatory_glass";
 
         [BoxGroup("Aquarium")] [SerializeField] protected int storageHeight;
         [BoxGroup("Aquarium")] [SerializeField] protected int storageWidth;
@@ -624,7 +626,7 @@ namespace DaftAppleGames.MoreAquariums
                 {
                     glassSkyApplier = skyApplier;
                 }
-                else
+                else if (skyApplier.anchorSky == Skies.Auto)
                 {
                     nonGlassSkyApplier = skyApplier;
                 }
@@ -663,9 +665,138 @@ namespace DaftAppleGames.MoreAquariums
 
             glassSkyApplier.renderers = ToRendererArray(glassRenderers);
             nonGlassSkyApplier.renderers = nonGlassRenderers.ToArray();
+
+            // Apply the current sky to renderers added after SkyApplier.Start.
+            glassSkyApplier.DebugRefreshSky();
+            nonGlassSkyApplier.DebugRefreshSky();
+
             ModDebugLog.LogDebug(
                 $"Configured {nonGlassSkyApplier.renderers.Length} non-glass and " +
                 $"{glassSkyApplier.renderers.Length} glass SkyApplier renderers.");
+        }
+
+        /// <summary>
+        /// Rebuilds the renderer collections used by a Below Zero Observatory base piece.
+        /// </summary>
+        protected void ConfigureBaseSkyAppliers(GameObject basePieceGameObject,
+            Dictionary<GameObject, GameObject> instantiatedObjects,
+            Renderer[] originalObservatoryRenderers)
+        {
+            ModDebugLog.LogDebug("Configuring Observatory SkyAppliers...");
+            SkyApplier exteriorSkyApplier = null;
+            SkyApplier glassSkyApplier = null;
+            SkyApplier interiorSkyApplier = null;
+            HashSet<Renderer> originalRendererSet = new HashSet<Renderer>();
+            if (originalObservatoryRenderers != null)
+            {
+                AddRenderers(originalRendererSet, originalObservatoryRenderers);
+            }
+
+            SkyApplier[] directSkyAppliers =
+                basePieceGameObject.GetComponents<SkyApplier>();
+
+            foreach (SkyApplier skyApplier in directSkyAppliers)
+            {
+                if (!skyApplier)
+                {
+                    continue;
+                }
+
+                if (skyApplier.anchorSky == Skies.Auto)
+                {
+                    exteriorSkyApplier = skyApplier;
+                    continue;
+                }
+
+                bool referencesOriginalRenderer = false;
+                bool referencesGlassRenderer = false;
+                Renderer[] skyRenderers = skyApplier.renderers;
+                if (skyRenderers == null)
+                {
+                    continue;
+                }
+
+                foreach (Renderer renderer in skyRenderers)
+                {
+                    if (!renderer || !originalRendererSet.Contains(renderer))
+                    {
+                        continue;
+                    }
+
+                    referencesOriginalRenderer = true;
+                    if (renderer.name == ObservatoryGlassRendererName)
+                    {
+                        referencesGlassRenderer = true;
+                    }
+                }
+
+                if (referencesGlassRenderer)
+                {
+                    glassSkyApplier = skyApplier;
+                }
+                else if (referencesOriginalRenderer)
+                {
+                    interiorSkyApplier = skyApplier;
+                }
+            }
+
+            if (!exteriorSkyApplier || !glassSkyApplier || !interiorSkyApplier)
+            {
+                ModDebugLog.LogError(
+                    "Could not identify the Observatory exterior, glass, and " +
+                    "interior SkyAppliers from their native renderer references.");
+                return;
+            }
+
+            HashSet<Renderer> glassRenderers = new HashSet<Renderer>();
+            AddRenderers(glassRenderers, glassSkyApplier.renderers);
+            AddMappedRenderers(
+                glassRenderers, newGlassGameObjects, instantiatedObjects);
+
+            HashSet<Renderer> explicitNonGlassRenderers = new HashSet<Renderer>();
+            AddMappedRenderers(explicitNonGlassRenderers,
+                newNonGlassGameObjects, instantiatedObjects);
+            foreach (Renderer nonGlassRenderer in explicitNonGlassRenderers)
+            {
+                glassRenderers.Remove(nonGlassRenderer);
+            }
+
+            HashSet<Renderer> interiorRenderers = new HashSet<Renderer>();
+            if (interiorSkyApplier)
+            {
+                AddRenderers(interiorRenderers, interiorSkyApplier.renderers);
+            }
+
+            List<Renderer> exteriorRenderers = new List<Renderer>();
+            Renderer[] allRenderers =
+                basePieceGameObject.GetComponentsInChildren<Renderer>(true);
+            foreach (Renderer renderer in allRenderers)
+            {
+                if (renderer &&
+                    !glassRenderers.Contains(renderer) &&
+                    !interiorRenderers.Contains(renderer))
+                {
+                    exteriorRenderers.Add(renderer);
+                }
+            }
+
+            exteriorSkyApplier.renderers = exteriorRenderers.ToArray();
+            glassSkyApplier.renderers = ToRendererArray(glassRenderers);
+
+            exteriorSkyApplier.DebugRefreshSky();
+            glassSkyApplier.DebugRefreshSky();
+
+            if (interiorSkyApplier)
+            {
+                interiorSkyApplier.renderers = ToRendererArray(interiorRenderers);
+                interiorSkyApplier.DebugRefreshSky();
+            }
+
+            ModDebugLog.LogDebug(
+                $"Configured Observatory SkyAppliers with " +
+                $"{exteriorSkyApplier.renderers.Length} exterior, " +
+                $"{glassSkyApplier.renderers.Length} glass, and " +
+                $"{interiorRenderers.Count} interior renderers.");
         }
 
         /// <summary>

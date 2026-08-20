@@ -12,7 +12,6 @@ namespace DaftAppleGames.MoreAquariums
     {
         private const string FishTrackContainerName = "FishTracks";
         private const string FloodVisualObjectName = "Flood_BaseObservatory";
-        private const string VanillaModelObjectName = "Room_Observatory";
         private const string StorageObjectName = "AquariumStorage";
         private const string StorageRootName = "StorageRoot";
         private const int AquariumCapacity = 20;
@@ -54,7 +53,8 @@ namespace DaftAppleGames.MoreAquariums
 
             if (!configurator.ConfigureAquariumPrefab(basePieceGameObject,
                     out GameObject runtimeModel,
-                    out Dictionary<GameObject, GameObject> instantiatedObjects))
+                    out Dictionary<GameObject, GameObject> instantiatedObjects,
+                    out Renderer[] originalObservatoryRenderers))
             {
                 Destroy(configurationInstance);
                 return;
@@ -62,7 +62,9 @@ namespace DaftAppleGames.MoreAquariums
 
             UWE.CoroutineHost.StartCoroutine(
                 configurator.ConfigureDecorationsAsync(basePieceGameObject,
-                    runtimeModel, instantiatedObjects, configurationInstance));
+                    runtimeModel, instantiatedObjects,
+                    originalObservatoryRenderers,
+                    configurationInstance));
         }
 
         /// <summary>
@@ -70,10 +72,12 @@ namespace DaftAppleGames.MoreAquariums
         /// </summary>
         internal bool ConfigureAquariumPrefab(GameObject basePieceGameObject,
             out GameObject runtimeModel,
-            out Dictionary<GameObject, GameObject> instantiatedObjects)
+            out Dictionary<GameObject, GameObject> instantiatedObjects,
+            out Renderer[] originalObservatoryRenderers)
         {
             runtimeModel = null;
             instantiatedObjects = null;
+            originalObservatoryRenderers = null;
             if (!basePieceGameObject)
             {
                 ModDebugLog.LogError(
@@ -109,9 +113,18 @@ namespace DaftAppleGames.MoreAquariums
 
             StorageContainer storageContainer = ConfigureStorage(
                 basePieceGameObject, interactionMarker, interactionBounds);
+            originalObservatoryRenderers =
+                basePieceGameObject.GetComponentsInChildren<Renderer>(true);
             runtimeModel = ConfigureModel(
-                basePieceGameObject, newAquariumModel.transform);
-            ConfigurePermanentWaterVisual(basePieceGameObject);
+                basePieceGameObject, newAquariumModel.transform,
+                originalObservatoryRenderers);
+
+            // Only add the Flood Water components if enabled in Mod Config
+            if (ConfigFile.UseObservatoryFloodWater)
+            {
+                ConfigurePermanentWaterVisual(basePieceGameObject);
+            }
+            
             instantiatedObjects =
                 new Dictionary<GameObject, GameObject>();
             instantiatedObjects.Add(newAquariumModel, runtimeModel);
@@ -143,6 +156,7 @@ namespace DaftAppleGames.MoreAquariums
         private IEnumerator ConfigureDecorationsAsync(GameObject basePieceGameObject,
             GameObject runtimeModel,
             Dictionary<GameObject, GameObject> instantiatedObjects,
+            Renderer[] originalRenderers,
             GameObject configurationInstance)
         {
             CoroutineTask<GameObject> prefabTask =
@@ -166,7 +180,8 @@ namespace DaftAppleGames.MoreAquariums
 
             if (basePieceGameObject && runtimeModel)
             {
-                ConfigureSkyAppliers(basePieceGameObject, instantiatedObjects);
+                ConfigureBaseSkyAppliers(basePieceGameObject, instantiatedObjects,
+                    originalRenderers);
             }
 
             Destroy(configurationInstance);
@@ -176,14 +191,18 @@ namespace DaftAppleGames.MoreAquariums
         /// Replaces the generated Observatory renderers with the authored aquarium model.
         /// </summary>
         private static GameObject ConfigureModel(GameObject basePieceGameObject,
-            Transform newModelMarker)
+            Transform newModelMarker, Renderer[] existingRenderers)
         {
-            Transform vanillaModelTransform =
-                basePieceGameObject.transform.Find(VanillaModelObjectName);
             Transform floodVisualTransform =
                 basePieceGameObject.transform.Find(FloodVisualObjectName);
-            Renderer[] existingRenderers =
-                basePieceGameObject.GetComponentsInChildren<Renderer>(true);
+
+            GameObject newModel = Instantiate(newModelMarker.gameObject,
+                basePieceGameObject.transform, false);
+            newModel.name = newModelMarker.name;
+            CopyLocalTransform(newModelMarker, newModel.transform);
+            ApplyNativeObservatoryMaterials(existingRenderers, newModel);
+            RemoveDeferredMaterialApplicators(newModel);
+
             foreach (Renderer existingRenderer in existingRenderers)
             {
                 if (floodVisualTransform &&
@@ -195,22 +214,108 @@ namespace DaftAppleGames.MoreAquariums
                 existingRenderer.enabled = false;
             }
 
-            if (vanillaModelTransform)
+            return newModel;
+        }
+
+        private static void ApplyNativeObservatoryMaterials(
+            Renderer[] observatoryRenderers, GameObject newModel)
+        {
+            Dictionary<string, Material> nativeMaterials =
+                new Dictionary<string, Material>();
+            foreach (Renderer observatoryRenderer in observatoryRenderers)
             {
-                vanillaModelTransform.gameObject.SetActive(false);
-            }
-            else
-            {
-                ModDebugLog.LogError(
-                    $"Could not find vanilla model '{VanillaModelObjectName}' " +
-                    "on the Observatory Aquarium.");
+                Material[] materials = observatoryRenderer.sharedMaterials;
+                foreach (Material material in materials)
+                {
+                    if (!material)
+                    {
+                        continue;
+                    }
+
+                    string materialName = NormalizeMaterialName(material.name);
+                    if (!nativeMaterials.ContainsKey(materialName))
+                    {
+                        nativeMaterials.Add(materialName, material);
+                    }
+                }
             }
 
-            GameObject newModel = Instantiate(newModelMarker.gameObject,
-                basePieceGameObject.transform, false);
-            newModel.name = newModelMarker.name;
-            CopyLocalTransform(newModelMarker, newModel.transform);
-            return newModel;
+            int replacedMaterialCount = 0;
+            Renderer[] newModelRenderers =
+                newModel.GetComponentsInChildren<Renderer>(true);
+            foreach (Renderer newModelRenderer in newModelRenderers)
+            {
+                Material[] materials = newModelRenderer.sharedMaterials;
+                bool materialsChanged = false;
+                for (int materialIndex = 0;
+                     materialIndex < materials.Length;
+                     materialIndex++)
+                {
+                    Material currentMaterial = materials[materialIndex];
+                    if (!currentMaterial)
+                    {
+                        continue;
+                    }
+
+                    string materialName =
+                        NormalizeMaterialName(currentMaterial.name);
+                    if (!nativeMaterials.TryGetValue(
+                            materialName, out Material nativeMaterial))
+                    {
+                        continue;
+                    }
+
+                    materials[materialIndex] = nativeMaterial;
+                    materialsChanged = true;
+                    replacedMaterialCount++;
+                }
+
+                if (materialsChanged)
+                {
+                    newModelRenderer.sharedMaterials = materials;
+                }
+            }
+
+            ModDebugLog.LogInfo(
+                $"Applied {replacedMaterialCount} native Observatory material " +
+                $"bindings to the custom model.");
+        }
+
+        private static void RemoveDeferredMaterialApplicators(GameObject newModel)
+        {
+            ApplyAquariumMaterial[] materialApplicators =
+                newModel.GetComponentsInChildren<ApplyAquariumMaterial>(true);
+            foreach (ApplyAquariumMaterial materialApplicator in materialApplicators)
+            {
+                materialApplicator.enabled = false;
+                Destroy(materialApplicator);
+            }
+
+            ModDebugLog.LogDebug(
+                $"Removed {materialApplicators.Length} deferred material applicators " +
+                $"from the custom Observatory model.");
+        }
+
+        private static string NormalizeMaterialName(string materialName)
+        {
+            const string InstanceSuffix = " (Instance)";
+            if (materialName.EndsWith(InstanceSuffix))
+            {
+                materialName = materialName.Substring(
+                    0, materialName.Length - InstanceSuffix.Length);
+            }
+
+            int suffixSeparatorIndex = materialName.LastIndexOf('.');
+            int suffixLength = materialName.Length - suffixSeparatorIndex - 1;
+            if (suffixSeparatorIndex >= 0 && suffixLength == 3 &&
+                char.IsDigit(materialName[suffixSeparatorIndex + 1]) &&
+                char.IsDigit(materialName[suffixSeparatorIndex + 2]) &&
+                char.IsDigit(materialName[suffixSeparatorIndex + 3]))
+            {
+                materialName = materialName.Substring(0, suffixSeparatorIndex);
+            }
+
+            return materialName;
         }
 
         private static void ConfigurePermanentWaterVisual(
