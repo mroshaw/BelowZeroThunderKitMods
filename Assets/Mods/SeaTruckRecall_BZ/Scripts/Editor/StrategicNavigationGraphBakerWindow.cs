@@ -32,7 +32,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Editor
         /// <summary>
         /// Opens the strategic terrain graph baker.
         /// </summary>
-        [MenuItem("Tools/Daft Apple Games/SeaTruck Recall/Loaded Collider Graph Baker (Validation)")]
+        [MenuItem("Tools/SeaTruck Recall/Loaded Collider Graph Baker (Validation)")]
         public static void ShowWindow()
         {
             StrategicNavigationGraphBakerWindow window = GetWindow<StrategicNavigationGraphBakerWindow>();
@@ -104,8 +104,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Editor
 
         private void BakeGraph()
         {
-            string validationMessage;
-            if (!ValidateSettings(out validationMessage))
+            if (!ValidateSettings(out var validationMessage))
             {
                 EditorUtility.DisplayDialog("Cannot Bake Strategic Graph", validationMessage, "OK");
                 return;
@@ -121,12 +120,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Editor
             }
 
             Physics.SyncTransforms();
-            List<StrategicNavigationGraph.Node> bakedNodes;
-            int blockedSamples;
-            int saturatedQueries;
-            int discardedNodes;
-            bool completed = TryBakeNodes(out bakedNodes, out blockedSamples, out saturatedQueries,
-                out discardedNodes);
+            bool completed = TryBakeNodes(out var bakedNodes, out var blockedSamples, out var saturatedQueries,
+                out var discardedNodes);
             EditorUtility.ClearProgressBar();
             if (!completed)
             {
@@ -181,9 +176,8 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Editor
                             return false;
                         }
 
-                        Vector3 position = origin + new Vector3(x * nodeSpacing, y * nodeSpacing, z * nodeSpacing);
-                        bool saturated;
-                        if (IsPositionBlocked(position, out saturated))
+                        Vector3 gridPosition = origin + new Vector3(x * nodeSpacing, y * nodeSpacing, z * nodeSpacing);
+                        if (IsPositionBlocked(gridPosition, out var saturated))
                         {
                             blockedSamples++;
                         }
@@ -191,7 +185,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Editor
                         {
                             Vector3Int gridIndex = new Vector3Int(x, y, z);
                             nodeIndices.Add(gridIndex, nodePositions.Count);
-                            nodePositions.Add(position);
+                            nodePositions.Add(gridPosition);
                         }
                         if (saturated)
                         {
@@ -231,16 +225,14 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Editor
 
                             Vector3Int neighbourIndex = nodeEntry.Key +
                                                         new Vector3Int(xOffset, yOffset, zOffset);
-                            int neighbourNode;
-                            if (!nodeIndices.TryGetValue(neighbourIndex, out neighbourNode) ||
+                            if (!nodeIndices.TryGetValue(neighbourIndex, out var neighbourNode) ||
                                 neighbourNode <= nodeEntry.Value)
                             {
                                 continue;
                             }
 
-                            bool saturated;
                             if (!IsConnectionBlocked(nodePositions[nodeEntry.Value], nodePositions[neighbourNode],
-                                    out saturated))
+                                    out var saturated))
                             {
                                 connections[nodeEntry.Value].Add(neighbourNode);
                                 connections[neighbourNode].Add(nodeEntry.Value);
@@ -353,9 +345,9 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Editor
             }
         }
 
-        private bool IsPositionBlocked(Vector3 position, out bool saturated)
+        private bool IsPositionBlocked(Vector3 gridPosition, out bool saturated)
         {
-            int hitCount = Physics.OverlapSphereNonAlloc(position, clearanceRadius, overlapBuffer, obstacleLayers,
+            int hitCount = Physics.OverlapSphereNonAlloc(gridPosition, clearanceRadius, overlapBuffer, obstacleLayers,
                 QueryTriggerInteraction.Ignore);
             saturated = hitCount == overlapBuffer.Length;
             for (int index = 0; index < hitCount; index++)

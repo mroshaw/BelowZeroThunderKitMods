@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 using DaftAppleGames.SeaTruckRecall_BZ.DockRecaller;
@@ -27,7 +26,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Editor
         /// <summary>
         /// Opens the production compiled-terrain graph baker.
         /// </summary>
-        [MenuItem("Tools/Daft Apple Games/SeaTruck Recall/Compiled Terrain Graph Baker")]
+        [MenuItem("Tools/SeaTruck Recall/Compiled Terrain Graph Baker")]
         public static void ShowWindow()
         {
             CompiledTerrainGraphBakerWindow window = GetWindow<CompiledTerrainGraphBakerWindow>();
@@ -150,8 +149,7 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Editor
 
         private void BakeGraph()
         {
-            string validationError;
-            if (!ValidateBakeSettings(out validationError))
+            if (!ValidateBakeSettings(out var validationError))
             {
                 EditorUtility.DisplayDialog("Cannot Bake Compiled Terrain Graph", validationError, "OK");
                 return;
@@ -173,14 +171,10 @@ namespace DaftAppleGames.SeaTruckRecall_BZ.Editor
 
                     StrategicGraphBuilder builder = new StrategicGraphBuilder(bakeBounds, nodeSpacing,
                         keepLargestConnectedRegion);
-                    List<StrategicNavigationGraph.Node> bakedNodes;
-                    int blockedSamples;
-                    int blockedConnections;
-                    int discardedNodes;
                     bool completed = builder.TryBuild(
-                        position => cacheReader.IsPositionClear(position, clearanceRadius),
+                        gridPosition => cacheReader.IsPositionClear(gridPosition, clearanceRadius),
                         (start, end) => cacheReader.IsConnectionClear(start, end, clearanceRadius),
-                        out bakedNodes, out blockedSamples, out blockedConnections, out discardedNodes);
+                        out var bakedNodes, out var blockedSamples, out var blockedConnections, out var discardedNodes);
                     if (!completed)
                     {
                         resultSummary = "Bake cancelled. The existing graph asset was not changed.";
