@@ -15,7 +15,7 @@ namespace DaftAppleGames.SubnauticaPets.Pets
     {
         private const string PrefabAssetName = "DNASampleTube.prefab";
         private const string EncKey = "PetDna";
-        private const string EncPath = "Lifeforms/Fauna";
+        private const string EncPath = "Research/Lifeforms/Fauna";
         private const string DatabankPopupImageAssetName = "PetDnaDataBankPopupImageTexture.png";
         private const string DatabankMainImageAssetName = "PetDnaDataBankMainImageTexture.png";
 

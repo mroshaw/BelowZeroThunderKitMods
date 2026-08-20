@@ -1,0 +1,105 @@
+[quote][size=3][i]The Alterra Corporation may be known for their monopoly of the weapons trade during The Expansion, but what they desire more than profit is control. Control of the weapons markets, control of their devoted employees, control of the very environments in which they operate.
+
+Ever on the lookout for an opportunity, Alterra executives devised a secret mission: the scientific crew of the Aurora were to tame and weaponize the native creatures of 4546B. These innocent beasts were to be transformed into formidable weapons, ready to march into battle as foot soldiers of the highest bidder.
+
+However, fate had different plans. The Aurora met a tragic demise, thwarting the realisation of this ambitious goal. In the explosive aftermath, strewn across the forsaken planet, cloning equipment lies broken, the mission unfulfilled.
+
+Ever enterprising, you see not waste but untapped potential. While these creatures may be useless as weapons to you, they hold the promise of companionship and hope in troubled times.[/i][/size][/quote]
+
+[size=6][b]Welcome to Subnautica Pets BZ![/b][/size]
+[size=4][b]New in v2.13[/b][/size]
+[size=3]The latest version comes with these new features:[/size]
+[list]
+[*][size=3]New Rock Puncher pet![/size][/*]
+[*][size=3]Loads of bug fixes and enhancements. See the change log for details.[/size][/*]
+[/list]
+[size=4][b]Game Features[/b][/size]
+[size=3]Subnautica Pets BZ adds a whole host of new features to the base game:[/size]
+[list]
+[*][size=3]A whole new mechanism for spawning and managing pets! Use the Pet Fabricator to spawn your chosen pet, and the Pet Console to manage, rename, and, if you're really callous, kill the beasties keeping your bases warm while you're away.[/size][/*]
+[*][size=3]New "Adventure Mode", as featured in the [url=https://www.nexusmods.com/subnautica/mods/1373]Subnautica Pets 2 mod[/url], with lore-friendly gameplay![/size][/*]
+[*][size=3]Choose from one of seven snuggly pets:[/size]
+[list]
+[*][size=3]Snowstalker Baby.[/size][/*]
+[*][size=3]Pengling Adult.[/size][/*]
+[*][size=3]Pengling Baby.[/size][/*]
+[*][size=3]Trivalve (Blue and Gold).[/size][/*]
+[*][size=3]Pinnacarid[/size][/*]
+[*][size=3]Rock Puncher[/size][/*]
+[/list]
+[/*]
+[*][size=3]Enable the "Bonus Pets" feature in Mod Options, and you can choose from these NEW custom pets:[/size]
+[list]
+[*][size=3]Cat[/size][/*]
+[*][size=3]Dog[/size][/*]
+[*][size=3]Rabbit[/size][/*]
+[*][size=3]Snow Fox[/size][/*]
+[*][size=3]Walrus[/size][/*]
+[*][size=3]Seal[/size][/*]
+[/list]
+[/*]
+[*][size=3]Spawn in any indoor location, above ground or underwater.[/size][/*]
+[*][size=3]Watch the little critters scurry around your base, walking, jumping and sleeping.[/size][/*]
+[*][size=3]Approach your pet to interact and watch its reaction. Left-click a pet to play a random animation.[/size][/*]
+[*][size=3]Pet names and locations are saved when you save your game, so they'll always be there to welcome you back at base![/size][/*]
+[/list]
+[quote][size=3][b]IMPORTANT:[/b] This mod uses BepInEx and Nautilus. You must install these to use this mod! Please install the latest versions of "[url=https://www.nexusmods.com/subnauticabelowzero/mods/344]Tobey's BepInEx Pack for Subnautica Below Zero[/url]" and "[url=https://www.nexusmods.com/subnauticabelowzero/mods/373]Nautilus BZ[/url]". Without them, this mod WILL NOT WORK!
+
+Please delete any old versions of the mod before installing this one!
+
+You can now use Vortex to install and manage the mod. You'll need the latest Vortex version, and the "[url=https://www.nexusmods.com/site/mods/203]Subnautica Below Zero Support[/url]" extension. Manual installation steps are shown in the video below.[/size][/quote]
+
+[quote][size=3][b]IMPORTANT![/b] With the release of the 2025 Patch, you'll need to install the LATEST versions of BepInEx Pack and Nautilus![/size][/quote]
+
+[size=4][b]User Guide[/b][/size]
+[size=3]With this new Subnautica Pets mod, I've rebuilt from the ground up, introducing "lore-friendly" gameplay around the "Pets" concept. With this in mind, this mod is ideally played "as is", with discovery playing a part in getting the most out of the mod. As such, I recommend you play the mod in "Adventure" mode! When it comes to collecting resources, don't forget the Scanner Room and Scanner Room Chip - scanning for resources is your friend!
+
+That said, if you're in the endgame and just want to enjoy having some beasties running around your base, you can enable "Creative" mode in the mod options to unlock everything. All you need then is titanium, and you can explore all that the mod has to offer. Switching modes requires a restart of the game but can be done mid-save.
+
+Note that "Custom Pets" don't require DNA, and are not a part of the "Adventure" lore-friendly experience.
+
+Unlike previous versions, there are no other "mod options" or keyboard shortcuts. All mod functionality is built into the game.[/size]
+
+[spoiler][size=4][b]Spoilers[/b][/size]
+[size=3]This new version of the Pets mod has been created in a way to make the experience more "organic", with discovery and task/reward-focused gameplay, rather than "instant access" to pets. If you want to get straight to spawning Pets, you can find spoilers on how it all works [url=https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/SubnauticaPets_BZ#readme]here[/url] or simply enable "Creative" mode, save, quit, reload, and enjoy! You can spawn DNA via the console using the standard "item" command - just use these item names in your command:[/size]
+
+[list]
+[*][size=3]PengwingAdultPetDna[/size][/*]
+[*][size=3]PenglingBabyPetDna[/size][/*]
+[*][size=3]SnowstalkerBabyPetDna[/size][/*]
+[*][size=3]TrivalveBluePetDna[/size][/*]
+[*][size=3]TrivalveYellowPetDna[/size][/*]
+[*][size=3]PinnacaridPetDna[/size][/*]
+[*][size=3]RockPuncherDna[/size][/*]
+[/list]
+[/spoiler]
+[size=4][b]Warning:[/b][/size]
+[size=3]Some important information before you start playing:[/size]
+[list]
+[*][size=3]A Subnautica Pet is for life, not just for Christmas![/size][/*]
+[*][size=3]Pets are clumsy and may get stuck. Right-click a pet to "beckon" them, and immediately move backwards. The Pet will move to your position.[/size][/*]
+[/list]
+[size=3]Thank you for reading, and please do enjoy the mod![/size]
+
+[size=4][b]Help and Feedback[/b][/size]
+[size=3]If you have trouble with the mod, or have questions, thoughts or feedback regarding gameplay, please get in touch! The best way to do this is via the [url=https://www.nexusmods.com/link/external?url=https%3A%2F%2Fdiscord.gg%2FUpWuWwq]Subnautica modding Discord[/url], which has two "help-and-support" channels that you can use. Tag me, MrOshaw-DaftAppleGames, with any request, and I’ll try to respond as soon as I can. Alternatively, you can raise issues on my [url=https://github.com/mroshaw/SubnauticaMods/issues]GitHub repository[/url].
+
+If you can provide a log file, that helps immensely! You can do so by following these steps:[/size]
+[list]
+[*][size=3]In the main menu, click Options > Mods.[/size][/*]
+[*][size=3]Under the Subnautica Pets menu, check the "Detailed logging" option.[/size][/*]
+[*][size=3]Start the game and reproduce the issue.[/size][/*]
+[*][size=3]Close the game.[/size][/*]
+[*][size=3]Open Windows Explorer and navigate to: %LOCALAPPDATA%low\Unknown Worlds\Subnautica Below Zero[/size][/*]
+[*][size=3]Send me the Player.log file that you find there.[/size][/*]
+[/list]
+[size=4][b]Additional Credits[/b][/size]
+[size=3]Credit is due for these elements of the mod:[/size]
+[list]
+[*][size=3]Custom Pet Models and Animation by [url=https://assetstore.unity.com/publishers/19311]Omabuarts Studio[/url]. You too can buy these awesome models here: [url=https://assetstore.unity.com/packages/3d/characters/animals/quirky-series-animals-mega-pack-vol-1-137259]Quirky Series - Animals Mega Pack Vol 1[/url].[/size][/*]
+[*][size=3]Rabbit Squeaking and Sneezing (RabbitSqueak.wav) by kessir -- https://freesound.org/s/385849/ -- License: Attribution 4.0[/size][/*]
+[*][size=3]alienbabycry.wav (PetDeath.wav) by xpoki -- https://freesound.org/s/432735/ -- License: Attribution 3.0[/size][/*]
+[*][size=3]Generative AI (ChatGPT) was used to create the pet icon textures used in the mod.[/size][/*]
+[/list]
+[size=4][b]Installation and Gameplay Guide[/b][/size]
+[youtube]vfi2Wnj1iE8[/youtube]

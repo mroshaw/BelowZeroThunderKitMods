@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using BepInEx;
@@ -16,7 +16,7 @@ namespace DaftAppleGames.SubnauticaPets
     {
         private const string MyGuid = "com.daftapplegames.subnauticapets2";
         private const string PluginName = "SubnauticaPets2";
-        internal const string VersionString = "2.12.0";
+        internal const string VersionString = "2.13.1";
 
         private const string AssetBundleName = "subnauticapets2assetbundle";
         
