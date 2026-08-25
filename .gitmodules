@@ -4,3 +4,6 @@
 [submodule "Packages/RippedAssetImporter"]
 	path = Packages/RippedAssetImporter
 	url = https://github.com/mroshaw/RippedAssetImporter.git
+[submodule "Packages/ModPublisher"]
+	path = Packages/ModPublisher
+	url = https://github.com/mroshaw/ModPublisher.git

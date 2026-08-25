@@ -29,9 +29,9 @@ MonoBehaviour:
       fileCategory: main
       archiveExistingVersion: 1
       updateModVersion: 1
-      primaryModManagerDownload: 0
-      allowModManagerDownload: 0
-      showRequirementsPopup: 0
+      primaryModManagerDownload: 1
+      allowModManagerDownload: 1
+      showRequirementsPopup: 1
   - name: Subnautica Pets BZ
     pluginScript: {fileID: 11500000, guid: f25f6695796b40d438cf3822dcceb811, type: 3}
     manifest: {fileID: 11400000, guid: 1046126c490d7384799f2de26323218c, type: 2}
@@ -57,7 +57,7 @@ MonoBehaviour:
     version:
       major: 1
       minor: 6
-      patch: 0
+      patch: 3
     nexusMods:
       fileGroupId: 1459612
       gameScopedModId: 596

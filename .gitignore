@@ -110,6 +110,8 @@ crashlytics-build.properties
 **/GameRefAssets.meta
 **/ImportedRefAssets/
 **/ImportedRefAssets.meta
+**/SubnauticaRefAssets/
+**/SubnauticaRefAssets.meta
 
 # Include the RipperAssetImporter package submodule
 !/[Pp]ackages/RippedAssetImporter
