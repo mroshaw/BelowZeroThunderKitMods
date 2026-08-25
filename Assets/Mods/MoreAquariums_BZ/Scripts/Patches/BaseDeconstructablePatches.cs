@@ -30,7 +30,7 @@ namespace DaftAppleGames.MoreAquariums.Patches
             Base generatedBase = __result.GetComponentInParent<Base>();
             bool newAquariumPlacement =
                 BaseGhostPatches.TryConsumeAquariumPlacement(
-                    generatedBase, recipe, bounds);
+                    generatedBase, recipe, bounds, __result.transform.position);
             bool persistedAquarium = recipe == TechType.BaseObservatory &&
                 BaseAquariumPersistence.ContainsLocation(__result.transform.position);
             if (!newAquariumPlacement && !persistedAquarium)

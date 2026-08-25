@@ -1,4 +1,5 @@
 using HarmonyLib;
+using UnityEngine;
 using static DaftAppleGames.MoreAquariums.MoreAquariumsPlugin;
 
 namespace DaftAppleGames.MoreAquariums.Patches
@@ -9,8 +10,11 @@ namespace DaftAppleGames.MoreAquariums.Patches
     [HarmonyPatch(typeof(BaseGhost))]
     internal class BaseGhostPatches
     {
+        private const float PlacementPositionToleranceSqr = 0.25f;
+
         private static Base pendingBase;
         private static Int3 pendingCell;
+        private static Vector3 pendingPosition;
         private static bool aquariumPlacementPending;
 
         /// <summary>
@@ -29,29 +33,40 @@ namespace DaftAppleGames.MoreAquariums.Patches
 
             pendingBase = __instance.targetBase;
             pendingCell = __instance.targetOffset;
+            pendingPosition = __instance.transform.position;
             aquariumPlacementPending = pendingBase;
             ModDebugLog.LogInfo(
                 $"Base aquarium ghost placement starting. Ghost: {__instance.name}, " +
                 $"target base: {GetBaseName(pendingBase)}, target cell: {pendingCell}, " +
-                $"world position: {__instance.transform.position}.");
+                $"world position: {pendingPosition}.");
         }
 
         /// <summary>
         /// Matches a generated Observatory deconstructable to the pending custom placement.
         /// </summary>
         internal static bool TryConsumeAquariumPlacement(Base generatedBase,
-            TechType recipe, Int3.Bounds bounds)
+            TechType recipe, Int3.Bounds bounds, Vector3 generatedPosition)
         {
             ModDebugLog.LogDebug(
                 $"Generated base cell deconstructable. Recipe: {recipe}, " +
                 $"base: {GetBaseName(generatedBase)}, bounds: {bounds}, " +
+                $"world position: {generatedPosition}, " +
                 $"aquarium pending: {aquariumPlacementPending}, " +
-                $"pending base: {GetBaseName(pendingBase)}, pending cell: {pendingCell}.");
+                $"pending base: {GetBaseName(pendingBase)}, pending cell: {pendingCell}, " +
+                $"pending world position: {pendingPosition}.");
 
             if (!aquariumPlacementPending ||
                 recipe != TechType.BaseObservatory ||
-                generatedBase != pendingBase ||
-                !ContainsCell(bounds, pendingCell))
+                generatedBase != pendingBase)
+            {
+                return false;
+            }
+
+            bool cellMatches = ContainsCell(bounds, pendingCell);
+            bool positionMatches =
+                (generatedPosition - pendingPosition).sqrMagnitude <=
+                PlacementPositionToleranceSqr;
+            if (!cellMatches && !positionMatches)
             {
                 return false;
             }
@@ -60,7 +75,8 @@ namespace DaftAppleGames.MoreAquariums.Patches
             pendingBase = null;
             ModDebugLog.LogInfo(
                 $"Matched generated Observatory cell {bounds} to the pending " +
-                $"Observatory Aquarium placement at {pendingCell}.");
+                $"Observatory Aquarium placement at {pendingCell} using " +
+                $"{(cellMatches ? "cell" : "world position")} matching.");
             return true;
         }
 
