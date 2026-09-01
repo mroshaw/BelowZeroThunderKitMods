@@ -1,0 +1,17 @@
+{
+  "AutoLockerLabels_Category_Empty": "Empty",
+  "AutoLockerLabels_Category_Metals": "Metals",
+  "AutoLockerLabels_Category_Crystals": "Crystals",
+  "AutoLockerLabels_Category_Batteries" : "Batteries",
+  "AutoLockerLabels_Category_Electronics" : "Electronics",
+  "AutoLockerLabels_Category_Food" : "Food",
+  "AutoLockerLabels_Category_Water" : "Water",
+  "AutoLockerLabels_Category_Tools" : "Tools",
+  "AutoLockerLabels_Category_Equipment" : "Equipment",
+  "AutoLockerLabels_Category_Materials" : "Materials",
+  "AutoLockerLabels_Category_Vehicle_Upgrades" : "Vehicle Upgrades",
+  "AutoLockerLabels_Category_Eggs" : "Eggs",
+  "AutoLockerLabels_Category_Collectibles" : "Collectibles",
+  "AutoLockerLabels_Category_Raw_Materials" : "Raw Materials",
+  "AutoLockerLabels_Category_Mixed" : "Mixed"
+}

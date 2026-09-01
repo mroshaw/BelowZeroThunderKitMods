@@ -70,3 +70,22 @@ MonoBehaviour:
       primaryModManagerDownload: 1
       allowModManagerDownload: 1
       showRequirementsPopup: 1
+  - name: Auto Locker Labels
+    pluginScript: {fileID: 11500000, guid: cc250c09ee1c4d7449cec39794487bfd, type: 3}
+    manifest: {fileID: 11400000, guid: 2902aab298b6abf48bd6fddb3e14f092, type: 2}
+    version:
+      major: 1
+      minor: 0
+      patch: 0
+    nexusMods:
+      fileGroupId: 
+      gameScopedModId: 752
+      gameDomain: subnauticabelowzero
+      displayName: AutoLockerLabels_ BZ
+      description: Main mod file
+      fileCategory: main
+      archiveExistingVersion: 1
+      updateModVersion: 1
+      primaryModManagerDownload: 1
+      allowModManagerDownload: 1
+      showRequirementsPopup: 1

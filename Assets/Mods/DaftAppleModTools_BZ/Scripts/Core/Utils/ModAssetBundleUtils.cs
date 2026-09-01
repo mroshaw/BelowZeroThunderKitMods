@@ -80,7 +80,7 @@ namespace DaftAppleGames.ModTools
         /// <summary>
         /// Loads a given Game Object from Asset Bundles shipped in the Mod folder
         /// </summary>
-        public Object GetObjectFromAssetBundle<T>(string objectName) where T : Object
+        public Object GetObjectFromAssetBundle<T>(string objectName, bool activeState = true) where T : Object
         {
             _modLog.LogDebug($"ModUtils: Looking for object of type {typeof(T)} named {objectName} in Asset Bundle.");
             
@@ -93,6 +93,12 @@ namespace DaftAppleGames.ModTools
                 return null;
             }
             _modLog.LogDebug($"ModUtils: Found GameObject named {objectName} in Asset Bundle.");
+
+            if (obj is GameObject objGameObject)
+            {
+                objGameObject.SetActive(activeState);
+            }
+            
             return obj;
         }
 
