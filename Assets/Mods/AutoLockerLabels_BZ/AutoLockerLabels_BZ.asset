@@ -16,7 +16,7 @@ MonoBehaviour:
   Author: Daft Apple Games
   Name: AutoLockerLabels_BZ
   Description: Automatically generates locker labels based on the contents
-  Version: 1.0.0
+  Version: 1.0.1
   Dependencies: []
 --- !u!114 &11400000
 MonoBehaviour:
@@ -71,3 +71,4 @@ MonoBehaviour:
   - <ManifestPluginStaging>
   definitions:
   - {fileID: 5897886265953266890, guid: a907e4edcfa300e4db1c7d8054b88dff, type: 3}
+  - {fileID: 5897886265953266890, guid: a8101a7f788ddab4d835833e6de817ac, type: 3}

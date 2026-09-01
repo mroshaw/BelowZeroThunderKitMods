@@ -102,6 +102,11 @@ namespace DaftAppleGames.ModTools
             return obj;
         }
 
+        public Object GetObjectFromAssetBundle<T>(string objectName) where T : Object
+        {
+            return GetObjectFromAssetBundle<T>(objectName, true);
+        }
+        
         /// <summary>
         /// Returns the internal paths of every asset contained in the loaded AssetBundle.
         /// </summary>
