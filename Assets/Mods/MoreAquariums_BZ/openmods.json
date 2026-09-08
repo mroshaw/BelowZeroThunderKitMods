@@ -1,0 +1,48 @@
+{
+  "$schema": "https://openmods.net/manifest.schema.json",
+  "schemaVersion": 2,
+
+  "slug": "more-aquariums-bz",
+  "name": "More Aquariums BZ",
+  "description" : "Adds beautiful new interior and exterior aquariums to the habitat builder.",
+  "supportedGameId": "subnautica-below-zero",
+
+  "releaseAssets": ["BiggerAquariums_BZ*.zip"],
+  "primaryAsset": "BiggerAquariums_BZ*.zip",
+
+  "readme": "README.md",
+
+  "thumbnail": "thumbnail.png",
+  
+  "links": [
+    { "label": "Discord", "icon": "chat", "url": "https://discord.gg/BJtGSdnRm" },
+    { "label": "Website", "url": "https://github.com/mroshaw/SubnauticaThunderKitMods" }
+  ],
+
+  "media": [
+    { "type": "image", "url": "ObservatoryAquarium.png", "label": "Observatory Aquarium" },
+    { "type": "image", "url": "SphericalAquarium.jpg", "label": "Spherical Aquarium" },
+    { "type": "image", "url": "DoubleAquarium.png", "label": "Double Aquarium" },
+    { "type": "image", "url": "DeskAquarium.png", "label": "Desk Aquarium" },
+    { "type": "image", "url": "CornerAquarium.png", "label": "Corner Aquarium" }
+  ],
+
+  "faq": [
+    { "question": "How do I install?", "answer": "Use the OpenMods Manager or extract the zip into your game folder." }
+  ],
+
+  "dependencies": {
+    "1.0.0": [
+      { "modId": 30, "release": "1.0.0-pre.50" },
+      { "modId": 31, "release": "5.4.23.5" }
+    ]
+  },
+
+  "install": {
+    "path": "BepInEx/plugins",
+    "custom-path": {
+      "src/plugin.dll": "BepInEx/plugins/",
+      "config/":       "BepInEx/config/"
+    }
+  }
+}

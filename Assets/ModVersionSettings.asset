@@ -83,10 +83,10 @@ MonoBehaviour:
       minor: 6
       patch: 3
     currentPublishedVersion:
-      major: 0
-      minor: 0
-      patch: 0
-    publishingSites: 1
+      major: 1
+      minor: 6
+      patch: 3
+    publishingSites: 2
     nexusMods:
       fileGroupId: 1459612
       gameScopedModId: 596
