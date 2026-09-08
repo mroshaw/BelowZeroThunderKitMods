@@ -17,8 +17,9 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.Patches
         [HarmonyPostfix]
         private static void AwakePostFix(StorageContainer __instance)
         {
+            TechType techType = CraftData.GetTechType(__instance.gameObject);
             // Add the new Label prefab and a LockerController to the freestanding locker
-            if (CraftData.GetTechType(__instance.gameObject) == TechType.Locker)
+            if (techType == TechType.Locker)
             {
                 ModDebugLog.LogDebug($"Instantiating label prefab instance on: '{__instance.name}'");
                 GameObject labelPrefab = ModAssetUtils.GetObjectFromAssetBundle<GameObject>(FreestandingLockerLabelPrefabName, false) as GameObject;
@@ -48,15 +49,15 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.Patches
             }
 
             // Add the new AutoToggle prefab and a LockerController to the small locker
-            if (CraftData.GetTechType(__instance.gameObject) == TechType.SmallLocker)
+            if (techType == TechType.SmallLocker)
             {
                 ModDebugLog.LogDebug($"Instantiating auto toggle prefab instance on: '{__instance.name}'");
                 GameObject toggleObject = ModAssetUtils.GetPrefabInstanceFromAssetBundle(WallLockerTogglePrefabName, true);
                 AutoToggle autoToggle = toggleObject.GetComponent<AutoToggle>();
                 
                 ColoredLabel coloredLabel = __instance.GetComponentInChildren<ColoredLabel>(true);
-                RectTransform toggleTransform = toggleObject.GetComponent<RectTransform>();;
-                toggleTransform.transform.SetParent(coloredLabel.signInput.transform, false);
+                RectTransform toggleTransform = toggleObject.GetComponent<RectTransform>();
+                toggleTransform.SetParent(coloredLabel.signInput.transform, false);
                 toggleTransform.anchorMin = new Vector2(0.5f, 0.5f);
                 toggleTransform.anchorMax = new Vector2(0.5f, 0.5f);
                 toggleTransform.pivot = new Vector2(0.5f, 0.5f);
@@ -75,6 +76,11 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.Patches
             if (labelObject == null)
             {
                 ModDebugLog.LogError($"ColoredLabel diagnostics at '{stage}': label GameObject is null.");
+                return;
+            }
+
+            if (!DetailedLoggingEnabled)
+            {
                 return;
             }
 

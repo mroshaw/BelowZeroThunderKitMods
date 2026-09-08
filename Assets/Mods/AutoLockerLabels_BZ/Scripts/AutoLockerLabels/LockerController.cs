@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using static DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabelsPlugin;
 
 namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
@@ -11,7 +12,9 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
         private StorageContainer storageContainer;
         private Constructable constructable;
         private ColoredLabel coloredLabel;
-        private AutoToggle autoToggle;
+        private Toggle automaticToggle;
+        private uGUI_InputField labelInput;
+        private ItemsContainer itemsContainer;
         private bool isAutomatic;
         private bool savesCustomLabel;
         private string lastGeneratedLabel;
@@ -25,15 +28,7 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
             storageContainer = GetComponent<StorageContainer>();
             constructable = GetComponent<Constructable>();
             coloredLabel = GetComponentInChildren<ColoredLabel>(true);
-            ModDebugLog.LogDebug($"LockerController components for '{gameObject.name}': StorageContainer={storageContainer != null}, ItemsContainer={storageContainer != null && storageContainer.container != null}, Constructable={constructable != null}, ColoredLabel={coloredLabel != null}, SignInput={coloredLabel != null && coloredLabel.signInput != null}, InputField={coloredLabel != null && coloredLabel.signInput != null && coloredLabel.signInput.inputField != null}.");
-            
-            /* ColoredLabel Debug */
-            ColoredLabel[] coloredLabels = GetComponentsInChildren<ColoredLabel>(true);
-
-            foreach (ColoredLabel candidate in coloredLabels)
-            {
-                ModDebugLog.LogDebug($"Found ColoredLabel on: {candidate.gameObject.name}");
-            }
+            LogComponentDiagnostics();
             
             if (!IsValidLocker())
             {
@@ -50,9 +45,10 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
                 return;
             }
 
-            AutoToggle[] autoToggles = GetComponentsInChildren<AutoToggle>(true);
-            autoToggle = autoToggles.Length > 0 ? autoToggles[0] : null;
-            ModDebugLog.LogDebug($"LockerController toggle discovery for '{gameObject.name}': AutoToggle count={autoToggles.Length}, selectedAutoToggle={(autoToggle == null ? "null" : autoToggle.gameObject.name)}, Toggle reference={autoToggle != null && autoToggle.Toggle != null}.");
+            AutoToggle autoToggle = GetComponentInChildren<AutoToggle>(true);
+            automaticToggle = autoToggle == null ? null : autoToggle.Toggle;
+            labelInput = coloredLabel.signInput.inputField;
+            itemsContainer = storageContainer.container;
             savesCustomLabel = CraftData.GetTechType(storageContainer.gameObject) == TechType.Locker;
            
             lockerId = prefabIdentifier.Id;
@@ -60,10 +56,10 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
             UpdateLabelEditability();
 
             // Subscribe to toggle state change to toggle automatic
-            if (autoToggle != null && autoToggle.Toggle != null)
+            if (automaticToggle != null)
             {
-                autoToggle.Toggle.SetIsOnWithoutNotify(isAutomatic);
-                autoToggle.Toggle.onValueChanged.AddListener(SetAutomatic);
+                automaticToggle.SetIsOnWithoutNotify(isAutomatic);
+                automaticToggle.onValueChanged.AddListener(SetAutomatic);
                 ModDebugLog.LogDebug($"LockerController subscribed to AutoToggle.onValueChanged for '{gameObject.name}', initial state={isAutomatic}.");
             }
             else
@@ -73,11 +69,12 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
 
             if (savesCustomLabel)
             {
-                coloredLabel.signInput.inputField.onEndEdit.AddListener(OnCustomLabelEdited);
+                labelInput.onEndEdit.AddListener(OnCustomLabelEdited);
             }
             
-            storageContainer.container.onAddItem += OnItemAdded;
-            storageContainer.container.onRemoveItem += OnItemRemoved;
+            itemsContainer.onAddItem += OnContentsChanged;
+            itemsContainer.onRemoveItem += OnContentsChanged;
+            CategoryService.CategoriesChanged += OnCategoriesChanged;
 
             if (isAutomatic)
             {
@@ -91,6 +88,8 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
 
         private void OnDestroy()
         {
+            CategoryService.CategoriesChanged -= OnCategoriesChanged;
+
             if (constructable != null &&
                 constructable.constructedAmount <= 0f &&
                 !string.IsNullOrWhiteSpace(lockerId))
@@ -98,23 +97,46 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
                 AutoLockerLabelsPlugin.SaveData.RemoveLocker(lockerId);
             }
 
-            if (autoToggle)
+            if (automaticToggle != null)
             {
-                autoToggle.Toggle.onValueChanged.RemoveListener(SetAutomatic);
+                automaticToggle.onValueChanged.RemoveListener(SetAutomatic);
             }
 
-            if (savesCustomLabel && coloredLabel != null && coloredLabel.signInput != null && coloredLabel.signInput.inputField != null)
+            if (savesCustomLabel && labelInput != null)
             {
-                coloredLabel.signInput.inputField.onEndEdit.RemoveListener(OnCustomLabelEdited);
+                labelInput.onEndEdit.RemoveListener(OnCustomLabelEdited);
             }
             
-            if (storageContainer == null || storageContainer.container == null)
+            if (itemsContainer is null)
             {
                 return;
             }
 
-            storageContainer.container.onAddItem -= OnItemAdded;
-            storageContainer.container.onRemoveItem -= OnItemRemoved;
+            itemsContainer.onAddItem -= OnContentsChanged;
+            itemsContainer.onRemoveItem -= OnContentsChanged;
+        }
+
+        private void LogComponentDiagnostics()
+        {
+            if (!DetailedLoggingEnabled)
+            {
+                return;
+            }
+
+            ModDebugLog.LogDebug($"LockerController components for '{gameObject.name}': StorageContainer={storageContainer != null}, ItemsContainer={storageContainer != null && storageContainer.container != null}, Constructable={constructable != null}, ColoredLabel={coloredLabel != null}, SignInput={coloredLabel != null && coloredLabel.signInput != null}, InputField={coloredLabel != null && coloredLabel.signInput != null && coloredLabel.signInput.inputField != null}.");
+            foreach (ColoredLabel candidate in GetComponentsInChildren<ColoredLabel>(true))
+            {
+                ModDebugLog.LogDebug($"Found ColoredLabel on: {candidate.gameObject.name}");
+            }
+        }
+
+        private void OnCategoriesChanged()
+        {
+            if (isAutomatic)
+            {
+                lastGeneratedLabel = null;
+                ApplyAutomaticLabel();
+            }
         }
 
         private bool IsValidLocker()
@@ -126,15 +148,7 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
                    coloredLabel.signInput.inputField != null;
         }
 
-        private void OnItemAdded(InventoryItem item)
-        {
-            if (isAutomatic)
-            {
-                ApplyAutomaticLabel();
-            }
-        }
-
-        private void OnItemRemoved(InventoryItem item)
+        private void OnContentsChanged(InventoryItem item)
         {
             if (isAutomatic)
             {
@@ -199,7 +213,7 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
 
         private void UpdateLabelEditability()
         {
-            coloredLabel.signInput.inputField.readOnly = isAutomatic;
+            labelInput.readOnly = isAutomatic;
         }
 
         private void ApplySavedCustomLabel()
@@ -212,7 +226,7 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
 
         private void ApplyAutomaticLabel()
         {
-            string newGeneratedLabel = LabelGenerator.Generate(storageContainer.container).ToUpper();
+            string newGeneratedLabel = LabelGenerator.Generate(itemsContainer).ToUpper();
 
             if (lastGeneratedLabel == newGeneratedLabel)
             {

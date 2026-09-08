@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Nautilus.Json;
 using Nautilus.Json.Attributes;
 
@@ -19,6 +19,7 @@ namespace DaftAppleGames.AutoLockerLabels_BZ
         internal bool IsAutomatic(string lockerId)
         {
             return !string.IsNullOrWhiteSpace(lockerId) &&
+                   AutomaticLockerIds != null &&
                    AutomaticLockerIds.Contains(lockerId);
         }
 
@@ -27,6 +28,11 @@ namespace DaftAppleGames.AutoLockerLabels_BZ
             if (string.IsNullOrWhiteSpace(lockerId))
             {
                 return;
+            }
+
+            if (AutomaticLockerIds == null)
+            {
+                AutomaticLockerIds = new HashSet<string>();
             }
 
             AutomaticLockerIds.Add(lockerId);
@@ -39,13 +45,15 @@ namespace DaftAppleGames.AutoLockerLabels_BZ
                 return;
             }
 
-            AutomaticLockerIds.Remove(lockerId);
+            AutomaticLockerIds?.Remove(lockerId);
         }
 
         internal bool TryGetCustomLabel(string lockerId, out string label)
         {
             label = string.Empty;
-            return !string.IsNullOrWhiteSpace(lockerId) && CustomLabels.TryGetValue(lockerId, out label);
+            return !string.IsNullOrWhiteSpace(lockerId) &&
+                   CustomLabels != null &&
+                   CustomLabels.TryGetValue(lockerId, out label);
         }
 
         internal void SetCustomLabel(string lockerId, string label)
@@ -53,6 +61,11 @@ namespace DaftAppleGames.AutoLockerLabels_BZ
             if (string.IsNullOrWhiteSpace(lockerId))
             {
                 return;
+            }
+
+            if (CustomLabels == null)
+            {
+                CustomLabels = new Dictionary<string, string>();
             }
 
             CustomLabels[lockerId] = label ?? string.Empty;
@@ -65,8 +78,8 @@ namespace DaftAppleGames.AutoLockerLabels_BZ
                 return;
             }
 
-            AutomaticLockerIds.Remove(lockerId);
-            CustomLabels.Remove(lockerId);
+            AutomaticLockerIds?.Remove(lockerId);
+            CustomLabels?.Remove(lockerId);
         }
     }
 }

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://openmods.net/manifest.schema.json",
+  "schemaVersion": 2,
+
+  "slug": "auto-locker-labels-bz",
+  "name": "Auto Locker Labels BZ",
+  "description" : "Adds editable labels to freestanding lockers and a toggleable 'auto' mode that automatically sets the labels based on their contents.",
+  "supportedGameId": "subnautica-below-zero",
+
+  "releaseAssets": ["AutoLockerLabels_BZ*.zip"],
+  "primaryAsset": "AutoLockerLabels_BZ*.zip",
+
+  "readme": "README.md",
+
+  "thumbnail": "thumbnail.png",
+  
+  "links": [
+    { "label": "Discord", "icon": "chat", "url": "https://discord.gg/BJtGSdnRm" },
+    { "label": "Website", "url": "https://github.com/mroshaw/SubnauticaThunderKitMods" }
+  ],
+
+  "media": [
+    { "type": "image", "url": "AutoLabelScreenshot.png", "label": "Auto labels in use" },
+    { "type": "image", "url": "CategoryCustomisationScreenshot.jpg", "label": "Category customisation" },
+    { "type": "image", "url": "AddTechTypesScreenshot.png", "label": "Category item customisation" }
+  ],
+
+  "faq": [
+    { "question": "How do I install?", "answer": "Use the OpenMods Manager or extract the zip into your game folder." }
+  ],
+
+  "dependencies": {
+    "1.0.0": [
+      { "modId": 30, "release": "1.0.0-pre.50" },
+      { "modId": 31, "release": "5.4.23.5" }
+    ]
+  },
+
+  "install": {
+    "path": "BepInEx/plugins",
+    "custom-path": {
+      "src/plugin.dll": "BepInEx/plugins/",
+      "config/":       "BepInEx/config/"
+    }
+  }
+}

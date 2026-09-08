@@ -1,6 +1,8 @@
 ﻿using Nautilus.Json;
 using Nautilus.Options;
 using Nautilus.Options.Attributes;
+using UnityEngine;
+using DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels;
 using static DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabelsPlugin;
 
 namespace DaftAppleGames.AutoLockerLabels_BZ
@@ -11,6 +13,39 @@ namespace DaftAppleGames.AutoLockerLabels_BZ
     [Menu("Auto Locker Labels")]
     public class ModConfigFile : ConfigFile
     {
+        private const string CategoryConfigUiPrefabAssetName = "CategoryConfigUi.prefab";
+        private static CategoryConfigDialog categoryConfigDialog;
+
+        /// <summary>
+        /// Opens the automatic locker category configuration dialog.
+        /// </summary>
+        [Button("Configure Categories")]
+        public void ConfigureCategories(ButtonClickedEventArgs eventArgs)
+        {
+            if (!categoryConfigDialog)
+            {
+                GameObject categoryConfigUi = ModAssetUtils.GetPrefabInstanceFromAssetBundle(
+                    CategoryConfigUiPrefabAssetName,
+                    false);
+                if (!categoryConfigUi)
+                {
+                    ModDebugLog.LogError("Could not load the category configuration UI prefab.");
+                    return;
+                }
+
+                categoryConfigDialog = categoryConfigUi.GetComponentInChildren<CategoryConfigDialog>(true);
+                if (!categoryConfigDialog)
+                {
+                    ModDebugLog.LogError("The category configuration UI has no CategoryConfigDialog component.");
+                    Object.Destroy(categoryConfigUi);
+                    return;
+                }
+            }
+
+            categoryConfigDialog.Reparent();
+            categoryConfigDialog.Show();
+        }
+
         /// <summary>
         /// Threshold for an item to override the locker label
         /// </summary>
@@ -23,7 +58,7 @@ namespace DaftAppleGames.AutoLockerLabels_BZ
         /// <summary>
         /// Enable detailed logging
         /// </summary>
-        [Toggle("Detailed logging", Tooltip="Use this to produce a detailed log when reporting bugs. Logs are written to %LOCALAPPDATA%low\\Unknown Worlds\\Subnautica\\Player.log"), OnChange(nameof(OnLoggingChanged))]
+        [Toggle("Detailed logging", Tooltip="Use this to produce a detailed log when reporting bugs. Logs are written to %LOCALAPPDATA%low\\Unknown Worlds\\Below Zero\\Player.log"), OnChange(nameof(OnLoggingChanged))]
         public bool DetailedLogging = false;
         
         /// <summary>

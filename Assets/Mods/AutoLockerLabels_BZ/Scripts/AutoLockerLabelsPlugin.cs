@@ -3,6 +3,7 @@ using BepInEx;
 using HarmonyLib;
 using DaftAppleGames.ModTools;
 using Nautilus.Handlers;
+using DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels;
 
 namespace DaftAppleGames.AutoLockerLabels_BZ
 {
@@ -10,10 +11,9 @@ namespace DaftAppleGames.AutoLockerLabels_BZ
     {
         private const string MyGuid = "com.mroshaw.autolockerlabels";
         private const string PluginName = "AutoLockerLabels BZ";
-        private const string VersionString = "1.0.1";
+        internal const string VersionString = "1.0.2";
         
         private const string AssetBundleName = "autolockerlabelassetbundle";
-        private const string ManagerPrefabName = "Label.prefab";
         
         private static readonly Harmony Harmony = new Harmony(MyGuid);
         internal static ModAssetBundleUtils ModAssetUtils;
@@ -22,9 +22,11 @@ namespace DaftAppleGames.AutoLockerLabels_BZ
 #if !UNITY_EDITOR
         internal static ModConfigFile ConfigFile = OptionsPanelHandler.RegisterModOptions<ModConfigFile>();
         internal static ModLog ModDebugLog;
+        internal static bool DetailedLoggingEnabled => ConfigFile.DetailedLogging;
 #else
         internal static readonly ModConfigFile ConfigFile;
         internal static ModLog ModDebugLog = new ModLog(null, true);
+        internal static bool DetailedLoggingEnabled => true;
 #endif
 
         // Save data
@@ -41,6 +43,9 @@ namespace DaftAppleGames.AutoLockerLabels_BZ
             // Initialise AssetBundle
             ModAssetUtils =
                 new ModAssetBundleUtils(AssetBundleName, Assembly.GetExecutingAssembly(), true, ModDebugLog);
+
+            // Load the effective built-in and player category configuration.
+            LabelGenerator.InitializeCategories();
             
             // Initialise save data
             SaveData =
