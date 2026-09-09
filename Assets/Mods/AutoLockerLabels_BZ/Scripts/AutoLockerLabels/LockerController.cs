@@ -10,9 +10,11 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
     public class LockerController : MonoBehaviour, IConstructable
     {
         private StorageContainer storageContainer;
+        private PrefabIdentifier prefabIdentifier;
         private Constructable constructable;
         private ColoredLabel coloredLabel;
         private Toggle automaticToggle;
+        private Button colorSelectorButton;
         private uGUI_InputField labelInput;
         private ItemsContainer itemsContainer;
         private bool isAutomatic;
@@ -27,8 +29,17 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
             ModDebugLog.LogDebug($"LockerController.Start entered for '{gameObject.name}'.");
             storageContainer = GetComponent<StorageContainer>();
             constructable = GetComponent<Constructable>();
-            coloredLabel = GetComponentInChildren<ColoredLabel>(true);
-            LogComponentDiagnostics();
+
+            GameObject lockerRoot = storageContainer && storageContainer.prefabRoot
+                ? storageContainer.prefabRoot
+                : gameObject;
+            TechType techType = CraftData.GetTechType(lockerRoot);
+
+            coloredLabel = lockerRoot.GetComponentInChildren<ColoredLabel>(true);
+            prefabIdentifier = lockerRoot.GetComponent<PrefabIdentifier>();
+
+            AutoToggle autoToggle = lockerRoot.GetComponentInChildren<AutoToggle>(true);
+            automaticToggle = autoToggle == null ? null : autoToggle.Toggle;
             
             if (!IsValidLocker())
             {
@@ -37,39 +48,46 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
                 return;
             }
 
-            PrefabIdentifier prefabIdentifier = storageContainer.GetComponent<PrefabIdentifier>();
-            if (prefabIdentifier == null)
-            {
-                ModDebugLog.LogError($"LockerController disabled for '{gameObject.name}' because no PrefabIdentifier was found.");
-                enabled = false;
-                return;
-            }
-
-            AutoToggle autoToggle = GetComponentInChildren<AutoToggle>(true);
-            automaticToggle = autoToggle == null ? null : autoToggle.Toggle;
             labelInput = coloredLabel.signInput.inputField;
             itemsContainer = storageContainer.container;
             savesCustomLabel = CraftData.GetTechType(storageContainer.gameObject) == TechType.Locker;
+
+            if (savesCustomLabel)
+            {
+                Transform colorSelectorTransform = coloredLabel.signInput.transform.Find("ColorSelector");
+                colorSelectorButton = colorSelectorTransform
+                    ? colorSelectorTransform.GetComponent<Button>()
+                    : null;
+            }
            
             lockerId = prefabIdentifier.Id;
             isAutomatic = AutoLockerLabelsPlugin.SaveData.IsAutomatic(lockerId);
             UpdateLabelEditability();
+            ApplySavedCustomLabelColor();
+
+            // For a SmallStorage locker, shift the ColorSelector to the left
+            if (techType == TechType.SmallStorage)
+            {
+                RectTransform colorSelectorTransform =
+                    coloredLabel.signInput.transform.Find("ColorSelector") as RectTransform;
+                RectTransform inputFieldTransform = labelInput.transform as RectTransform;
+                MoveSmallStorageUiElement(colorSelectorTransform, "ColorSelector", -40.0f, 0.0f);
+                // MoveSmallStorageUiElement(inputFieldTransform, "InputField", 20.0f, -25.0f);
+            }
 
             // Subscribe to toggle state change to toggle automatic
-            if (automaticToggle != null)
-            {
-                automaticToggle.SetIsOnWithoutNotify(isAutomatic);
-                automaticToggle.onValueChanged.AddListener(SetAutomatic);
-                ModDebugLog.LogDebug($"LockerController subscribed to AutoToggle.onValueChanged for '{gameObject.name}', initial state={isAutomatic}.");
-            }
-            else
-            {
-                ModDebugLog.LogError($"LockerController could not subscribe to AutoToggle.onValueChanged for '{gameObject.name}'.");
-            }
+            automaticToggle.SetIsOnWithoutNotify(isAutomatic);
+            automaticToggle.onValueChanged.AddListener(SetAutomatic);
+            ModDebugLog.LogDebug($"LockerController subscribed to AutoToggle.onValueChanged for '{gameObject.name}', initial state={isAutomatic}.");
 
             if (savesCustomLabel)
             {
                 labelInput.onEndEdit.AddListener(OnCustomLabelEdited);
+
+                if (colorSelectorButton)
+                {
+                    colorSelectorButton.onClick.AddListener(OnCustomLabelColorChanged);
+                }
             }
             
             itemsContainer.onAddItem += OnContentsChanged;
@@ -86,25 +104,46 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
             }
         }
 
+        private void MoveSmallStorageUiElement(
+            RectTransform controlRectTransform,
+            string gameObjectName,
+            float xDelta,
+            float yDelta)
+        {
+            if (controlRectTransform)
+            {
+                ModDebugLog.LogDebug($"Moving {gameObjectName} control...");
+                Vector2 position = controlRectTransform.anchoredPosition;
+                position.x += xDelta;
+                position.y += yDelta;
+                controlRectTransform.anchoredPosition = position;
+            }
+        }
+
         private void OnDestroy()
         {
             CategoryService.CategoriesChanged -= OnCategoriesChanged;
 
-            if (constructable != null &&
+            if (constructable &&
                 constructable.constructedAmount <= 0f &&
                 !string.IsNullOrWhiteSpace(lockerId))
             {
                 AutoLockerLabelsPlugin.SaveData.RemoveLocker(lockerId);
             }
 
-            if (automaticToggle != null)
+            if (automaticToggle)
             {
                 automaticToggle.onValueChanged.RemoveListener(SetAutomatic);
             }
 
-            if (savesCustomLabel && labelInput != null)
+            if (savesCustomLabel && labelInput)
             {
                 labelInput.onEndEdit.RemoveListener(OnCustomLabelEdited);
+            }
+
+            if (colorSelectorButton)
+            {
+                colorSelectorButton.onClick.RemoveListener(OnCustomLabelColorChanged);
             }
             
             if (itemsContainer is null)
@@ -115,21 +154,6 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
             itemsContainer.onAddItem -= OnContentsChanged;
             itemsContainer.onRemoveItem -= OnContentsChanged;
         }
-
-        private void LogComponentDiagnostics()
-        {
-            if (!DetailedLoggingEnabled)
-            {
-                return;
-            }
-
-            ModDebugLog.LogDebug($"LockerController components for '{gameObject.name}': StorageContainer={storageContainer != null}, ItemsContainer={storageContainer != null && storageContainer.container != null}, Constructable={constructable != null}, ColoredLabel={coloredLabel != null}, SignInput={coloredLabel != null && coloredLabel.signInput != null}, InputField={coloredLabel != null && coloredLabel.signInput != null && coloredLabel.signInput.inputField != null}.");
-            foreach (ColoredLabel candidate in GetComponentsInChildren<ColoredLabel>(true))
-            {
-                ModDebugLog.LogDebug($"Found ColoredLabel on: {candidate.gameObject.name}");
-            }
-        }
-
         private void OnCategoriesChanged()
         {
             if (isAutomatic)
@@ -141,11 +165,11 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
 
         private bool IsValidLocker()
         {
-            return storageContainer != null &&
-                   storageContainer.container != null &&
-                   coloredLabel != null &&
+            return storageContainer && storageContainer.container != null &&
+                   coloredLabel &&
                    coloredLabel.signInput != null &&
-                   coloredLabel.signInput.inputField != null;
+                   coloredLabel.signInput.inputField != null &&
+                   prefabIdentifier && automaticToggle;
         }
 
         private void OnContentsChanged(InventoryItem item)
@@ -175,6 +199,13 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
             {
                 AutoLockerLabelsPlugin.SaveData.SetCustomLabel(lockerId, label);
             }
+        }
+
+        private void OnCustomLabelColorChanged()
+        {
+            AutoLockerLabelsPlugin.SaveData.SetCustomLabelColor(
+                lockerId,
+                coloredLabel.signInput.colorIndex);
         }
         
         private void EnableAutomatic()
@@ -224,6 +255,15 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
             }
         }
 
+        private void ApplySavedCustomLabelColor()
+        {
+            if (savesCustomLabel &&
+                AutoLockerLabelsPlugin.SaveData.TryGetCustomLabelColor(lockerId, out int colorIndex))
+            {
+                coloredLabel.signInput.colorIndex = colorIndex;
+            }
+        }
+
         private void ApplyAutomaticLabel()
         {
             string newGeneratedLabel = LabelGenerator.Generate(itemsContainer).ToUpper();
@@ -242,12 +282,12 @@ namespace DaftAppleGames.AutoLockerLabels_BZ.AutoLockerLabels
         /// </summary>
         void IConstructable.OnConstructedChanged(bool constructed)
         {
-            if (coloredLabel == null)
+            if (!coloredLabel)
             {
                 coloredLabel = GetComponentInChildren<ColoredLabel>(true);
             }
 
-            if (coloredLabel != null)
+            if (coloredLabel)
             {
                 coloredLabel.gameObject.SetActive(constructed);
             }

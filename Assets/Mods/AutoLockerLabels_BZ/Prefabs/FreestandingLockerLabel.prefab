@@ -269,6 +269,7 @@ MonoBehaviour:
   elements: []
   editOnly:
   - {fileID: 8671410352880874887}
+  - {fileID: 8901628496852233740}
 --- !u!114 &8671410351979361332
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -906,7 +907,7 @@ PrefabInstance:
     - target: {fileID: 6156108530618107513, guid: f7a74898b3adf524eb84f58a9507b754,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 287.7
+      value: 280
       objectReference: {fileID: 0}
     - target: {fileID: 6156108530618107513, guid: f7a74898b3adf524eb84f58a9507b754,
         type: 3}
@@ -935,6 +936,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f7a74898b3adf524eb84f58a9507b754, type: 3}
+--- !u!1 &8901628496852233740 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7813790020144079554, guid: f7a74898b3adf524eb84f58a9507b754,
+    type: 3}
+  m_PrefabInstance: {fileID: 1727349722583207118}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &4798061469286501047 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6156108530618107513, guid: f7a74898b3adf524eb84f58a9507b754,

@@ -15,6 +15,8 @@ namespace DaftAppleGames.AutoLockerLabels_BZ
             new HashSet<string>();
 
         public Dictionary<string, string> CustomLabels { get; set; } = new Dictionary<string, string>();
+
+        public Dictionary<string, int> CustomLabelColors { get; set; } = new Dictionary<string, int>();
         
         internal bool IsAutomatic(string lockerId)
         {
@@ -71,6 +73,29 @@ namespace DaftAppleGames.AutoLockerLabels_BZ
             CustomLabels[lockerId] = label ?? string.Empty;
         }
 
+        internal bool TryGetCustomLabelColor(string lockerId, out int colorIndex)
+        {
+            colorIndex = 0;
+            return !string.IsNullOrWhiteSpace(lockerId) &&
+                   CustomLabelColors != null &&
+                   CustomLabelColors.TryGetValue(lockerId, out colorIndex);
+        }
+
+        internal void SetCustomLabelColor(string lockerId, int colorIndex)
+        {
+            if (string.IsNullOrWhiteSpace(lockerId))
+            {
+                return;
+            }
+
+            if (CustomLabelColors == null)
+            {
+                CustomLabelColors = new Dictionary<string, int>();
+            }
+
+            CustomLabelColors[lockerId] = colorIndex;
+        }
+
         internal void RemoveLocker(string lockerId)
         {
             if (string.IsNullOrWhiteSpace(lockerId))
@@ -80,6 +105,7 @@ namespace DaftAppleGames.AutoLockerLabels_BZ
 
             AutomaticLockerIds?.Remove(lockerId);
             CustomLabels?.Remove(lockerId);
+            CustomLabelColors?.Remove(lockerId);
         }
     }
 }

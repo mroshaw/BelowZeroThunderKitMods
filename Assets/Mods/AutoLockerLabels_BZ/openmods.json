@@ -21,6 +21,7 @@
 
   "media": [
     { "type": "image", "url": "AutoLabelScreenshot.png", "label": "Auto labels in use" },
+    { "type": "image", "url": "FloatingLockerScreenshot.png", "label": "Auto labels on a floating locker" },
     { "type": "image", "url": "CategoryCustomisationScreenshot.jpg", "label": "Category customisation" },
     { "type": "image", "url": "AddTechTypesScreenshot.png", "label": "Category item customisation" }
   ],
