@@ -1,0 +1,47 @@
+[size=6][b]Auto Locker Labels[/b][/size]
+[size=3]This mod automatically generates locker labels based on the items stored within. For example:[/size]
+
+[list]
+[*][size=3][color=#D4D4D8]All 'Copper' items - the locker label will be 'Copper'.[/color][/size][/*]
+[*][size=3][color=#D4D4D8]'Copper' and 'Titanium' items - the locker label will be 'Metals'.[/color][/size][/*]
+[*][size=3][color=#D4D4D8]'Coffee' and 'Hoopfish' - the locker label will be 'Food'.[/color][/size][/*]
+[*][size=3][color=#D4D4D8]Lots of different items - the locker label will be 'Mixed'.[/color][/size][/*]
+[*][color=#D4D4D8]Details of all the categories and item mappings can be found in [url=https://github.com/mroshaw/SubnauticaThunderKitMods/blob/main/Assets/Mods/AutoLockerLabels_SN/CATEGORIES.md]this document[/url].[/color][/*]
+[/list]
+[size=3]To ensure you get the most out of this functionality, the mod also adds a customisable label to the larger, freestanding locker, with equivalent UI controls, including the colour selector from the small locker.[/size]
+
+[img]https://staticdelivery.nexusmods.com/mods/1155/images/4152/4152-1788264612-758711809.png[/img]
+[size=4]Features[/size]
+[size=3]The mod adds these new features:[/size]
+
+[list]
+[*][size=3][color=#D4D4D8]Customisable labels on freestanding lockers that work in the same way as the wall lockers.[/color][/size][/*]
+[*][size=3][color=#D4D4D8]A new toggle button within the existing locker UI to toggle automatic labelling mode.[/color][/size][/*]
+[*][size=3][color=#D4D4D8]Labels and toggling are persisted across saves.[/color][/size][/*]
+[*][size=3][color=#D4D4D8]A mod option to tweak how the automatic naming works.[/color][/size][/*]
+[/list]
+[size=4]User Guide[/size]
+[size=3]Interact with a locker label as you would normally. Use the new toggle control to toggle automatic labelling on or off:[/size]
+
+[size=3][img]https://staticdelivery.nexusmods.com/mods/1155/images/4152/4152-1788264611-1288687227.png[/img][/size]
+
+[size=3]You can see the full list of categories and mappings of items to categories in [url=https://github.com/mroshaw/SubnauticaThunderKitMods/blob/main/Assets/Mods/AutoLockerLabels_SN/CATEGORIES.md]this document[/url].
+
+If you'd like to see more categories, change the ones that are there, or tweak or change the mappings, please do leave a post and I'll do my best to accommodate![/size]
+
+[size=4]Options[/size]
+[size=3]Go into Options > Mods where you can tweak some settings:[/size]
+
+[list]
+[*][size=3][color=#D4D4D8][b]Dominant item ratio[/b] - if the percentage of a single item in a locker exceeds this threshold, then the locker will be labelled according to that single item. So, if this value is 90, if 'Titanium' represents 90% or more of a locker's contents, it will be labelled 'Titanium'. This is to prevent the accidental addition of one or two items that might force the label to 'Mixed'.[/color][/size][/*]
+[*][size=3][color=#D4D4D8][size=3][color=#D4D4D8][b]Detailed logging[/b]  - Only enable this if you have an issue and want to provide useful logging when reporting a bug.[/color][/size][/color][/size][/*]
+[/list]
+[size=3][color=#D4D4D8][size=4]Installation and Dependencies[/size][/color][/size]
+[quote][size=3][color=#D4D4D8][size=3][size=4][b]IMPORTANT![/b] This mod uses [url=https://www.nexusmods.com/subnautica/mods/1108][/url][url=https://www.nexusmods.com/subnautica/mods/1108]BepInEx[/url]?? ??and [url=https://www.nexusmods.com/subnautica/mods/1262]Nautilus[/url]??. You must install the latest versions of these to use this mod. The mod supports Vortex, but you must use the latest version of Vortex and the [url=https://www.nexusmods.com/site/mods/202]Subnautica Support extension[/url]???. Just unzip the mod into <gamefolder>\BepInEx\plugins, or let Vortex do its thing. Only works with the 2025 patch and later game versions.[/size][/size][/color][/size][/quote]
+[size=4]Source Code[/size]
+[size=3]All of my mods are open source, and you can find the full source code in my [url=https://github.com/mroshaw/SubnauticaThunderKitMods]Subnautica Mods GitHub Repository[/url].[/size]
+
+[size=4]Attribution[/size]
+[size=3]Thank you to Discord user "[b].epanastatis.[/b]" for the idea! Here's the original idea info:[/size]
+[quote][b]Suggestion #3436[/b]
+Automatic locker labels. Place items in standing or wall lockers, and the label is automatically populated for you based on the contents. Could handle specific items (E.g. copper ore would set the locker label to Copper or Cu) and varieties of items (E.g. titanium and copper ore would set the locker label to Metals or Ore)[/quote]
