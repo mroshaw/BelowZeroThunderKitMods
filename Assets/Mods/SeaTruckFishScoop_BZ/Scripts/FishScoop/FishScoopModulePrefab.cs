@@ -41,11 +41,8 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
                 .WithCraftingTime(5f)
                 .WithFabricatorType(CraftTree.Type.Workbench);
             
-            prefab.SetVehicleUpgradeModule(EquipmentType.SeaTruckModule, QuickSlotType.Toggleable)
+            prefab.SetVehicleUpgradeModule(EquipmentType.SeaTruckModule, QuickSlotType.Selectable)
                 .WithEnergyCost(EnergyCost)
-                // Currently, BZ doesn't seem to actually implement Toggleable, so this is handled manually
-                // in SeaTruckUpgradesPatches and in the FishScoop component
-                // .WithOnModuleToggled(ScoopToggled)
                 .WithOnModuleAdded(ScoopAdded)
                 .WithOnModuleRemoved(ScoopRemoved);
             

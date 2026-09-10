@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+﻿    using HarmonyLib;
 using UnityEngine;
 using static DaftAppleGames.SeaTruckFishScoop_BZ.SeaTruckFishScoopPluginBz;
 
@@ -56,12 +56,10 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             }
 
             // Invoke the might of the scoop
-            FishScoop fishScoop = dealer.gameObject.GetComponent<FishScoop>();
+            FishScoop fishScoop = rootDealer.GetComponent<FishScoop>();
             if (fishScoop != null)
             {
                 ModDebugLog.LogDebug("Calling Scoop...");
-                // Set caught fish to maximum health
-                __instance.ResetHealth();
                 bool scoopSuccess = fishScoop.Scoop(rootTaker);
                 
                 return !scoopSuccess;

@@ -3,82 +3,103 @@
 namespace DaftAppleGames.SeaTruckFishScoop_BZ
 {
     /// <summary>
-    /// Patch SeaTruckUpgradesPatches to implement "toggle" QuickSlot functionality and
-    /// allow holding the QuickSlot key to purge attached aquariums
+    /// Extends selected SeaTruck upgrade activation to support Fish Scoop toggle and purge actions
     /// </summary>
     public static class SeaTruckUpgradesPatches
     {
+        private static bool IsValidSlot(int slotId)
+        {
+            return slotId >= 0 && slotId < SeaTruckUpgrades.slotIDs.Length;
+        }
+
+        private static bool TryGetActiveFishScoop(SeaTruckUpgrades upgrades, out FishScoop fishScoop)
+        {
+            fishScoop = null;
+            int activeSlot = ((IQuickSlots)upgrades).GetActiveSlotID();
+            if (!IsValidSlot(activeSlot))
+            {
+                return false;
+            }
+
+            TechType techType = upgrades.modules.GetTechTypeInSlot(SeaTruckUpgrades.slotIDs[activeSlot]);
+            if (techType != FishScoopModulePrefab.PrefabInfo.TechType)
+            {
+                return false;
+            }
+
+            fishScoop = upgrades.GetComponent<FishScoop>();
+            return fishScoop != null;
+        }
+
         /// <summary>
-        /// Captures the slot "Key Down" - use this to either toggle the scoop (single press)
-        /// on purge (hold down)
+        /// Starts timing activation for the selected Fish Scoop
         /// </summary>
-        [HarmonyPatch] public static class SlotKeyDown_Prefix
+        [HarmonyPatch] public static class SlotLeftDownPrefix
         {
             static System.Reflection.MethodBase TargetMethod()
             {
-                return AccessTools.Method(typeof(SeaTruckUpgrades), "IQuickSlots.SlotKeyDown");
+                return AccessTools.Method(typeof(SeaTruckUpgrades), "IQuickSlots.SlotLeftDown");
             }
-            
-            static bool Prefix(SeaTruckUpgrades __instance, int slotID)
-            {
-                TechType techType = __instance.modules.GetTechTypeInSlot(SeaTruckUpgrades.slotIDs[slotID]);
 
-                if (techType == FishScoopModulePrefab.PrefabInfo.TechType)
+            static bool Prefix(SeaTruckUpgrades __instance)
+            {
+                FishScoop fishScoop;
+                if (!TryGetActiveFishScoop(__instance, out fishScoop))
                 {
-                    __instance.GetComponent<FishScoop>().QuickSlotPressed(slotID);
-                    
-                    return false;
+                    return true;
                 }
+
+                fishScoop.ActivationPressed();
                 return true;
             }
         }
 
         /// <summary>
-        /// Used to determine if the press was a single one or a "hold"
+        /// Tracks a held activation for the selected Fish Scoop
         /// </summary>
-        [HarmonyPatch] public static class SlotKeyUp_Prefix
+        [HarmonyPatch] public static class SlotLeftHeldPrefix
         {
             static System.Reflection.MethodBase TargetMethod()
             {
-                return AccessTools.Method(typeof(SeaTruckUpgrades), "IQuickSlots.SlotKeyUp");
+                return AccessTools.Method(typeof(SeaTruckUpgrades), "IQuickSlots.SlotLeftHeld");
             }
-            
-            static bool Prefix(SeaTruckUpgrades __instance, int slotID)
-            {
-                TechType techType = __instance.modules.GetTechTypeInSlot(SeaTruckUpgrades.slotIDs[slotID]);
 
-                if (techType == FishScoopModulePrefab.PrefabInfo.TechType)
+            static bool Prefix(SeaTruckUpgrades __instance)
+            {
+                FishScoop fishScoop = __instance.GetComponent<FishScoop>();
+                if (fishScoop == null || !fishScoop.IsActivationInProgress)
                 {
-                    __instance.GetComponent<FishScoop>().QuickSlotReleased(slotID);
-                    return false;
+                    return true;
                 }
-                return true;
+
+                fishScoop.ActivationHeld();
+                return false;
             }
         }
-        
+
         /// <summary>
-        /// Used to determine how long the key was held down for
+        /// Completes a short activation for the selected Fish Scoop
         /// </summary>
-        [HarmonyPatch] public static class SlotKeyHeld_Prefix
+        [HarmonyPatch] public static class SlotLeftUpPrefix
         {
             static System.Reflection.MethodBase TargetMethod()
             {
-                return AccessTools.Method(typeof(SeaTruckUpgrades), "IQuickSlots.SlotKeyHeld");
+                return AccessTools.Method(typeof(SeaTruckUpgrades), "IQuickSlots.SlotLeftUp");
             }
-            
-            static bool Prefix(SeaTruckUpgrades __instance, int slotID)
-            {
-                TechType techType = __instance.modules.GetTechTypeInSlot(SeaTruckUpgrades.slotIDs[slotID]);
 
-                if (techType == FishScoopModulePrefab.PrefabInfo.TechType)
+            static bool Prefix(SeaTruckUpgrades __instance)
+            {
+                FishScoop fishScoop = __instance.GetComponent<FishScoop>();
+                if (fishScoop == null || !fishScoop.IsActivationInProgress)
                 {
-                    __instance.GetComponent<FishScoop>().QuickSlotHeld(slotID);
-                    return false;
+                    return true;
                 }
-                return true;
+
+                fishScoop.ActivationReleased();
+                return false;
             }
         }
-        
+
         /// <summary>
         /// As SeaTruckUpgrades has no "toggled" state of it's own, we must patch in our
         /// FishScoop state to return it's toggled state
@@ -92,11 +113,21 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             
             static bool Prefix(SeaTruckUpgrades __instance, int slotID, ref bool __result)
             {
+                if (!IsValidSlot(slotID))
+                {
+                    return true;
+                }
+
                 TechType techType = __instance.modules.GetTechTypeInSlot(SeaTruckUpgrades.slotIDs[slotID]);
 
                 if (techType == FishScoopModulePrefab.PrefabInfo.TechType)
                 {
                     FishScoop fishScoop = __instance.GetComponent<FishScoop>();
+                    if (fishScoop == null)
+                    {
+                        return true;
+                    }
+
                     __result = fishScoop.IsOn;
                     return false;
                 }

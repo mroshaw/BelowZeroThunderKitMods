@@ -1,0 +1,45 @@
+{
+  "$schema": "https://openmods.net/manifest.schema.json",
+  "schemaVersion": 2,
+
+  "slug": "seatruck-fish-scoop-bz",
+  "name": "Seatruck Fish Scoop BZ",
+  "description" : "Adds a new craftable Sea Truck upgrade module to the workbench: the 'SeaTruck Fish Scoop'! When enabled, hitting small fish will automatically add them to any attached aquarium modules, instead of killing them.",
+  "supportedGameId": "subnautica-below-zero",
+
+  "releaseAssets": ["SeaTruckFishScoop_BZ*.zip"],
+  "primaryAsset": "SeaTruckFishScoop_BZ*.zip",
+
+  "readme": "README.md",
+
+  "thumbnail": "thumbnail.png",
+  
+  "links": [
+    { "label": "Discord", "icon": "chat", "url": "https://discord.gg/BJtGSdnRm" },
+    { "label": "Website", "url": "https://github.com/mroshaw/SubnauticaThunderKitMods" }
+  ],
+
+  "media": [
+    { "type": "image", "url": "FishScoopUpgradeFabricator.png", "label": "Creating the upgrade in the fabricator" },
+    { "type": "image", "url": "RecallUpgradeScreenshot.png", "label": "Installing the upgrade in the Seatruck" }
+  ],
+
+  "faq": [
+    { "question": "How do I install?", "answer": "Use the OpenMods Manager or extract the zip into your game folder." }
+  ],
+
+  "dependencies": {
+    "1.0.0": [
+      { "modId": 30, "release": "1.0.0-pre.50" },
+      { "modId": 31, "release": "5.4.23.5" }
+    ]
+  },
+
+  "install": {
+    "path": "BepInEx/plugins",
+    "custom-path": {
+      "src/plugin.dll": "BepInEx/plugins/",
+      "config/":       "BepInEx/config/"
+    }
+  }
+}

@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using BepInEx;
 using DaftAppleGames.ModTools;
 using HarmonyLib;
@@ -12,7 +12,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         // Plugin properties
         private const string MyGuid = "com.mroshaw.SeaTruckfishscoopmodbz";
         private const string PluginName = "Sea Truck Fish Scoop Mod BZ";
-        private const string VersionString = "3.2.0";
+        private const string VersionString = "3.2.1";
         private const string AssetBundleName = "seatruckfishscoopassetbundle";
 
         

@@ -51,7 +51,7 @@ MonoBehaviour:
   Author: Daft Apple Games
   Name: SeaTruckFishScoop_BZ
   Description: Adds a Fish Scoop to the Sea Truck
-  Version: 3.0.1
+  Version: 3.2.1
   Dependencies: []
 --- !u!114 &1985807167473828797
 MonoBehaviour:

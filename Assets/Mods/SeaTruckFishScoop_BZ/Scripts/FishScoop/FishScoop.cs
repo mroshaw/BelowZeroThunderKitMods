@@ -21,11 +21,11 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         [SerializeField] private float slotPressedTimeForPurge = 2.0f;         // Number of seconds the slot activation key must be held to purge the aquariums
         [SerializeField] private float audioVolume = 10.0f;
         
-        // Static FMODAsset for playing sounds
-        private static readonly FMODAsset SoundsToPlay = ScriptableObject.CreateInstance<FMODAsset>();
         private const string FishScoopPowerOnSoundPath = "event:/sub/cyclops/start";
         private const string FishScoopPowerOffSoundPath = "event:/sub/base/power_off";
         private const string AudioBusPath = "bus:/master/SFX_for_pause/PDA_pause/all/SFX/vehicles/SeaTruck";
+        private static readonly FMODAsset FishScoopPowerOnSound = CreateSoundAsset(FishScoopPowerOnSoundPath);
+        private static readonly FMODAsset FishScoopPowerOffSound = CreateSoundAsset(FishScoopPowerOffSoundPath);
         
         // Custom sounds
         private const string PurgeAudioAsset = "PurgeSound.wav";
@@ -34,6 +34,8 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         // Custom Emitter for purge and release sounds
         private FMOD_CustomEmitter _purgeEmitter;
         private FMOD_CustomEmitter _fishReleasedEmitter;
+        private FMOD_CustomEmitter _powerOnEmitter;
+        private FMOD_CustomEmitter _powerOffEmitter;
 
         private SeaTruckUpgrades _SeaTruckUpgrades;
 
@@ -50,10 +52,13 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         
         private float _timeSlotPressed;
         private bool _scoopPurging;
+        private bool _activationInProgress;
+
+        internal bool IsActivationInProgress => _activationInProgress;
         
         // Determines in which slot the scoop is configured
         // -1 means not equipped
-        private int _scoopQuickSlotId;
+        private int _scoopQuickSlotId = -1;
         private SeaTruckMotor _mainMotor;
 
         private void Awake()
@@ -81,62 +86,88 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             // Set up the purge sound emitter
             _purgeEmitter = gameObject.AddComponent<FMOD_CustomEmitter>();
             _fishReleasedEmitter = gameObject.AddComponent<FMOD_CustomEmitter>();
+            _powerOnEmitter = gameObject.AddComponent<FMOD_CustomEmitter>();
+            _powerOffEmitter = gameObject.AddComponent<FMOD_CustomEmitter>();
             ConfigureEmitters();
+            FindQuickSlotId();
         }
 
         // Set up the FMOD emitter for the custom purge sound
         private void ConfigureEmitters()
         {
             // Purge audio
-            ModAudioUtils.RegisterSound(PurgeAudioAsset, AudioUtils.BusPaths.PlayerSFXs, ModAssetUtils, ModDebugLog, 1.0f, 7.0f, 0, true);
+            ModAudioUtils.RegisterSound(PurgeAudioAsset, AudioUtils.BusPaths.PlayerSFXs, ModAssetUtils, ModDebugLog, 1.0f, 7.0f);
             FMODAsset purgeAudioAsset =  AudioUtils.GetFmodAsset(PurgeAudioAsset);
-            ModAudioUtils.ConfigureEmitter(_purgeEmitter, purgeAudioAsset, ModDebugLog);
+            ConfigureFollowingEmitter(_purgeEmitter, purgeAudioAsset);
             
             // Release audio
-            ModAudioUtils.RegisterSound(PurgeAudioAsset, AudioUtils.BusPaths.PlayerSFXs, ModAssetUtils, ModDebugLog, 1.0f, 7.0f, 0, true);
-            FMODAsset releaseAudioAsset =  AudioUtils.GetFmodAsset(PurgeAudioAsset);
-            ModAudioUtils.ConfigureEmitter(_fishReleasedEmitter, releaseAudioAsset, ModDebugLog);
+            ModAudioUtils.RegisterSound(FishReleasedAudioAsset, AudioUtils.BusPaths.PlayerSFXs, ModAssetUtils, ModDebugLog, 1.0f, 7.0f);
+            FMODAsset releaseAudioAsset =  AudioUtils.GetFmodAsset(FishReleasedAudioAsset);
+            ConfigureFollowingEmitter(_fishReleasedEmitter, releaseAudioAsset);
+
+            ConfigureFollowingEmitter(_powerOnEmitter, FishScoopPowerOnSound, true);
+            ConfigureFollowingEmitter(_powerOffEmitter, FishScoopPowerOffSound, true);
+        }
+
+        private static FMODAsset CreateSoundAsset(string path)
+        {
+            FMODAsset soundAsset = ScriptableObject.CreateInstance<FMODAsset>();
+            soundAsset.path = path;
+            return soundAsset;
+        }
+
+        private static void ConfigureFollowingEmitter(FMOD_CustomEmitter emitter, FMODAsset soundAsset, bool restartOnPlay = false)
+        {
+            emitter.followParent = true;
+            emitter.restartOnPlay = restartOnPlay;
+            ModAudioUtils.ConfigureEmitter(emitter, soundAsset, ModDebugLog);
         }
         
         /// <summary>
-        /// Record when the Quick Slot was pressed. Use this to determine whether
+        /// Record when the selected upgrade activation was pressed. Use this to determine whether
         /// the player is pressing (toggle) or holding (purge)
         /// </summary>
-        internal void QuickSlotPressed(int slotId)
+        internal void ActivationPressed()
         {
-            if (slotId != _scoopQuickSlotId)
-            {
-                return;
-            }
-            
+            _activationInProgress = true;
             _scoopPurging = false;
-            _timeSlotPressed = Time.fixedTime;
+            _timeSlotPressed = Time.time;
         }
         
-        internal void QuickSlotReleased(int slotId)
+        internal void ActivationReleased()
         {
-            if (slotId != _scoopQuickSlotId)
+            if (!_activationInProgress)
             {
                 return;
             }
-            if (Time.fixedTime < _timeSlotPressed + slotPressedTimeForPurge)
+
+            bool shouldPurge = !_scoopPurging && Time.time >= _timeSlotPressed + slotPressedTimeForPurge;
+            _activationInProgress = false;
+            if (shouldPurge)
+            {
+                _scoopPurging = true;
+                PurgeAquariums();
+                return;
+            }
+
+            if (!_scoopPurging)
             {
                 ToggleScoop();
             }
         }
 
         /// <summary>
-        /// Called every frame while the quick slot button is held down
+        /// Called every frame while the selected upgrade activation is held down
         /// Use this to call purge once the held time is reached
         /// </summary>
-        internal void QuickSlotHeld(int slotId)
+        internal void ActivationHeld()
         {
-            if (slotId != _scoopQuickSlotId)
+            if (!_activationInProgress)
             {
                 return;
             }
-            
-            if (Time.fixedTime >= _timeSlotPressed + slotPressedTimeForPurge && !_scoopPurging)
+
+            if (Time.time >= _timeSlotPressed + slotPressedTimeForPurge && !_scoopPurging)
             {
                 _scoopPurging = true;
                 PurgeAquariums();
@@ -176,8 +207,9 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         /// </summary>
         internal void Unequip(int fromSlotId)
         {
-            _scoopQuickSlotId = -1;
+            CancelActivation();
             StopScoop();
+            _scoopQuickSlotId = -1;
         }
         
         /// <summary>
@@ -216,7 +248,6 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
                 StartScoop();
             }
 
-            SetQuickSlotToggleState();
             return _isOn;
         }
         
@@ -228,9 +259,10 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             if (_isOn)
             {
                 ShowAlert($"Fish Scoop powering down.");
-                SoundsToPlay.path = FishScoopPowerOffSoundPath;
-                FMODUWE.PlayOneShot(SoundsToPlay, _mainMotor.transform.position);
+                _powerOnEmitter.Stop();
+                _powerOffEmitter.Play();
                 _isOn = false;
+                SetQuickSlotToggleState();
             }
         }
 
@@ -242,9 +274,10 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             if(!_isOn)
             {
                 ShowAlert($"Fish Scoop powering up.");
-                SoundsToPlay.path = FishScoopPowerOnSoundPath;
-                FMODUWE.PlayOneShot(SoundsToPlay, _mainMotor.transform.position);
+                _powerOffEmitter.Stop();
+                _powerOnEmitter.Play();
                 _isOn = true;
+                SetQuickSlotToggleState();
             }
         }
 
@@ -253,10 +286,17 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         /// </summary>
         internal void StopPiloting()
         {
+            CancelActivation();
             if (ConfigFile.OnlyScoopWhilePiloting)
             {
                 StopScoop();
             }
+        }
+
+        private void CancelActivation()
+        {
+            _activationInProgress = false;
+            _scoopPurging = false;
         }
         
         /// <summary>
@@ -265,7 +305,10 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         private void SetQuickSlotToggleState()
         {
             ModDebugLog.LogDebug($"Setting quick slot {_scoopQuickSlotId} toggled state to {_isOn}");
-            RaiseOnToggle(_SeaTruckUpgrades, _scoopQuickSlotId, _isOn);
+            if (_SeaTruckUpgrades && _scoopQuickSlotId >= 0)
+            {
+                RaiseOnToggle(_SeaTruckUpgrades, _scoopQuickSlotId, _isOn);
+            }
         }
         
         /// <summary>
@@ -293,6 +336,7 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             // Is this thing on?
             if(!_isOn)
             {
+                ModDebugLog.LogDebug("No scoop as FishScoop is not turned on.");
                 return false;
             }
 
@@ -304,8 +348,9 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
 
             // Check if SeaTruck is being piloted and whether or not we're allowed to scoop
             bool isPiloted = _mainMotor.IsPiloted();
-            if (!isPiloted && !ConfigFile.OnlyScoopWhilePiloting)
+            if (!isPiloted && ConfigFile.OnlyScoopWhilePiloting)
             {
+                ModDebugLog.LogDebug("Seatruck is not being piloted and option override is off. No scoop.");
                 return false;
             }
 
@@ -313,11 +358,11 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             float velocityMagnitude = _mainMotor.useRigidbody.velocity.magnitude;
             if ((velocityMagnitude == 0.0f) && !ConfigFile.ScoopWhileStatic)
             {
+                ModDebugLog.LogDebug("Seatruck is not moving and option override is off. No scoop.");
                  return false;
             }
 
             // We've passed our checks, now try to add the fish
-            ModDebugLog.LogDebug("Taker is a supported fish");
             bool fishAdded = AddFishToFreeAquarium(objectToScoop);
             return fishAdded;
         }
@@ -327,19 +372,19 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
         /// </summary>
         private bool IsValidObject(GameObject takerGameObject)
         {
-            ModDebugLog.LogDebug("In IsValidObject");
+            ModDebugLog.LogDebug($"Checking IsValidObject for {takerGameObject.name}");
             if (!takerGameObject.GetComponent<AquariumFish>())
             {
-                ModDebugLog.LogDebug("IsValidObject: Not an AquariumFish. No Scoop.");
+                ModDebugLog.LogDebug("Not an AquariumFish. Invalid.");
                 return false;
             }
             WaterParkCreature waterParkCreature = takerGameObject.GetComponent<WaterParkCreature>();
             if (waterParkCreature && waterParkCreature.IsInsideWaterPark())
             {
-                ModDebugLog.LogDebug("IsValidObject: Target IsInsideWaterPark. No Scoop.");
+                ModDebugLog.LogDebug("Target IsInsideWaterPark. Invalid.");
                 return false;
             }
-            ModDebugLog.LogDebug("IsValidObject: Target IsInsideWaterPark. No Scoop.");
+            ModDebugLog.LogDebug($"{takerGameObject.name} is valid.");
             return true;
         }
 
@@ -445,7 +490,9 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             {
                 if (AddFishToAquarium(SeaTruckAquarium, fish))
                 {
+                    fish.GetComponent<LiveMixin>()?.ResetHealth();
                     ModDebugLog.LogDebug($"Fish successfully added {fish.name} as {friendlyFishName}");
+                    if(ConfigFile.ShowScoopAlerts)
                     ShowAlert($"Scooped {friendlyFishName}!");
                     return true;
                 }
@@ -454,10 +501,12 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
             
             if (ConfigFile.ReleaseFailedScoopFish)
             {
+                ModDebugLog.LogDebug($"Aquariums are full. Releasing {friendlyFishName}");
                 ReleaseSingleFish(fish);
                 ShowAlert($"Aquariums are full! Releasing {friendlyFishName}!");
                 return true;
             }
+            ModDebugLog.LogDebug($"Aquariums are full.");
             ShowAlert("Aquariums are full! Scoop failed!");
             return false;
         }
@@ -495,12 +544,14 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
                             if (bioReactor._container.HasRoomFor(fishPickupable))
                             {
                                 ModDebugLog.LogDebug("Adding to BioReactor...");
-                                InventoryItem item = new InventoryItem(fishPickupable);
-                                bioReactor._container.UnsafeAdd(item);
-                                addedToReactor = true;
-                                numFishInBioReactor++;
-                                ModDebugLog.LogDebug("Successfully added to BioReactor!");
-                                break;
+                                InventoryItem item = bioReactor._container.AddItem(fishPickupable);
+                                if (item != null)
+                                {
+                                    addedToReactor = true;
+                                    numFishInBioReactor++;
+                                    ModDebugLog.LogDebug("Successfully added to BioReactor!");
+                                    break;
+                                }
                             }
                         }
 
@@ -516,8 +567,6 @@ namespace DaftAppleGames.SeaTruckFishScoop_BZ
                 
 
 
-                // Remove from aquarium container
-                container.RemoveItem(fishPickupable, true);
                 ModDebugLog.LogDebug($"Removed {fishPickupable.name}");
             }
             return (numFishInWater,  numFishInBioReactor);
