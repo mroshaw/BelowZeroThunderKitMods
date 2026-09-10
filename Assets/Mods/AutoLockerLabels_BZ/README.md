@@ -1,4 +1,4 @@
-# **Auto Locker Labels**
+# Auto Locker Labels BZ
 
 This mod automatically generates locker labels based on the items stored within. For example:
 
@@ -70,7 +70,7 @@ Go into Options > Mods where you can tweak some settings:
 
 ## Source Code
 
-All of my mods are open source, and you can find the full source code in my [Subnautica Mods GitHub Repository](https://github.com/mroshaw/SubnauticaThunderKitMods).
+All of my mods are open source, and you can find the full source code in my [Below Zero Mods GitHub Repository](https://github.com/mroshaw/BelowZeroThunderKitMods).
 
 ## Attribution
 
