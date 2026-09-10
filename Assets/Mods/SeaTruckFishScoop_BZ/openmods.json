@@ -4,7 +4,7 @@
 
   "slug": "seatruck-fish-scoop-bz",
   "name": "Seatruck Fish Scoop BZ",
-  "description" : "Adds a new craftable Sea Truck upgrade module to the workbench: the 'SeaTruck Fish Scoop'! When enabled, hitting small fish will automatically add them to any attached aquarium modules, instead of killing them.",
+  "description" : "Adds a new craftable Seatruck upgrade module to the workbench: the 'Seatruck Fish Scoop'! When enabled, hitting small fish will automatically add them to any attached aquarium modules, instead of killing them.",
   "supportedGameId": "subnautica-below-zero",
 
   "releaseAssets": ["SeaTruckFishScoop_BZ*.zip"],
