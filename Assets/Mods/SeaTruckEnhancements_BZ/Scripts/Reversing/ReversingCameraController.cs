@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using static DaftAppleGames.SeaTruckEnhancements_BZ.SeaTruckEnhancementsPlugin_BZ;
 
-namespace DaftAppleGames.SeaTruckEnhancements_BZ.UI
+namespace DaftAppleGames.SeaTruckEnhancements_BZ.Reversing
 {
     internal class ReversingCameraController : MonoBehaviour
     {
@@ -12,7 +12,7 @@ namespace DaftAppleGames.SeaTruckEnhancements_BZ.UI
         private float reversingSpeedThreshold = 0.1f;
 
         [SerializeField]
-        private bool copyMainCameraCullingMask = true;
+        private LayerMask reversingCameraCullingMask = 727758871;
 
         [SerializeField]
         private bool enableWaterscapeEffects = true;
@@ -20,9 +20,19 @@ namespace DaftAppleGames.SeaTruckEnhancements_BZ.UI
         [SerializeField]
         private string rearViewFramePath = "Frame";
 
+        [SerializeField]
+        private string rearViewImagePath = "Mask/Camera";
+
+        [SerializeField, MinValue(1)]
+        private int renderTextureWidth = 512;
+
+        [SerializeField, MinValue(1)]
+        private int renderTextureHeight = 512;
+
         private readonly List<SeaTruckSegment> seaTruckChain = new List<SeaTruckSegment>();
         private uGUI_SeaTruckHUD seaTruckHud;
         private Camera configuredRearCamera;
+        private RenderTexture renderTexture;
 
         private void Awake()
         {
@@ -35,6 +45,7 @@ namespace DaftAppleGames.SeaTruckEnhancements_BZ.UI
             }
 
             ApplyCameraFrameSprite();
+            CreateRenderTexture();
         }
 
         private void ApplyCameraFrameSprite()
@@ -50,6 +61,34 @@ namespace DaftAppleGames.SeaTruckEnhancements_BZ.UI
             frameImage.sprite = SeaTruckCameraFrameSprite;
         }
 
+        private void CreateRenderTexture()
+        {
+            Transform imageTransform = seaTruckHud.rearView.transform.Find(rearViewImagePath);
+            RawImage rearViewImage = imageTransform ? imageTransform.GetComponent<RawImage>() : null;
+            if (!rearViewImage)
+            {
+                ModDebugLog.LogError("Could not find the vanilla SeaTruck reversing camera image.");
+                enabled = false;
+                return;
+            }
+
+            renderTexture = new RenderTexture(
+                renderTextureWidth,
+                renderTextureHeight,
+                24,
+                RenderTextureFormat.ARGB32)
+            {
+                name = $"SeaTruckReversingCamera_{GetInstanceID()}",
+                antiAliasing = 1,
+                filterMode = FilterMode.Bilinear,
+                wrapMode = TextureWrapMode.Clamp,
+                useMipMap = false,
+                autoGenerateMips = false
+            };
+            renderTexture.Create();
+            rearViewImage.texture = renderTexture;
+        }
+
         private void LateUpdate()
         {
             bool showRearView = ConfigFile.EnableReversingCamera && TryRenderRearView();
@@ -63,6 +102,16 @@ namespace DaftAppleGames.SeaTruckEnhancements_BZ.UI
             if (seaTruckHud && seaTruckHud.rearView)
             {
                 seaTruckHud.rearView.SetActive(false);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (renderTexture)
+            {
+                renderTexture.Release();
+                Destroy(renderTexture);
+                renderTexture = null;
             }
         }
 
@@ -94,6 +143,12 @@ namespace DaftAppleGames.SeaTruckEnhancements_BZ.UI
                 return false;
             }
 
+            if (!renderTexture || !renderTexture.IsCreated())
+            {
+                seaTruckChain.Clear();
+                return false;
+            }
+
             ConfigureRearCamera(rearCamera);
             rearCamera.Render();
             seaTruckChain.Clear();
@@ -109,10 +164,8 @@ namespace DaftAppleGames.SeaTruckEnhancements_BZ.UI
 
             configuredRearCamera = rearCamera;
             Camera mainCamera = MainCamera.camera;
-            if (copyMainCameraCullingMask && mainCamera)
-            {
-                rearCamera.cullingMask = mainCamera.cullingMask;
-            }
+            rearCamera.cullingMask = reversingCameraCullingMask;
+            rearCamera.targetTexture = renderTexture;
 
             WaterscapeVolumeOnCamera waterscapeEffect =
                 rearCamera.GetComponent<WaterscapeVolumeOnCamera>();

@@ -57961,37 +57961,5 @@ PrefabInstance:
       propertyPath: m_Name
       value: SeatruckEnhancedIndicators
       objectReference: {fileID: 0}
-    - target: {fileID: 5185986739756994631, guid: 8d81f9a7023ef8c47ba982600c2bca98,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7185371108531592347, guid: 8d81f9a7023ef8c47ba982600c2bca98,
-        type: 3}
-      propertyPath: m_Color.b
-      value: 0.79215693
-      objectReference: {fileID: 0}
-    - target: {fileID: 7185371108531592347, guid: 8d81f9a7023ef8c47ba982600c2bca98,
-        type: 3}
-      propertyPath: m_Color.g
-      value: 0.5647059
-      objectReference: {fileID: 0}
-    - target: {fileID: 7185371108531592347, guid: 8d81f9a7023ef8c47ba982600c2bca98,
-        type: 3}
-      propertyPath: m_Color.r
-      value: 0.08235294
-      objectReference: {fileID: 0}
-    - target: {fileID: 8575013490120536025, guid: 8d81f9a7023ef8c47ba982600c2bca98,
-        type: 3}
-      propertyPath: m_fontColor.a
-      value: 0.627451
-      objectReference: {fileID: 0}
-    - target: {fileID: 8575013490120536025, guid: 8d81f9a7023ef8c47ba982600c2bca98,
-        type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 2701131775
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 6219988445626901701, guid: 8d81f9a7023ef8c47ba982600c2bca98, type: 3}
-    - {fileID: 6219988445626901702, guid: 8d81f9a7023ef8c47ba982600c2bca98, type: 3}
+    m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8d81f9a7023ef8c47ba982600c2bca98, type: 3}

@@ -1,12 +1,12 @@
 using DaftAppleGames.ModTools;
 using FMOD;
-using FMOD.Studio;
 using FMODUnity;
+using Nautilus.Handlers;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using static DaftAppleGames.SeaTruckEnhancements_BZ.SeaTruckEnhancementsPlugin_BZ;
 
-namespace DaftAppleGames.SeaTruckEnhancements_BZ.Audio
+namespace DaftAppleGames.SeaTruckEnhancements_BZ.Reversing
 {
     internal class ReversingAudioController : MonoBehaviour
     {
@@ -31,10 +31,12 @@ namespace DaftAppleGames.SeaTruckEnhancements_BZ.Audio
         private SeaTruckMotor attachedMotor;
         private DSP reversingBeepsLowPass;
         private DSP thisSeaTruckIsReversingLowPass;
-        private ChannelGroup reversingBeepsChannelGroup;
-        private ChannelGroup thisSeaTruckIsReversingChannelGroup;
+        private Channel reversingBeepsChannel;
+        private Channel thisSeaTruckIsReversingChannel;
         private bool reversingBeepsLowPassAttached;
         private bool thisSeaTruckIsReversingLowPassAttached;
+        private float appliedBeepsVolume = -1.0f;
+        private float appliedVoiceVolume = -1.0f;
 
         private void Awake()
         {
@@ -78,18 +80,23 @@ namespace DaftAppleGames.SeaTruckEnhancements_BZ.Audio
             bool playVoice = isReversing &&
                             (selectedAudio == ReversingAudio.ThisSeaTruckIsReversing ||
                              selectedAudio == ReversingAudio.Both);
+            float volume = Mathf.Clamp01(ConfigFile.ReversingAudioVolume);
 
             SetEmitterPlaying(
                 reversingBeepsEmitter,
                 playBeeps,
+                volume,
+                ref appliedBeepsVolume,
                 ref reversingBeepsLowPass,
-                ref reversingBeepsChannelGroup,
+                ref reversingBeepsChannel,
                 ref reversingBeepsLowPassAttached);
             SetEmitterPlaying(
                 thisSeaTruckIsReversingEmitter,
                 playVoice,
+                volume,
+                ref appliedVoiceVolume,
                 ref thisSeaTruckIsReversingLowPass,
-                ref thisSeaTruckIsReversingChannelGroup,
+                ref thisSeaTruckIsReversingChannel,
                 ref thisSeaTruckIsReversingLowPassAttached);
         }
 
@@ -103,11 +110,11 @@ namespace DaftAppleGames.SeaTruckEnhancements_BZ.Audio
         {
             ReleaseLowPassDsp(
                 ref reversingBeepsLowPass,
-                ref reversingBeepsChannelGroup,
+                ref reversingBeepsChannel,
                 ref reversingBeepsLowPassAttached);
             ReleaseLowPassDsp(
                 ref thisSeaTruckIsReversingLowPass,
-                ref thisSeaTruckIsReversingChannelGroup,
+                ref thisSeaTruckIsReversingChannel,
                 ref thisSeaTruckIsReversingLowPassAttached);
         }
 
@@ -184,18 +191,22 @@ namespace DaftAppleGames.SeaTruckEnhancements_BZ.Audio
         private static void SetEmitterPlaying(
             FMOD_CustomEmitter emitter,
             bool shouldPlay,
+            float volume,
+            ref float appliedVolume,
             ref DSP lowPass,
-            ref ChannelGroup channelGroup,
+            ref Channel soundChannel,
             ref bool lowPassAttached)
         {
             if (!shouldPlay)
             {
-                DetachLowPassDsp(ref lowPass, ref channelGroup, ref lowPassAttached);
+                DetachLowPassDsp(ref lowPass, ref soundChannel, ref lowPassAttached);
 
                 if (emitter.playing)
                 {
                     emitter.Stop();
                 }
+
+                appliedVolume = -1.0f;
                 return;
             }
 
@@ -204,15 +215,25 @@ namespace DaftAppleGames.SeaTruckEnhancements_BZ.Audio
                 emitter.Play();
             }
 
-            if (!lowPassAttached && lowPass.hasHandle())
+            if (!soundChannel.hasHandle())
             {
-                EventInstance eventInstance = emitter.GetEventInstance();
-                if (eventInstance.hasHandle() &&
-                    eventInstance.getChannelGroup(out channelGroup) == RESULT.OK &&
-                    channelGroup.hasHandle() &&
-                    channelGroup.addDSP(-3, lowPass) == RESULT.OK)
+                CustomSoundHandler.TryGetCustomSoundChannel(emitter.GetInstanceID(), out soundChannel);
+            }
+
+            if (!lowPassAttached && lowPass.hasHandle() && soundChannel.hasHandle())
+            {
+                if (soundChannel.addDSP(-3, lowPass) == RESULT.OK)
                 {
                     lowPassAttached = true;
+                }
+            }
+
+            if (!Mathf.Approximately(appliedVolume, volume) &&
+                soundChannel.hasHandle())
+            {
+                if (soundChannel.setVolume(volume) == RESULT.OK)
+                {
+                    appliedVolume = volume;
                 }
             }
         }
@@ -232,10 +253,10 @@ namespace DaftAppleGames.SeaTruckEnhancements_BZ.Audio
 
         private static void ReleaseLowPassDsp(
             ref DSP lowPass,
-            ref ChannelGroup channelGroup,
+            ref Channel soundChannel,
             ref bool lowPassAttached)
         {
-            DetachLowPassDsp(ref lowPass, ref channelGroup, ref lowPassAttached);
+            DetachLowPassDsp(ref lowPass, ref soundChannel, ref lowPassAttached);
 
             if (lowPass.hasHandle())
             {
@@ -246,15 +267,15 @@ namespace DaftAppleGames.SeaTruckEnhancements_BZ.Audio
 
         private static void DetachLowPassDsp(
             ref DSP lowPass,
-            ref ChannelGroup channelGroup,
+            ref Channel soundChannel,
             ref bool lowPassAttached)
         {
-            if (lowPassAttached && channelGroup.hasHandle() && lowPass.hasHandle())
+            if (lowPassAttached && soundChannel.hasHandle() && lowPass.hasHandle())
             {
-                channelGroup.removeDSP(lowPass);
+                soundChannel.removeDSP(lowPass);
             }
 
-            channelGroup.clearHandle();
+            soundChannel.clearHandle();
             lowPassAttached = false;
         }
 
@@ -265,8 +286,10 @@ namespace DaftAppleGames.SeaTruckEnhancements_BZ.Audio
                 SetEmitterPlaying(
                     reversingBeepsEmitter,
                     false,
+                    0.0f,
+                    ref appliedBeepsVolume,
                     ref reversingBeepsLowPass,
-                    ref reversingBeepsChannelGroup,
+                    ref reversingBeepsChannel,
                     ref reversingBeepsLowPassAttached);
             }
 
@@ -275,8 +298,10 @@ namespace DaftAppleGames.SeaTruckEnhancements_BZ.Audio
                 SetEmitterPlaying(
                     thisSeaTruckIsReversingEmitter,
                     false,
+                    0.0f,
+                    ref appliedVoiceVolume,
                     ref thisSeaTruckIsReversingLowPass,
-                    ref thisSeaTruckIsReversingChannelGroup,
+                    ref thisSeaTruckIsReversingChannel,
                     ref thisSeaTruckIsReversingLowPassAttached);
             }
         }
