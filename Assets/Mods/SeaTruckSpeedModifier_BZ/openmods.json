@@ -1,0 +1,45 @@
+{
+  "$schema": "https://openmods.net/manifest.schema.json",
+  "schemaVersion": 2,
+
+  "slug": "seatruck-speed-modifier-bz",
+  "name": "Seatruck Speed Modifier BZ",
+  "description" : "A simple mod to apply a configurable speed modifier to the Seatruck.",
+  "supportedGameId": "subnautica-below-zero",
+
+  "releaseAssets": ["SeaTruckSpeedModifier_BZ*.zip"],
+  "primaryAsset": "SeaTruckSpeedModifier_BZ*.zip",
+
+  "readme": "README.md",
+
+  "thumbnail": "thumbnail.png",
+  
+  "links": [
+    { "label": "Discord", "icon": "chat", "url": "https://discord.gg/BJtGSdnRm" },
+    { "label": "Website", "url": "https://github.com/mroshaw/SubnauticaThunderKitMods" }
+  ],
+
+  "media": [
+    { "type": "image", "url": "SeatruckSpeedBoost.png", "label": "Speedy Seatruck, flying high!" },
+    { "type": "image", "url": "SeatruckSpeedBoostOptions.png", "label": "Seatruck speed boost options" }
+  ],
+
+  "faq": [
+    { "question": "How do I install?", "answer": "Use the OpenMods Manager or extract the zip into your game folder." }
+  ],
+
+  "dependencies": {
+    "1.0.0": [
+      { "modId": 30, "release": "1.0.0-pre.50" },
+      { "modId": 31, "release": "5.4.23.5" }
+    ]
+  },
+
+  "install": {
+    "path": "BepInEx/plugins",
+    "custom-path": {
+      "src/plugin.dll": "BepInEx/plugins/",
+      "config/":       "BepInEx/config/"
+    }
+  }
+}

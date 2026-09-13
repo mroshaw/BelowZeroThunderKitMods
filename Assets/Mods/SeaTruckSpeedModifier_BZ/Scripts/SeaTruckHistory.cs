@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace DaftAppleGames.SeaTruckSpeedMod_BZ
 {
@@ -17,43 +16,39 @@ namespace DaftAppleGames.SeaTruckSpeedMod_BZ
         /// </summary>
         internal static void UpdateAllDrag(float multiplier)
         {
-            foreach (SeaTruckHistoryItem historyItem in SeaTruckInstanceHistory)
+            for (int index = SeaTruckInstanceHistory.Count - 1; index >= 0; index--)
             {
+                SeaTruckHistoryItem historyItem = SeaTruckInstanceHistory[index];
+                if (!historyItem.SeaTruckInstance)
+                {
+                    SeaTruckInstanceHistory.RemoveAt(index);
+                    continue;
+                }
+
                 historyItem.ApplyDragdModifier(multiplier);
             }
         }
 
         /// <summary>
-        /// Apply the given power efficiency modifier to all SeaTruck instances
-        /// </summary>
-        internal static void UpdateAllPowerEfficiency(float multiplier)
-        {
-            foreach (SeaTruckHistoryItem historyItem in SeaTruckInstanceHistory)
-            {
-                historyItem.ApplyPowerModifier(multiplier);
-            }
-        }
-
-
-        /// <summary>
         /// Add a new SeaTruck
         /// </summary>
-        internal static void AddSeaTruck(SeaTruckMotor SeaTruck)
+        internal static void AddSeaTruck(SeaTruckMotor seaTruck)
         {
-            SeaTruckHistoryItem newSeaglideItem = new SeaTruckHistoryItem(SeaTruck);
-            SeaTruckInstanceHistory.Add(newSeaglideItem);
+            SeaTruckHistoryItem newSeatruckItem = new SeaTruckHistoryItem(seaTruck);
+            SeaTruckInstanceHistory.Add(newSeatruckItem);
         }
 
         /// <summary>
         /// Remove a SeaTruck
         /// </summary>
-        internal static void RemoveSeaTruck(SeaTruckMotor SeaTruck)
+        internal static void RemoveSeaTruck(SeaTruckMotor seaTruck)
         {
-            foreach (SeaTruckHistoryItem SeaTruckHistoryItem in SeaTruckInstanceHistory.ToList())
+            for (int index = SeaTruckInstanceHistory.Count - 1; index >= 0; index--)
             {
-                if (SeaTruckHistoryItem.SeaTruckInstance == SeaTruck)
+                SeaTruckHistoryItem historyItem = SeaTruckInstanceHistory[index];
+                if (ReferenceEquals(historyItem.SeaTruckInstance, seaTruck))
                 {
-                    SeaTruckInstanceHistory.Remove(SeaTruckHistoryItem);
+                    SeaTruckInstanceHistory.RemoveAt(index);
                 }
             }
         }

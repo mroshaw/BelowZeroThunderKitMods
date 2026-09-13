@@ -1,13 +1,14 @@
 ﻿using Nautilus.Json;
 using Nautilus.Options;
 using Nautilus.Options.Attributes;
+using static DaftAppleGames.SeaTruckSpeedMod_BZ.SeaTruckSpeedPluginBz;
 
 namespace DaftAppleGames.SeaTruckSpeedMod_BZ.Config
 {
     /// <summary>
     /// Nautilus mod config class
     /// </summary>
-    [Menu("SeaTruck Speed")]
+    [Menu("SeaTruck Speed Modifier")]
     internal class ModConfigFile : ConfigFile
     {
         /// <summary>
@@ -17,10 +18,16 @@ namespace DaftAppleGames.SeaTruckSpeedMod_BZ.Config
         public float DragModifier = 2.0f;
 
         /// <summary>
-        /// Power Efficiency Modifier
+        /// Additional speed-relative power drain
         /// </summary>
-        [Slider("Energy Drain Multiplier", Step = 0.1f, Format = "{0:F2}", Min = 1.0f, Max = 10.0f, DefaultValue = 2.5f), OnChange(nameof(PowerSliderChangedHandler))]
-        public float PowerEfficiencyModifier = 2.5f;
+        [Slider("Power Drain", Tooltip = "Adds a modest amount of power consumption based on the Seatruck's actual speed. Set to 0 to disable.", Step = 0.05f, Format = "{0:F2}", Min = 0.0f, Max = 1.0f, DefaultValue = 0.2f)]
+        public float PowerDrain = 0.2f;
+
+        /// <summary>
+        /// Enable detailed logging
+        /// </summary>
+        [Toggle("Detailed logging", Tooltip = "Use this to produce a detailed log when reporting bugs. Logs are written to %LOCALAPPDATA%low\\Unknown Worlds\\Below Zero\\Player.log"), OnChange(nameof(OnLoggingChanged))]
+        public bool DetailedLogging = false;
 
 
         /// <summary>
@@ -32,11 +39,11 @@ namespace DaftAppleGames.SeaTruckSpeedMod_BZ.Config
         }
 
         /// <summary>
-        /// Handle Power slider changes
+        /// Handle toggling of detailed logging
         /// </summary>
-        private void PowerSliderChangedHandler(SliderChangedEventArgs newPowerArgs)
+        private void OnLoggingChanged(ToggleChangedEventArgs eventArgs)
         {
-            SeaTruckHistory.UpdateAllDrag(newPowerArgs.Value);
+            ModDebugLog.SetDetailedLoggingState(eventArgs.Value);
         }
     }
 }
