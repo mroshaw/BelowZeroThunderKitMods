@@ -46,7 +46,10 @@ namespace DaftAppleGames.ModTools
             {
                 sound.getLength(out uint soundLength, TIMEUNIT.PCM);
                 modLog.LogDebug($"Sound length: {soundLength}");
-                sound.setLoopPoints(0, TIMEUNIT.PCM, soundLength, TIMEUNIT.PCMFRACTION);
+                if (soundLength > 0)
+                {
+                    sound.setLoopPoints(0, TIMEUNIT.PCM, soundLength - 1, TIMEUNIT.PCM);
+                }
             }
 
             sound.getMode(out MODE soundMode);
