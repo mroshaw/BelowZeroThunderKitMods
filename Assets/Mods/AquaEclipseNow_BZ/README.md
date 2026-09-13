@@ -11,7 +11,7 @@ Open the command prompt (usually via the tilda ~ keyboard key) and enter one of 
 
 ## Options
 
-You can set a couple of options via the Options > Mods > Menu:
+You can set a couple of options via the Options > Mods menu:
 
 - **Time Before Eclipse** - the eclipse now command will forward game time to this many seconds before the next eclipse.
 - **Time Skip Duration** - the time taken to smoothly transition from the current time to the time of the next eclipse.
