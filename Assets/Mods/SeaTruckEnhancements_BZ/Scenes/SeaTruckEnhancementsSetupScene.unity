@@ -57851,6 +57851,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 224357141774430719}
     m_Modifications:
+    - target: {fileID: 3336643295793529836, guid: 8d81f9a7023ef8c47ba982600c2bca98,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4713639018825503368, guid: 8d81f9a7023ef8c47ba982600c2bca98,
         type: 3}
       propertyPath: m_Pivot.x
@@ -57960,6 +57965,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: SeatruckEnhancedIndicators
+      objectReference: {fileID: 0}
+    - target: {fileID: 7420320197920937870, guid: 8d81f9a7023ef8c47ba982600c2bca98,
+        type: 3}
+      propertyPath: m_FillAmount
+      value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 7420320198335348009, guid: 8d81f9a7023ef8c47ba982600c2bca98,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7420320198335348014, guid: 8d81f9a7023ef8c47ba982600c2bca98,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 95
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8d81f9a7023ef8c47ba982600c2bca98, type: 3}

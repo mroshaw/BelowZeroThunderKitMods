@@ -18,7 +18,7 @@ You can set a few options via the Options > Mods menu:
 
 - **Show speedometer** - toggle on to enable the speedometer enhancement.
 - **Show reversing camera** - toggle on to enable the reversing camera.
-- Reversing audio - select a reversing sound to play when backing up the Seatruck. Select "None" to disable the reversing audio.
+- **Reversing audio** - select a reversing sound to play when backing up the Seatruck. Select "None" to disable the reversing audio.
 - **Detailed logging** - Only enable this if you have an issue and want to provide useful logging when reporting a bug.
 
 ## Installation and Dependencies
@@ -28,3 +28,9 @@ You can set a few options via the Options > Mods menu:
 ## Source Code
 
 All of my mods are open source, and you can find the full source code in my [Subnautica Mods GitHub Repository](https://github.com/mroshaw/SubnauticaThunderKitMods).
+
+## Attribution
+
+- Speedometer graphics by Olusola Olaoye as part of [In Game UI](https://assetstore.unity.com/packages/2d/gui/icons/in-game-ui-251863).
+- Thanks to Kallie for the amazing [SnPdaVoice](https://github.com/32Kallies/SnPdaVoice) tool, used to generate the voice audio.
+- Beep audio provided by [backing up beep](https://pixabay.com/sound-effects/city-backing-up-beepwav-14889/), by freesound_community.
