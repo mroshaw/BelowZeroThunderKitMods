@@ -22,7 +22,8 @@
   "media": [
     { "type": "image", "url": "SeaTruckSpeedo.png", "label": "New Seatruck speedometer." },
     { "type": "image", "url": "SeatruckReverseCamera.png", "label": "New Seatruck reversing camera." },
-    { "type": "image", "url": "SeatruckOptions.png", "label": "Mod options." }
+    { "type": "image", "url": "SeatruckOptions.png", "label": "Mod options." },
+    { "type":  "video", "url": "https://youtu.be/pvUavsuUq68"}
   ],
 
   "faq": [
