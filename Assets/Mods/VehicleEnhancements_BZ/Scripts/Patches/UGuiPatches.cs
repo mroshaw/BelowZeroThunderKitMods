@@ -62,8 +62,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Patches
 
             SpeedometerController speedometer = enhancedIndicators.GetComponent<SpeedometerController>();
             HsiController hsi = enhancedIndicators.GetComponent<HsiController>();
-            TimeAndWeatherController timeAndWeather =
-                enhancedIndicators.GetComponentInChildren<TimeAndWeatherController>(true);
+            TimeAndWeatherController timeAndWeather = enhancedIndicators.GetComponent<TimeAndWeatherController>();
             if (!speedometer || !hsi || !timeAndWeather)
             {
                 ModDebugLog.LogError("Enhanced indicator prefab is missing a display controller.");
@@ -74,6 +73,11 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Patches
             speedometer.Configure(vehicle);
             hsi.Configure(vehicle);
             timeAndWeather.Configure(vehicle);
+
+            if (vehicle == EnhancedVehicle.PrawnSuit)
+            {
+                hsi.enabled = false;
+            }
 
             if (vehicle != EnhancedVehicle.Seatruck)
             {

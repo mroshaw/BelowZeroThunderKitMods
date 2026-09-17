@@ -16,6 +16,12 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Speedometer
         [SerializeField, Required] private RectTransform verticalNeedle;
 
         [SerializeField, Required] private TextMeshProUGUI verticalSpeedText;
+
+        [SerializeField] private Vector2 seaTruckOffset;
+
+        [SerializeField] private Vector2 prawnSuitOffset = new Vector2(0.0f, 20.0f);
+
+        [SerializeField] private Vector2 snowfoxOffset;
         
         [SerializeField] private float minimumNeedleAngle = 180.0f;
 
@@ -42,6 +48,32 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Speedometer
         internal void Configure(EnhancedVehicle selectedVehicle)
         {
             vehicle = selectedVehicle;
+            if (!speedometerRoot)
+            {
+                return;
+            }
+
+            RectTransform speedometerRect = speedometerRoot.transform as RectTransform;
+            if (!speedometerRect)
+            {
+                return;
+            }
+
+            Vector2 offset;
+            switch (vehicle)
+            {
+                case EnhancedVehicle.PrawnSuit:
+                    offset = prawnSuitOffset;
+                    break;
+                case EnhancedVehicle.Snowfox:
+                    offset = snowfoxOffset;
+                    break;
+                default:
+                    offset = seaTruckOffset;
+                    break;
+            }
+
+            speedometerRect.anchoredPosition += offset;
         }
 
         private void Awake()

@@ -8,11 +8,14 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.UI
 {
     internal class TimeAndWeatherController : MonoBehaviour
     {
+        [SerializeField, Required] private GameObject timeAndWeatherRoot;
         [SerializeField, Required] private TextMeshProUGUI timeText;
-        [SerializeField, Required] private RectTransform dayNightIndicator;
-        [SerializeField, Required] private Image dayTimeImage;
+        [SerializeField, Required] private RectTransform timeOfDayIndicator;
+        [SerializeField, Required] private Image timeImage;
+        [SerializeField, Required] private Sprite dayTimeSprite;
         [SerializeField, Required] private Sprite nightTimeSprite;
-        [SerializeField, Required] private Image weatherIndicator;
+        [SerializeField, Required] private GameObject weatherIndicator;
+        [SerializeField, Required] private Image weatherImage;
         [SerializeField, Required] private Sprite sunnyWeatherSprite;
         [SerializeField, Required] private Sprite partlyCloudyWeatherSprite;
         [SerializeField, Required] private Sprite cloudyWeatherSprite;
@@ -23,7 +26,6 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.UI
         private RectTransform nextMoon;
         private int lastDisplayedMinute = -1;
         private float nextWeatherUpdateTime;
-        private bool isVisible;
         private EnhancedVehicle vehicle = EnhancedVehicle.Seatruck;
 
         internal void Configure(EnhancedVehicle selectedVehicle)
@@ -33,8 +35,9 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.UI
 
         private void Awake()
         {
-            if (!timeText || !dayNightIndicator || !dayTimeImage || !nightTimeSprite ||
-                !weatherIndicator || !sunnyWeatherSprite || !partlyCloudyWeatherSprite ||
+            if (!timeAndWeatherRoot || !timeText || !timeOfDayIndicator || !timeImage ||
+                !dayTimeSprite || !nightTimeSprite || !weatherIndicator || !weatherImage ||
+                !sunnyWeatherSprite || !partlyCloudyWeatherSprite ||
                 !cloudyWeatherSprite || !rainyWeatherSprite || !snowyWeatherSprite)
             {
                 ModDebugLog.LogError("Could not find the time and weather indicator objects or sprites.");
@@ -42,25 +45,34 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.UI
                 return;
             }
 
-            if (!dayNightIndicator.GetComponent<RectMask2D>())
+            if (timeImage.transform.parent != timeOfDayIndicator ||
+                weatherImage.transform.parent != weatherIndicator.transform)
             {
-                dayNightIndicator.gameObject.AddComponent<RectMask2D>();
+                ModDebugLog.LogError("Time and weather images are not children of their indicators.");
+                enabled = false;
+                return;
             }
 
-            dayTimeImage.raycastTarget = false;
+            if (!timeOfDayIndicator.GetComponent<RectMask2D>())
+            {
+                timeOfDayIndicator.gameObject.AddComponent<RectMask2D>();
+            }
+
+            timeImage.sprite = dayTimeSprite;
+            timeImage.raycastTarget = false;
             previousMoon = CreateMoon("PreviousMoon");
             nextMoon = CreateMoon("NextMoon");
             timeText.SetText("--:--");
-            weatherIndicator.enabled = false;
-            SetVisibility(ConfigFile.IsTimeAndWeatherEnabled(vehicle));
+            weatherImage.enabled = false;
+            timeAndWeatherRoot.SetActive(ConfigFile.IsTimeAndWeatherEnabled(vehicle));
         }
 
         private void Update()
         {
             bool showTimeAndWeather = ConfigFile.IsTimeAndWeatherEnabled(vehicle);
-            if (isVisible != showTimeAndWeather)
+            if (timeAndWeatherRoot.activeSelf != showTimeAndWeather)
             {
-                SetVisibility(showTimeAndWeather);
+                timeAndWeatherRoot.SetActive(showTimeAndWeather);
             }
 
             if (!showTimeAndWeather)
@@ -81,18 +93,9 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.UI
             }
         }
 
-        private void SetVisibility(bool visible)
-        {
-            isVisible = visible;
-            foreach (Transform child in transform)
-            {
-                child.gameObject.SetActive(visible);
-            }
-        }
-
         private RectTransform CreateMoon(string objectName)
         {
-            Image moonImage = Instantiate(dayTimeImage, dayNightIndicator);
+            Image moonImage = Instantiate(timeImage, timeOfDayIndicator);
             moonImage.name = objectName;
             moonImage.sprite = nightTimeSprite;
             moonImage.raycastTarget = false;
@@ -108,9 +111,9 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.UI
                 timeText.SetText("{0:00}:{1:00}", minuteOfDay / 60, minuteOfDay % 60);
             }
 
-            float viewportHeight = dayNightIndicator.rect.height;
+            float viewportHeight = timeOfDayIndicator.rect.height;
             float sunPosition = (dayFraction * 2.0f - 1.0f) * viewportHeight;
-            dayTimeImage.rectTransform.anchoredPosition = new Vector2(0.0f, sunPosition);
+            timeImage.rectTransform.anchoredPosition = new Vector2(0.0f, sunPosition);
             previousMoon.anchoredPosition = new Vector2(0.0f, sunPosition + viewportHeight);
             nextMoon.anchoredPosition = new Vector2(0.0f, sunPosition - viewportHeight);
         }
@@ -121,7 +124,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.UI
             WeatherEvent weather = weatherManager ? weatherManager.GetCurrentWeatherConditions() : null;
             if (weather == null)
             {
-                weatherIndicator.enabled = false;
+                weatherImage.enabled = false;
                 return;
             }
 
@@ -148,12 +151,12 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.UI
                 sprite = sunnyWeatherSprite;
             }
 
-            if (weatherIndicator.sprite != sprite)
+            if (weatherImage.sprite != sprite)
             {
-                weatherIndicator.sprite = sprite;
+                weatherImage.sprite = sprite;
             }
 
-            weatherIndicator.enabled = true;
+            weatherImage.enabled = true;
         }
     }
 }

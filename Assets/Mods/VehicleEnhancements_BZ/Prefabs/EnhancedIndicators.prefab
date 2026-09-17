@@ -68,7 +68,7 @@ GameObject:
   - component: {fileID: 4738719161238093654}
   - component: {fileID: 2143278423538423115}
   m_Layer: 0
-  m_Name: DayTime
+  m_Name: Time Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -114,7 +114,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.09019608, g: 0.454902, b: 0.6313726, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.627451}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -273,10 +273,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6651443371270906701}
-  - component: {fileID: 1989635521802847839}
-  - component: {fileID: 679316361371568974}
   m_Layer: 5
-  m_Name: WeatherIndicator
+  m_Name: Weather Indicator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -302,43 +300,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 60, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &1989635521802847839
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1096216290343918165}
-  m_CullTransparentMesh: 0
---- !u!114 &679316361371568974
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1096216290343918165}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: ec03c5a697f8f664284111f0ec812d3d, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &1593418624037045165
 GameObject:
   m_ObjectHideFlags: 0
@@ -351,7 +312,7 @@ GameObject:
   - component: {fileID: 7519071849706561423}
   - component: {fileID: 8575013490120536025}
   m_Layer: 5
-  m_Name: PlaneSpeedText
+  m_Name: Plane Speed Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -606,7 +567,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.80784315}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -634,7 +595,7 @@ GameObject:
   - component: {fileID: 1874275980581770289}
   - component: {fileID: 7349695093864141835}
   m_Layer: 5
-  m_Name: SnowyWeather
+  m_Name: Weather Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -680,7 +641,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.09019608, g: 0.454902, b: 0.6313726, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.627451}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -1275,6 +1236,7 @@ GameObject:
   - component: {fileID: 6219988445626901703}
   - component: {fileID: 5276108820365332941}
   - component: {fileID: 3372825952849277632}
+  - component: {fileID: 8818688959980339929}
   m_Layer: 5
   m_Name: EnhancedIndicators
   m_TagString: Untagged
@@ -1337,6 +1299,9 @@ MonoBehaviour:
   speedText: {fileID: 8575013490120536025}
   verticalNeedle: {fileID: 8670672121634274167}
   verticalSpeedText: {fileID: 2407745977858173684}
+  seaTruckOffset: {x: 0, y: 0}
+  prawnSuitOffset: {x: 0, y: 20}
+  snowfoxOffset: {x: 0, y: 0}
   minimumNeedleAngle: 180
   maximumNeedleAngle: -80
   maximumDisplayedSpeed: 20
@@ -1401,6 +1366,33 @@ MonoBehaviour:
   rollText: {fileID: 5550304788245442938}
   pitchUnitsPerDegree: 2.6
   smoothTime: 0.12
+--- !u!114 &8818688959980339929
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4713639018825503371}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed41bb81f7c94871b49f798d9e72d0e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timeAndWeatherRoot: {fileID: 7839551863179794180}
+  timeText: {fileID: 1335688316202699314}
+  timeOfDayIndicator: {fileID: 4931461211141982883}
+  timeImage: {fileID: 2143278423538423115}
+  dayTimeSprite: {fileID: 21300000, guid: 2c7d415ebf0f4f242979fb708ca14b7e, type: 3}
+  nightTimeSprite: {fileID: 21300000, guid: 8959c4c55fed64c44b867b3a57746060, type: 3}
+  weatherIndicator: {fileID: 1096216290343918165}
+  weatherImage: {fileID: 7349695093864141835}
+  sunnyWeatherSprite: {fileID: 21300000, guid: e6ea78c987745a5469e0a83a86fd4a53, type: 3}
+  partlyCloudyWeatherSprite: {fileID: 21300000, guid: fdcf7bcebcbc28043975ddee14d30c6c,
+    type: 3}
+  cloudyWeatherSprite: {fileID: 21300000, guid: 6dae481ea034ec147b1166fc9bcbb337,
+    type: 3}
+  rainyWeatherSprite: {fileID: 21300000, guid: 04af614d1c42e7241b3a6b77011a7f73, type: 3}
+  snowyWeatherSprite: {fileID: 21300000, guid: ec03c5a697f8f664284111f0ec812d3d, type: 3}
 --- !u!1 &4743132722026177057
 GameObject:
   m_ObjectHideFlags: 0
@@ -1564,12 +1556,12 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4604279929346698646}
-  m_RootOrder: 2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 290, y: 230}
+  m_SizeDelta: {x: 305, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5481136768482092625
 CanvasRenderer:
@@ -1592,7 +1584,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.80784315}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -1774,7 +1766,7 @@ RectTransform:
   - {fileID: 8670672121634274167}
   - {fileID: 8389539459576002250}
   m_Father: {fileID: 4604279929346698646}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1828,7 +1820,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4931461211141982883}
   m_Layer: 5
-  m_Name: DayNightIndicator
+  m_Name: Time Of Day Indicator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1953,7 +1945,7 @@ MonoBehaviour:
   m_fontSizeMax: 40
   m_fontStyle: 0
   m_HorizontalAlignment: 2
-  m_VerticalAlignment: 1024
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -2020,7 +2012,7 @@ RectTransform:
   - {fileID: 7185371109953327647}
   - {fileID: 5185986739756994631}
   m_Father: {fileID: 4604279929346698646}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -2076,7 +2068,7 @@ GameObject:
   - component: {fileID: 7185371109649973836}
   - component: {fileID: 7185371109649973839}
   m_Layer: 5
-  m_Name: PlaneNeedle
+  m_Name: Plane Needle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2501,8 +2493,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4604279929346698646}
-  - component: {fileID: 2164875280984844614}
-  - component: {fileID: 6123880942953810452}
   m_Layer: 5
   m_Name: Speedometer
   m_TagString: Untagged
@@ -2521,9 +2511,9 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
+  - {fileID: 772398943137983289}
   - {fileID: 7185371108531592346}
   - {fileID: 8991662620134907254}
-  - {fileID: 772398943137983289}
   m_Father: {fileID: 4713639018825503368}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2532,43 +2522,6 @@ RectTransform:
   m_AnchoredPosition: {x: -30, y: 110}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &2164875280984844614
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7759051693240293448}
-  m_CullTransparentMesh: 0
---- !u!114 &6123880942953810452
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7759051693240293448}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: bfb01f198ffbcd04d9327b96650382c2, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &7829126937079006615
 GameObject:
   m_ObjectHideFlags: 0
@@ -2712,7 +2665,8 @@ GameObject:
   m_Component:
   - component: {fileID: 8818688959980339928}
   - component: {fileID: 6743847711908698284}
-  - component: {fileID: 8818688959980339929}
+  - component: {fileID: 4713639018970594709}
+  - component: {fileID: 4713639018970594708}
   m_Layer: 5
   m_Name: Time And Weather
   m_TagString: Untagged
@@ -2739,8 +2693,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
   m_AnchorMin: {x: 0.15, y: 0.23}
   m_AnchorMax: {x: 0.15, y: 0.23}
-  m_AnchoredPosition: {x: -200, y: 78.7}
-  m_SizeDelta: {x: 256, y: 60}
+  m_AnchoredPosition: {x: -215, y: 78.7}
+  m_SizeDelta: {x: 300, y: 90}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &6743847711908698284
 MonoBehaviour:
@@ -2755,10 +2709,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
+    m_Left: 15
+    m_Right: 15
+    m_Top: 15
+    m_Bottom: 4
   m_ChildAlignment: 0
   m_Spacing: 0
   m_ChildForceExpandWidth: 1
@@ -2767,7 +2721,15 @@ MonoBehaviour:
   m_ChildControlHeight: 0
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
---- !u!114 &8818688959980339929
+--- !u!222 &4713639018970594709
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7839551863179794180}
+  m_CullTransparentMesh: 0
+--- !u!114 &4713639018970594708
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2776,21 +2738,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 7839551863179794180}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed41bb81f7c94871b49f798d9e72d0e4, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timeText: {fileID: 1335688316202699314}
-  dayNightIndicator: {fileID: 4931461211141982883}
-  dayTimeImage: {fileID: 2143278423538423115}
-  nightTimeSprite: {fileID: 21300000, guid: 8959c4c55fed64c44b867b3a57746060, type: 3}
-  weatherIndicator: {fileID: 679316361371568974}
-  sunnyWeatherSprite: {fileID: 21300000, guid: e6ea78c987745a5469e0a83a86fd4a53, type: 3}
-  partlyCloudyWeatherSprite: {fileID: 21300000, guid: fdcf7bcebcbc28043975ddee14d30c6c,
-    type: 3}
-  cloudyWeatherSprite: {fileID: 21300000, guid: 6dae481ea034ec147b1166fc9bcbb337,
-    type: 3}
-  rainyWeatherSprite: {fileID: 21300000, guid: 04af614d1c42e7241b3a6b77011a7f73, type: 3}
-  snowyWeatherSprite: {fileID: 21300000, guid: ec03c5a697f8f664284111f0ec812d3d, type: 3}
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.8352941}
+  m_RaycastTarget: 1
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 8e879396aea1113469d0f17fdbc48580, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &7921726673248566833
 GameObject:
   m_ObjectHideFlags: 0

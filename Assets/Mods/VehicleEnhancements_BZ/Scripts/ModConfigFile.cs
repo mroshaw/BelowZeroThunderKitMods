@@ -39,9 +39,6 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
         [Toggle("Prawn Suit: Speedometer", Order = 20, Tooltip = "Shows the Prawn Suit speedometer")]
         public bool EnablePrawnSpeedometer = true;
 
-        [Toggle("Prawn Suit: HSI", Order = 21, Tooltip = "Shows the Prawn Suit pitch and roll indicator")]
-        public bool EnablePrawnHsi = true;
-
         [Toggle("Prawn Suit: Time and Weather", Order = 22, Tooltip = "Shows time and weather in the Prawn Suit HUD")]
         public bool EnablePrawnTimeAndWeather = true;
 
@@ -61,10 +58,10 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
         public bool EnableReversingCamera = true;
 
         /// <summary>
-        /// Building inside the Vehicles
+        /// Building inside the Seatruck
         /// </summary>
-        [Toggle("Allow Building Inside Vehicles", Order = 40,
-            Tooltip = "Allows wall-mounted and floor-based habitat builder objects to be constructed inside vehicles.")]
+        [Toggle("Seatruck: Allow Building Inside", Order = 16,
+            Tooltip = "Allows wall-mounted and floor-based habitat builder objects to be constructed inside the Seatruck.")]
         public bool EnableBuildingInside = true;
 
         /// <summary>
@@ -106,7 +103,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
             switch (vehicle)
             {
                 case EnhancedVehicle.PrawnSuit:
-                    return EnablePrawnHsi;
+                    return false;
                 case EnhancedVehicle.Snowfox:
                     return EnableSnowfoxHsi;
                 default:
