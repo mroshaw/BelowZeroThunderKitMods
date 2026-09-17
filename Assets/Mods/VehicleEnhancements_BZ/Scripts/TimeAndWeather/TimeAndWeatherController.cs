@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using static DaftAppleGames.VehicleEnhancements_BZ.VehicleEnhancementsPlugin_BZ;
 
-namespace DaftAppleGames.VehicleEnhancements_BZ.UI
+namespace DaftAppleGames.VehicleEnhancements_BZ.TimeAndWeather
 {
     internal class TimeAndWeatherController : MonoBehaviour
     {

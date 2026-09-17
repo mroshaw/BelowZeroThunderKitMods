@@ -3,7 +3,7 @@ using UnityEngine;
 using DaftAppleGames.VehicleEnhancements_BZ.Hsi;
 using DaftAppleGames.VehicleEnhancements_BZ.Reversing;
 using DaftAppleGames.VehicleEnhancements_BZ.Speedometer;
-using DaftAppleGames.VehicleEnhancements_BZ.UI;
+using DaftAppleGames.VehicleEnhancements_BZ.TimeAndWeather;
 using static DaftAppleGames.VehicleEnhancements_BZ.VehicleEnhancementsPlugin_BZ;
 
 namespace DaftAppleGames.VehicleEnhancements_BZ.Patches

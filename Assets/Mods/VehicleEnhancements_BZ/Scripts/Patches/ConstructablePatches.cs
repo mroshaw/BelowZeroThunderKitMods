@@ -1,6 +1,7 @@
+using DaftAppleGames.VehicleEnhancements_BZ.Building;
 using HarmonyLib;
 
-namespace DaftAppleGames.VehicleEnhancements_BZ.Building
+namespace DaftAppleGames.VehicleEnhancements_BZ.Patches
 {
     [HarmonyPatch(typeof(Constructable), nameof(Constructable.CheckFlags))]
     internal static class ConstructablePatches

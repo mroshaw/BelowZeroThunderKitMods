@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using DaftAppleGames.VehicleEnhancements_BZ.Building;
 using HarmonyLib;
 using UnityEngine;
 using static DaftAppleGames.VehicleEnhancements_BZ.VehicleEnhancementsPlugin_BZ;
 
-namespace DaftAppleGames.VehicleEnhancements_BZ.Building
+namespace DaftAppleGames.VehicleEnhancements_BZ.Patches
 {
     [HarmonyPatch(typeof(Builder))]
     internal static class BuilderPatches
