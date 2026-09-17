@@ -21,6 +21,13 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.UI
         [SerializeField, Required] private Sprite cloudyWeatherSprite;
         [SerializeField, Required] private Sprite rainyWeatherSprite;
         [SerializeField, Required] private Sprite snowyWeatherSprite;
+        [SerializeField, Required] private Sprite hailWeatherSprite;
+        [SerializeField, Required] private Sprite lightningStormWeatherSprite;
+        [SerializeField, Required] private Sprite fogWeatherSprite;
+        [SerializeField, Required] private Sprite windBlizzardWeatherSprite;
+        [SerializeField, Required] private Sprite dustStormWeatherSprite;
+        [SerializeField, Required] private Sprite meteorWeatherSprite;
+        [SerializeField, Required] private Sprite auroraWeatherSprite;
 
         private RectTransform previousMoon;
         private RectTransform nextMoon;
@@ -38,7 +45,10 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.UI
             if (!timeAndWeatherRoot || !timeText || !timeOfDayIndicator || !timeImage ||
                 !dayTimeSprite || !nightTimeSprite || !weatherIndicator || !weatherImage ||
                 !sunnyWeatherSprite || !partlyCloudyWeatherSprite ||
-                !cloudyWeatherSprite || !rainyWeatherSprite || !snowyWeatherSprite)
+                !cloudyWeatherSprite || !rainyWeatherSprite || !snowyWeatherSprite ||
+                !hailWeatherSprite || !lightningStormWeatherSprite || !fogWeatherSprite ||
+                !windBlizzardWeatherSprite || !dustStormWeatherSprite ||
+                !meteorWeatherSprite || !auroraWeatherSprite)
             {
                 ModDebugLog.LogError("Could not find the time and weather indicator objects or sprites.");
                 enabled = false;
@@ -130,13 +140,45 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.UI
 
             WeatherParameters conditions = weather.parameters;
             Sprite sprite;
-            if (conditions.snowIntensity >= 0.1f || conditions.hailIntensity >= 0.1f)
+            if (conditions.lightningIntensity >= 0.25f)
+            {
+                sprite = lightningStormWeatherSprite;
+            }
+            else if (conditions.hailIntensity >= 0.1f)
+            {
+                sprite = hailWeatherSprite;
+            }
+            else if (conditions.meteorIntensity >= 0.25f)
+            {
+                sprite = meteorWeatherSprite;
+            }
+            else if (conditions.snowIntensity >= 0.2f && conditions.windSpeed >= 30.0f)
+            {
+                sprite = windBlizzardWeatherSprite;
+            }
+            else if (conditions.snowIntensity >= 0.1f)
             {
                 sprite = snowyWeatherSprite;
             }
             else if (conditions.rainIntensity >= 0.1f)
             {
                 sprite = rainyWeatherSprite;
+            }
+            else if (conditions.smokinessIntensity >= 0.25f && conditions.windSpeed >= 25.0f)
+            {
+                sprite = dustStormWeatherSprite;
+            }
+            else if (conditions.fogDensity >= 0.12f)
+            {
+                sprite = fogWeatherSprite;
+            }
+            else if (conditions.windSpeed >= 30.0f)
+            {
+                sprite = windBlizzardWeatherSprite;
+            }
+            else if (conditions.auroraBorealisIntensity >= 0.25f)
+            {
+                sprite = auroraWeatherSprite;
             }
             else if (conditions.cloudCoverage >= 0.7f)
             {

@@ -28,7 +28,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
         [SerializeField, Range(1.0f, 10.0f)]
         private float cabinLowPassResonance = 1.0f;
 
-        private SeaTruckMotor attachedMotor;
+        private EnhancedVehicle vehicle = EnhancedVehicle.Seatruck;
         private DSP reversingBeepsLowPass;
         private DSP thisSeaTruckIsReversingLowPass;
         private Channel reversingBeepsChannel;
@@ -38,42 +38,49 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
         private float appliedBeepsVolume = -1.0f;
         private float appliedVoiceVolume = -1.0f;
 
+        internal void Configure(EnhancedVehicle selectedVehicle)
+        {
+            vehicle = selectedVehicle;
+        }
+
         private void Awake()
         {
             if (!reversingBeepsEmitter || !thisSeaTruckIsReversingEmitter)
             {
-                ModDebugLog.LogError("Could not find the SeaTruck reversing audio emitters.");
+                ModDebugLog.LogError("Could not find the vehicle reversing audio emitters.");
                 enabled = false;
                 return;
             }
 
             if (!ReversingBeepsFmodAsset || !ThisSeaTruckIsReversingFmodAsset)
             {
-                ModDebugLog.LogError("The SeaTruck reversing FMOD assets are not available.");
+                ModDebugLog.LogError("The vehicle reversing FMOD assets are not available.");
                 enabled = false;
                 return;
             }
 
             ConfigureEmitter(reversingBeepsEmitter, ReversingBeepsFmodAsset);
             ConfigureEmitter(thisSeaTruckIsReversingEmitter, ThisSeaTruckIsReversingFmodAsset);
-            CreateLowPassDsp(ref reversingBeepsLowPass);
-            CreateLowPassDsp(ref thisSeaTruckIsReversingLowPass);
+            if (vehicle != EnhancedVehicle.Snowfox)
+            {
+                CreateLowPassDsp(ref reversingBeepsLowPass);
+                CreateLowPassDsp(ref thisSeaTruckIsReversingLowPass);
+            }
         }
 
         private void Update()
         {
-            SeaTruckMotor seaTruckMotor = GetPilotedSeaTruckMotor();
-            if (!seaTruckMotor)
+            if (!TryGetPilotedVehicleMotion(out Transform vehicleTransform, out Vector3 velocity))
             {
                 StopEmitters();
                 ReturnEmittersToHud();
                 return;
             }
 
-            AttachEmittersToSeaTruck(seaTruckMotor);
+            PositionEmittersAtVehicle(vehicleTransform);
 
-            bool isReversing = GetSignedForwardSpeed(seaTruckMotor) < -reversingSpeedThreshold;
-            ReversingAudio selectedAudio = ConfigFile.ReversingAudio;
+            bool isReversing = Vector3.Dot(velocity, vehicleTransform.forward) < -reversingSpeedThreshold;
+            ReversingAudio selectedAudio = ConfigFile.GetReversingAudio(vehicle);
 
             bool playBeeps = isReversing &&
                              (selectedAudio == ReversingAudio.Beeps || selectedAudio == ReversingAudio.Both);
@@ -126,66 +133,53 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
             ModAudioUtils.ConfigureEmitter(emitter, soundAsset, ModDebugLog);
         }
 
-        private static SeaTruckMotor GetPilotedSeaTruckMotor()
+        private bool TryGetPilotedVehicleMotion(out Transform vehicleTransform, out Vector3 velocity)
         {
-            Player player = Player.main;
-            if (!player)
+            vehicleTransform = null;
+            velocity = Vector3.zero;
+            if (!VehicleMotion.TryGet(vehicle, out vehicleTransform, out velocity))
             {
-                return null;
+                return false;
             }
 
-            SeaTruckMotor seaTruckMotor = player.GetComponentInParent<SeaTruckMotor>();
-            return seaTruckMotor && seaTruckMotor.IsPiloted() ? seaTruckMotor : null;
-        }
-
-        private void AttachEmittersToSeaTruck(SeaTruckMotor seaTruckMotor)
-        {
-            if (attachedMotor == seaTruckMotor)
+            if (vehicle == EnhancedVehicle.Seatruck)
             {
-                return;
+                SeaTruckMotor seaTruckMotor = vehicleTransform.GetComponent<SeaTruckMotor>();
+                return seaTruckMotor && seaTruckMotor.IsPiloted();
             }
 
-            SetEmitterTransform(reversingBeepsEmitter.transform, seaTruckMotor.transform);
-            SetEmitterTransform(thisSeaTruckIsReversingEmitter.transform, seaTruckMotor.transform);
-            attachedMotor = seaTruckMotor;
+            return true;
         }
 
-        private void SetEmitterTransform(Transform emitterTransform, Transform parent)
+        private void PositionEmittersAtVehicle(Transform vehicleTransform)
         {
-            emitterTransform.SetParent(parent, false);
-            emitterTransform.localPosition = audioSourceOffset;
-            emitterTransform.localRotation = Quaternion.identity;
-            emitterTransform.localScale = Vector3.one;
+            SetEmitterTransform(reversingBeepsEmitter.transform, vehicleTransform);
+            SetEmitterTransform(thisSeaTruckIsReversingEmitter.transform, vehicleTransform);
+        }
+
+        private void SetEmitterTransform(Transform emitterTransform, Transform vehicleTransform)
+        {
+            emitterTransform.position = vehicleTransform.TransformPoint(audioSourceOffset);
+            emitterTransform.rotation = vehicleTransform.rotation;
         }
 
         private void ReturnEmittersToHud()
         {
-            if (!attachedMotor)
+            if (reversingBeepsEmitter)
             {
-                return;
+                SetHudEmitterTransform(reversingBeepsEmitter.transform);
             }
 
-            SetHudEmitterTransform(reversingBeepsEmitter.transform);
-            SetHudEmitterTransform(thisSeaTruckIsReversingEmitter.transform);
-            attachedMotor = null;
+            if (thisSeaTruckIsReversingEmitter)
+            {
+                SetHudEmitterTransform(thisSeaTruckIsReversingEmitter.transform);
+            }
         }
 
         private void SetHudEmitterTransform(Transform emitterTransform)
         {
-            emitterTransform.SetParent(transform, false);
             emitterTransform.localPosition = Vector3.zero;
             emitterTransform.localRotation = Quaternion.identity;
-            emitterTransform.localScale = Vector3.one;
-        }
-
-        private static float GetSignedForwardSpeed(SeaTruckMotor seaTruckMotor)
-        {
-            if (!seaTruckMotor.useRigidbody)
-            {
-                return 0.0f;
-            }
-
-            return Vector3.Dot(seaTruckMotor.useRigidbody.velocity, seaTruckMotor.transform.forward);
         }
 
         private static void SetEmitterPlaying(
@@ -243,7 +237,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
             RESULT result = RuntimeManager.CoreSystem.createDSPByType(DSP_TYPE.LOWPASS, out lowPass);
             if (result != RESULT.OK || !lowPass.hasHandle())
             {
-                ModDebugLog.LogError($"Could not create the SeaTruck cabin low-pass DSP: {result}.");
+                ModDebugLog.LogError($"Could not create the vehicle cabin low-pass DSP: {result}.");
                 return;
             }
 

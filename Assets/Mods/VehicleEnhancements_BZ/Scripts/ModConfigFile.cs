@@ -42,6 +42,10 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
         [Toggle("Prawn Suit: Time and Weather", Order = 22, Tooltip = "Shows time and weather in the Prawn Suit HUD")]
         public bool EnablePrawnTimeAndWeather = true;
 
+        [Choice("Prawn Suit: Reversing Audio", "None", "Beeps", "Voice", "Both", Order = 23,
+            Tooltip = "Set the audio that plays when the Prawn Suit reverses.")]
+        public ReversingAudio PrawnReversingAudio = ReversingAudio.Both;
+
         [Toggle("Snowfox: Speedometer", Order = 30, Tooltip = "Shows the Snowfox speedometer")]
         public bool EnableSnowfoxSpeedometer = true;
 
@@ -50,6 +54,10 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
 
         [Toggle("Snowfox: Time and Weather", Order = 32, Tooltip = "Shows time and weather in the Snowfox HUD")]
         public bool EnableSnowfoxTimeAndWeather = true;
+
+        [Choice("Snowfox: Reversing Audio", "None", "Beeps", "Voice", "Both", Order = 33,
+            Tooltip = "Set the audio that plays when the Snowfox reverses.")]
+        public ReversingAudio SnowfoxReversingAudio = ReversingAudio.Both;
 
         /// <summary>
         /// Reversing Camera
@@ -75,15 +83,28 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
         /// Reversing audio volume
         /// </summary>
         [Slider(
-            "Seatruck: Reversing Audio Volume",
-            Order = 15,
-            Tooltip = "Sets the volume of the reversing audio.",
+            "Reversing Audio Volume",
+            Order = 40,
+            Tooltip = "Sets the reversing audio volume for all vehicles.",
             Step = 0.05f,
             Format = "{0:F2}",
             Min = 0.0f,
             Max = 1.0f,
             DefaultValue = 0.1f)]
         public float ReversingAudioVolume = 0.1f;
+
+        internal ReversingAudio GetReversingAudio(EnhancedVehicle vehicle)
+        {
+            switch (vehicle)
+            {
+                case EnhancedVehicle.PrawnSuit:
+                    return PrawnReversingAudio;
+                case EnhancedVehicle.Snowfox:
+                    return SnowfoxReversingAudio;
+                default:
+                    return ReversingAudio;
+            }
+        }
 
         internal bool IsSpeedometerEnabled(EnhancedVehicle vehicle)
         {
@@ -129,7 +150,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
         /// </summary>
         [Toggle("Detailed logging", Order = 50,
              Tooltip =
-                 "Use this to produce a detailed log when reporting bugs. Logs are written to %LOCALAPPDATA%low\\Unknown Worlds\\Below Zero\\Player.log"),
+                 "Use this to produce a detailed log when reporting bugs. Logs are written to %USERPROFILE%\\AppData\\LocalLow\\Unknown Worlds\\Subnautica Below Zero\\Player.log"),
          OnChange(nameof(OnLoggingChanged))]
         public bool DetailedLogging = false;
 

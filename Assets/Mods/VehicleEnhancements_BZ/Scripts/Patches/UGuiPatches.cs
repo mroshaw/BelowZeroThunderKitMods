@@ -63,7 +63,8 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Patches
             SpeedometerController speedometer = enhancedIndicators.GetComponent<SpeedometerController>();
             HsiController hsi = enhancedIndicators.GetComponent<HsiController>();
             TimeAndWeatherController timeAndWeather = enhancedIndicators.GetComponent<TimeAndWeatherController>();
-            if (!speedometer || !hsi || !timeAndWeather)
+            ReversingAudioController reversingAudio = enhancedIndicators.GetComponent<ReversingAudioController>();
+            if (!speedometer || !hsi || !timeAndWeather || !reversingAudio)
             {
                 ModDebugLog.LogError("Enhanced indicator prefab is missing a display controller.");
                 Object.Destroy(enhancedIndicators);
@@ -73,6 +74,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Patches
             speedometer.Configure(vehicle);
             hsi.Configure(vehicle);
             timeAndWeather.Configure(vehicle);
+            reversingAudio.Configure(vehicle);
 
             if (vehicle == EnhancedVehicle.PrawnSuit)
             {
@@ -91,22 +93,10 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Patches
 
                 enhancedIndicators.AddComponent<VehicleHudLayout>().Configure(hudContent);
 
-                ReversingAudioController reversingAudio = enhancedIndicators.GetComponent<ReversingAudioController>();
                 ReversingCameraController reversingCamera = enhancedIndicators.GetComponent<ReversingCameraController>();
-                if (reversingAudio)
-                {
-                    reversingAudio.enabled = false;
-                }
-
                 if (reversingCamera)
                 {
                     reversingCamera.enabled = false;
-                }
-
-                Transform fmodEmitters = enhancedIndicators.transform.Find("FMOD Emitters");
-                if (fmodEmitters)
-                {
-                    fmodEmitters.gameObject.SetActive(false);
                 }
             }
 
