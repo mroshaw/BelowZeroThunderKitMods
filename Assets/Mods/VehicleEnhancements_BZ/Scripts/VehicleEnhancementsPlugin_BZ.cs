@@ -17,17 +17,23 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
         // Plugin properties
         private const string MyGuid = "com.mroshaw.vehicleenhancements";
         private const string PluginName = "Vehicle Enhancements BZ";
-        private const string VersionString = "1.0.1";
+        private const string VersionString = "2.0.0";
         private const string LegacyAssemblyFileName = "SeaTruckEnhancements_BZ.dll";
         private const string AssetBundleName = "enhancedvehiclesassetbundle";
         private const string ReversingCameraFrameSpriteName = "ReversingCameraFrame.png";
         private const string ReversingBeepsAudioClipName = "ReversingBeeps.wav";
         private const string ThisVehicleIsReversingAudioClipName = "ThisVehicleIsReversing.wav";
+        private const string ThisSeatruckIsReversingAudioClipName = "ThisSeatruckIsReversing.wav";
+        private const string ThisPrawnSuitIsReversingAudioClipName = "ThisPrawnSuitIsReversing.wav";
+        private const string ThisSnowfoxIsReversingAudioClipName = "ThisSnowFoxIsReversing.wav";
 
         internal static ModAssetBundleUtils ModAssetUtils;
         internal static Sprite SeaTruckCameraFrameSprite;
         internal static FMODAsset ReversingBeepsFmodAsset;
-        internal static FMODAsset ThisSeaTruckIsReversingFmodAsset;
+        internal static FMODAsset ThisVehicleIsReversingFmodAsset;
+        internal static FMODAsset ThisSeatruckIsReversingFmodAsset;
+        internal static FMODAsset ThisPrawnSuitIsReversingFmodAsset;
+        internal static FMODAsset ThisSnowfoxIsReversingFmodAsset;
 
         // Config file / Log initialisation
 #if !UNITY_EDITOR
@@ -129,11 +135,33 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
         private static void RegisterCustomSounds()
         {
             ReversingBeepsFmodAsset = RegisterCustomSound(ReversingBeepsAudioClipName);
-            ThisSeaTruckIsReversingFmodAsset = RegisterCustomSound(ThisVehicleIsReversingAudioClipName);
+            ThisVehicleIsReversingFmodAsset = RegisterCustomSound(ThisVehicleIsReversingAudioClipName);
+            ThisSeatruckIsReversingFmodAsset = RegisterCustomSound(ThisSeatruckIsReversingAudioClipName);
+            ThisPrawnSuitIsReversingFmodAsset = RegisterCustomSound(ThisPrawnSuitIsReversingAudioClipName);
+            ThisSnowfoxIsReversingFmodAsset = RegisterCustomSound(ThisSnowfoxIsReversingAudioClipName);
 
-            if (!ReversingBeepsFmodAsset || !ThisSeaTruckIsReversingFmodAsset)
+            if (!ReversingBeepsFmodAsset || !ThisVehicleIsReversingFmodAsset ||
+                !ThisSeatruckIsReversingFmodAsset || !ThisPrawnSuitIsReversingFmodAsset ||
+                !ThisSnowfoxIsReversingFmodAsset)
             {
-                ModDebugLog.LogError("Could not register one or more SeaTruck reversing sounds.");
+                ModDebugLog.LogError("Could not register one or more vehicle reversing sounds.");
+            }
+        }
+
+        internal static FMODAsset GetReversingVoiceAsset(ReversingVoice voice)
+        {
+            switch (voice)
+            {
+                case ReversingVoice.ThisVehicleIsReversing:
+                    return ThisVehicleIsReversingFmodAsset;
+                case ReversingVoice.ThisSeatruckIsReversing:
+                    return ThisSeatruckIsReversingFmodAsset;
+                case ReversingVoice.ThisPrawnSuitIsReversing:
+                    return ThisPrawnSuitIsReversingFmodAsset;
+                case ReversingVoice.ThisSnowfoxIsReversing:
+                    return ThisSnowfoxIsReversingFmodAsset;
+                default:
+                    return null;
             }
         }
 

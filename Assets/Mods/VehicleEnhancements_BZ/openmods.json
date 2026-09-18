@@ -4,7 +4,7 @@
 
   "slug": "vehicle-enhancements-bz",
   "name": "Vehicle Enhancements BZ",
-  "description" : "Adds vehicle features in Below Zero, including a speedometer and reversing camera for the Seatruck.",
+  "description" : "Adds loads of great new features to the base game vehicles in Below Zero!",
   "supportedGameId": "subnautica-below-zero",
 
   "releaseAssets": ["VehicleEnhancements_BZ*.zip"],
@@ -20,9 +20,12 @@
   ],
 
   "media": [
-    { "type": "image", "url": "SeaTruckSpeedo.png", "label": "New Seatruck speedometer." },
-    { "type": "image", "url": "SeatruckReverseCamera.png", "label": "New Seatruck reversing camera." },
-    { "type": "image", "url": "SeatruckOptions.png", "label": "Mod options." },
+    { "type": "image", "url": "SeaTruckUi.png", "label": "Enhanced Seatruck HUD." },
+    { "type": "image", "url": "PrawnSuitUi.png", "label": "Enhanced Prawn Suit HUD." },
+    { "type": "image", "url": "SnowFoxUi.png", "label": "Enhanced Snow Fox HUD." },
+    { "type": "image", "url": "BuildInSeatruck.png", "label": "Build inside the Seatruck!" },
+    { "type": "image", "url": "SeatruckReverseCamera.png", "label": "Seatruck reversing camera." },
+    { "type": "image", "url": "VehicleEnhancementOptions.png", "label": "Mod options." },
     { "type":  "video", "url": "https://youtu.be/pvUavsuUq68"}
   ],
 

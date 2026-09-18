@@ -64,9 +64,11 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Patches
             HsiController hsi = enhancedIndicators.GetComponent<HsiController>();
             TimeAndWeatherController timeAndWeather = enhancedIndicators.GetComponent<TimeAndWeatherController>();
             ReversingAudioController reversingAudio = enhancedIndicators.GetComponent<ReversingAudioController>();
-            if (!speedometer || !hsi || !timeAndWeather || !reversingAudio)
+            ReversingCameraController reversingCamera = enhancedIndicators.GetComponent<ReversingCameraController>();
+            if (!speedometer || !hsi || !timeAndWeather || !reversingAudio ||
+                (vehicle == EnhancedVehicle.Seatruck && !reversingCamera))
             {
-                ModDebugLog.LogError("Enhanced indicator prefab is missing a display controller.");
+                ModDebugLog.LogError("Enhanced indicator prefab is missing a required controller.");
                 Object.Destroy(enhancedIndicators);
                 return;
             }
@@ -75,11 +77,6 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Patches
             hsi.Configure(vehicle);
             timeAndWeather.Configure(vehicle);
             reversingAudio.Configure(vehicle);
-
-            if (vehicle == EnhancedVehicle.PrawnSuit)
-            {
-                hsi.enabled = false;
-            }
 
             if (vehicle != EnhancedVehicle.Seatruck)
             {
@@ -93,7 +90,6 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Patches
 
                 enhancedIndicators.AddComponent<VehicleHudLayout>().Configure(hudContent);
 
-                ReversingCameraController reversingCamera = enhancedIndicators.GetComponent<ReversingCameraController>();
                 if (reversingCamera)
                 {
                     reversingCamera.enabled = false;

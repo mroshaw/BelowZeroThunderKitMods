@@ -20,6 +20,9 @@ MonoBehaviour:
     - {fileID: 4713639018825503371, guid: 8d81f9a7023ef8c47ba982600c2bca98, type: 3}
     - {fileID: 8300000, guid: e12d26327eea87a47a7125de2844959e, type: 3}
     - {fileID: 8300000, guid: 14cd7a7d5b3c52c43a7e9234e3eb6856, type: 3}
+    - {fileID: 8300000, guid: 2418a665cd1b62343a9b8ed4559ef144, type: 3}
+    - {fileID: 8300000, guid: 14246d7c4c1defc448aa5576443f413e, type: 3}
+    - {fileID: 8300000, guid: 1273b5faa9b58e44b9f6d9fe4495de33, type: 3}
     - {fileID: 2800000, guid: b19775d235d609c4dbe5598502bf7bd3, type: 3}
 --- !u!114 &-7429185305120216054
 MonoBehaviour:
@@ -72,5 +75,5 @@ MonoBehaviour:
   Author: Daft Apple Games
   Name: VehicleEnhancements_BZ
   Description: Adds new features to vehicles in Below Zero
-  Version: 1.0.1
+  Version: 2.0.0
   Dependencies: []

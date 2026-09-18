@@ -1301,7 +1301,7 @@ MonoBehaviour:
   verticalSpeedText: {fileID: 2407745977858173684}
   seaTruckOffset: {x: 0, y: 0}
   prawnSuitOffset: {x: 0, y: 20}
-  snowfoxOffset: {x: 0, y: 0}
+  snowfoxOffset: {x: 0, y: -100}
   minimumNeedleAngle: 180
   maximumNeedleAngle: -80
   maximumDisplayedSpeed: 20
@@ -1322,7 +1322,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   reversingBeepsEmitter: {fileID: 1081809627194231716}
-  thisSeaTruckIsReversingEmitter: {fileID: 704262065560276570}
+  reversingVoiceEmitter: {fileID: 704262065560276570}
   reversingSpeedThreshold: 0.1
   audioSourceOffset: {x: 0, y: 0, z: -3}
   cabinLowPassCutoff: 1200
@@ -1394,12 +1394,15 @@ MonoBehaviour:
   rainyWeatherSprite: {fileID: 21300000, guid: 04af614d1c42e7241b3a6b77011a7f73, type: 3}
   snowyWeatherSprite: {fileID: 21300000, guid: ec03c5a697f8f664284111f0ec812d3d, type: 3}
   hailWeatherSprite: {fileID: 21300000, guid: 77c12a8c3b958fa4e9dfdffbd0dbb31e, type: 3}
-  lightningStormWeatherSprite: {fileID: 21300000, guid: 70e5c2a7b3334e646a34c31377a838c0, type: 3}
+  lightningStormWeatherSprite: {fileID: 21300000, guid: 70e5c2a7b3334e646a34c31377a838c0,
+    type: 3}
   fogWeatherSprite: {fileID: 21300000, guid: 5954701168329d8498b4fdeabd438fd7, type: 3}
-  windBlizzardWeatherSprite: {fileID: 21300000, guid: 6f145607652addd42a897039f1220772, type: 3}
-  dustStormWeatherSprite: {fileID: 21300000, guid: be36236b9cf6634478ef1dd2440a29e7, type: 3}
-  meteorWeatherSprite: {fileID: 21300000, guid: 6a0f100b3baf49f4d88d1b0364b23402, type: 3}
-  auroraWeatherSprite: {fileID: 21300000, guid: 42cc1ec5a5297f048a566e03147125e1, type: 3}
+  windBlizzardWeatherSprite: {fileID: 21300000, guid: 6f145607652addd42a897039f1220772,
+    type: 3}
+  dustStormWeatherSprite: {fileID: 21300000, guid: be36236b9cf6634478ef1dd2440a29e7,
+    type: 3}
+  meteorWeatherSprite: {fileID: 21300000, guid: 6a0f100b3baf49f4d88d1b0364b23402,
+    type: 3}
 --- !u!1 &4743132722026177057
 GameObject:
   m_ObjectHideFlags: 0

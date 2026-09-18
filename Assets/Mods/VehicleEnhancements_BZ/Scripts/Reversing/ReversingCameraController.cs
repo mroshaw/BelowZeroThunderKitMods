@@ -34,6 +34,16 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
         private uGUI_SeaTruckHUD seaTruckHud;
         private RawImage rearViewImage;
         private Camera configuredRearCamera;
+        private RenderTexture originalCameraTargetTexture;
+        private int originalCameraCullingMask;
+        private bool originalCameraEnabled;
+        private WaterscapeVolumeOnCamera configuredWaterscapeEffect;
+        private WaterscapeVolumeOnCamera originalWaterscapeEffect;
+        private WaterscapeVolume originalWaterscapeSettings;
+        private bool originalWaterscapeEnabled;
+        private Texture originalRearViewTexture;
+        private Image frameImage;
+        private Sprite originalFrameSprite;
         private RenderTexture renderTexture;
         private Texture2D diagnosticPixel;
         private float nextDiagnosticTime;
@@ -62,13 +72,14 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
         private void ApplyCameraFrameSprite()
         {
             Transform frameTransform = seaTruckHud.rearView.transform.Find(rearViewFramePath);
-            Image frameImage = frameTransform ? frameTransform.GetComponent<Image>() : null;
+            frameImage = frameTransform ? frameTransform.GetComponent<Image>() : null;
             if (!frameImage || !SeaTruckCameraFrameSprite)
             {
                 ModDebugLog.LogError("Could not replace the vanilla SeaTruck reversing camera frame sprite.");
                 return;
             }
 
+            originalFrameSprite = frameImage.sprite;
             frameImage.sprite = SeaTruckCameraFrameSprite;
         }
 
@@ -97,6 +108,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
                 autoGenerateMips = false
             };
             renderTexture.Create();
+            originalRearViewTexture = rearViewImage.texture;
             rearViewImage.texture = renderTexture;
             if (DetailedLoggingEnabled)
             {
@@ -109,6 +121,10 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
         private void LateUpdate()
         {
             bool showRearView = ConfigFile.EnableReversingCamera && TryRenderRearView();
+            if (!showRearView)
+            {
+                RestoreRearCamera();
+            }
             seaTruckHud.rearView.SetActive(showRearView);
             if (DetailedLoggingEnabled && showRearView &&
                 (!wasShowingRearView || Time.unscaledTime >= nextDiagnosticTime))
@@ -127,6 +143,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
 
         private void OnDisable()
         {
+            RestoreRearCamera();
             seaTruckChain.Clear();
             wasShowingRearView = false;
 
@@ -138,6 +155,17 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
 
         private void OnDestroy()
         {
+            RestoreRearCamera();
+            if (rearViewImage && rearViewImage.texture == renderTexture)
+            {
+                rearViewImage.texture = originalRearViewTexture;
+            }
+
+            if (frameImage && frameImage.sprite == SeaTruckCameraFrameSprite)
+            {
+                frameImage.sprite = originalFrameSprite;
+            }
+
             if (renderTexture)
             {
                 renderTexture.Release();
@@ -255,16 +283,26 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
                 return;
             }
 
+            RestoreRearCamera();
             configuredRearCamera = rearCamera;
+            originalCameraTargetTexture = rearCamera.targetTexture;
+            originalCameraCullingMask = rearCamera.cullingMask;
+            originalCameraEnabled = rearCamera.enabled;
             Camera mainCamera = MainCamera.camera;
             rearCamera.cullingMask = reversingCameraCullingMask;
             rearCamera.targetTexture = renderTexture;
+            rearCamera.enabled = false;
 
-            WaterscapeVolumeOnCamera waterscapeEffect =
-                rearCamera.GetComponent<WaterscapeVolumeOnCamera>();
-            if (!waterscapeEffect)
+            configuredWaterscapeEffect = rearCamera.GetComponent<WaterscapeVolumeOnCamera>();
+            originalWaterscapeEffect = configuredWaterscapeEffect;
+            if (configuredWaterscapeEffect)
             {
-                waterscapeEffect = rearCamera.gameObject.AddComponent<WaterscapeVolumeOnCamera>();
+                originalWaterscapeEnabled = configuredWaterscapeEffect.enabled;
+                originalWaterscapeSettings = configuredWaterscapeEffect.settings;
+            }
+            else
+            {
+                configuredWaterscapeEffect = rearCamera.gameObject.AddComponent<WaterscapeVolumeOnCamera>();
             }
 
             WaterscapeVolumeOnCamera mainWaterscapeEffect =
@@ -272,11 +310,38 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
             bool enableEffect = enableWaterscapeEffects &&
                                 mainWaterscapeEffect &&
                                 mainWaterscapeEffect.settings;
-            waterscapeEffect.enabled = enableEffect;
+            configuredWaterscapeEffect.enabled = enableEffect;
             if (enableEffect)
             {
-                waterscapeEffect.settings = mainWaterscapeEffect.settings;
+                configuredWaterscapeEffect.settings = mainWaterscapeEffect.settings;
             }
+        }
+
+        private void RestoreRearCamera()
+        {
+            if (!configuredRearCamera)
+            {
+                return;
+            }
+
+            configuredRearCamera.targetTexture = originalCameraTargetTexture;
+            configuredRearCamera.cullingMask = originalCameraCullingMask;
+            configuredRearCamera.enabled = originalCameraEnabled;
+            if (originalWaterscapeEffect)
+            {
+                originalWaterscapeEffect.settings = originalWaterscapeSettings;
+                originalWaterscapeEffect.enabled = originalWaterscapeEnabled;
+            }
+            else if (configuredWaterscapeEffect)
+            {
+                Destroy(configuredWaterscapeEffect);
+            }
+
+            configuredRearCamera = null;
+            configuredWaterscapeEffect = null;
+            originalWaterscapeEffect = null;
+            originalCameraTargetTexture = null;
+            originalWaterscapeSettings = null;
         }
 
         private static SeaTruckMotor GetPilotedSeaTruckMotor()

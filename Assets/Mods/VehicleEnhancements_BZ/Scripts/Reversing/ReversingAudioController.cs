@@ -14,7 +14,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
         private FMOD_CustomEmitter reversingBeepsEmitter;
 
         [SerializeField, Required]
-        private FMOD_CustomEmitter thisSeaTruckIsReversingEmitter;
+        private FMOD_CustomEmitter reversingVoiceEmitter;
 
         [SerializeField, MinValue(0.0f)]
         private float reversingSpeedThreshold = 0.1f;
@@ -30,13 +30,14 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
 
         private EnhancedVehicle vehicle = EnhancedVehicle.Seatruck;
         private DSP reversingBeepsLowPass;
-        private DSP thisSeaTruckIsReversingLowPass;
+        private DSP reversingVoiceLowPass;
         private Channel reversingBeepsChannel;
-        private Channel thisSeaTruckIsReversingChannel;
+        private Channel reversingVoiceChannel;
         private bool reversingBeepsLowPassAttached;
-        private bool thisSeaTruckIsReversingLowPassAttached;
+        private bool reversingVoiceLowPassAttached;
         private float appliedBeepsVolume = -1.0f;
         private float appliedVoiceVolume = -1.0f;
+        private ReversingVoice configuredVoice = ReversingVoice.None;
 
         internal void Configure(EnhancedVehicle selectedVehicle)
         {
@@ -45,14 +46,14 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
 
         private void Awake()
         {
-            if (!reversingBeepsEmitter || !thisSeaTruckIsReversingEmitter)
+            if (!reversingBeepsEmitter || !reversingVoiceEmitter)
             {
                 ModDebugLog.LogError("Could not find the vehicle reversing audio emitters.");
                 enabled = false;
                 return;
             }
 
-            if (!ReversingBeepsFmodAsset || !ThisSeaTruckIsReversingFmodAsset)
+            if (!ReversingBeepsFmodAsset)
             {
                 ModDebugLog.LogError("The vehicle reversing FMOD assets are not available.");
                 enabled = false;
@@ -60,11 +61,11 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
             }
 
             ConfigureEmitter(reversingBeepsEmitter, ReversingBeepsFmodAsset);
-            ConfigureEmitter(thisSeaTruckIsReversingEmitter, ThisSeaTruckIsReversingFmodAsset);
+            UpdateVoiceSelection();
             if (vehicle != EnhancedVehicle.Snowfox)
             {
                 CreateLowPassDsp(ref reversingBeepsLowPass);
-                CreateLowPassDsp(ref thisSeaTruckIsReversingLowPass);
+                CreateLowPassDsp(ref reversingVoiceLowPass);
             }
         }
 
@@ -78,15 +79,12 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
             }
 
             PositionEmittersAtVehicle(vehicleTransform);
+            UpdateVoiceSelection();
 
             bool isReversing = Vector3.Dot(velocity, vehicleTransform.forward) < -reversingSpeedThreshold;
-            ReversingAudio selectedAudio = ConfigFile.GetReversingAudio(vehicle);
-
-            bool playBeeps = isReversing &&
-                             (selectedAudio == ReversingAudio.Beeps || selectedAudio == ReversingAudio.Both);
-            bool playVoice = isReversing &&
-                            (selectedAudio == ReversingAudio.ThisSeaTruckIsReversing ||
-                             selectedAudio == ReversingAudio.Both);
+            bool playBeeps = isReversing && ConfigFile.AreReversingBeepsEnabled(vehicle);
+            bool playVoice = isReversing && configuredVoice != ReversingVoice.None &&
+                             GetReversingVoiceAsset(configuredVoice);
             float volume = Mathf.Clamp01(ConfigFile.ReversingAudioVolume);
 
             SetEmitterPlaying(
@@ -98,13 +96,13 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
                 ref reversingBeepsChannel,
                 ref reversingBeepsLowPassAttached);
             SetEmitterPlaying(
-                thisSeaTruckIsReversingEmitter,
+                reversingVoiceEmitter,
                 playVoice,
                 volume,
                 ref appliedVoiceVolume,
-                ref thisSeaTruckIsReversingLowPass,
-                ref thisSeaTruckIsReversingChannel,
-                ref thisSeaTruckIsReversingLowPassAttached);
+                ref reversingVoiceLowPass,
+                ref reversingVoiceChannel,
+                ref reversingVoiceLowPassAttached);
         }
 
         private void OnDisable()
@@ -120,9 +118,9 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
                 ref reversingBeepsChannel,
                 ref reversingBeepsLowPassAttached);
             ReleaseLowPassDsp(
-                ref thisSeaTruckIsReversingLowPass,
-                ref thisSeaTruckIsReversingChannel,
-                ref thisSeaTruckIsReversingLowPassAttached);
+                ref reversingVoiceLowPass,
+                ref reversingVoiceChannel,
+                ref reversingVoiceLowPassAttached);
         }
 
         private static void ConfigureEmitter(FMOD_CustomEmitter emitter, FMODAsset soundAsset)
@@ -131,6 +129,39 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
             emitter.playOnAwake = false;
             emitter.restartOnPlay = false;
             ModAudioUtils.ConfigureEmitter(emitter, soundAsset, ModDebugLog);
+        }
+
+        private void UpdateVoiceSelection()
+        {
+            ReversingVoice selectedVoice = ConfigFile.GetReversingVoice(vehicle);
+            if (configuredVoice == selectedVoice)
+            {
+                return;
+            }
+
+            SetEmitterPlaying(
+                reversingVoiceEmitter,
+                false,
+                0.0f,
+                ref appliedVoiceVolume,
+                ref reversingVoiceLowPass,
+                ref reversingVoiceChannel,
+                ref reversingVoiceLowPassAttached);
+
+            configuredVoice = selectedVoice;
+            if (selectedVoice == ReversingVoice.None)
+            {
+                return;
+            }
+
+            FMODAsset voiceAsset = GetReversingVoiceAsset(selectedVoice);
+            if (!voiceAsset)
+            {
+                ModDebugLog.LogError($"The selected reversing voice '{selectedVoice}' is unavailable.");
+                return;
+            }
+
+            ConfigureEmitter(reversingVoiceEmitter, voiceAsset);
         }
 
         private bool TryGetPilotedVehicleMotion(out Transform vehicleTransform, out Vector3 velocity)
@@ -154,7 +185,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
         private void PositionEmittersAtVehicle(Transform vehicleTransform)
         {
             SetEmitterTransform(reversingBeepsEmitter.transform, vehicleTransform);
-            SetEmitterTransform(thisSeaTruckIsReversingEmitter.transform, vehicleTransform);
+            SetEmitterTransform(reversingVoiceEmitter.transform, vehicleTransform);
         }
 
         private void SetEmitterTransform(Transform emitterTransform, Transform vehicleTransform)
@@ -170,9 +201,9 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
                 SetHudEmitterTransform(reversingBeepsEmitter.transform);
             }
 
-            if (thisSeaTruckIsReversingEmitter)
+            if (reversingVoiceEmitter)
             {
-                SetHudEmitterTransform(thisSeaTruckIsReversingEmitter.transform);
+                SetHudEmitterTransform(reversingVoiceEmitter.transform);
             }
         }
 
@@ -287,16 +318,16 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
                     ref reversingBeepsLowPassAttached);
             }
 
-            if (thisSeaTruckIsReversingEmitter)
+            if (reversingVoiceEmitter)
             {
                 SetEmitterPlaying(
-                    thisSeaTruckIsReversingEmitter,
+                    reversingVoiceEmitter,
                     false,
                     0.0f,
                     ref appliedVoiceVolume,
-                    ref thisSeaTruckIsReversingLowPass,
-                    ref thisSeaTruckIsReversingChannel,
-                    ref thisSeaTruckIsReversingLowPassAttached);
+                    ref reversingVoiceLowPass,
+                    ref reversingVoiceChannel,
+                    ref reversingVoiceLowPassAttached);
             }
         }
     }

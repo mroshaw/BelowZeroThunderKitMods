@@ -27,7 +27,6 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.TimeAndWeather
         [SerializeField, Required] private Sprite windBlizzardWeatherSprite;
         [SerializeField, Required] private Sprite dustStormWeatherSprite;
         [SerializeField, Required] private Sprite meteorWeatherSprite;
-        [SerializeField, Required] private Sprite auroraWeatherSprite;
 
         private RectTransform previousMoon;
         private RectTransform nextMoon;
@@ -48,7 +47,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.TimeAndWeather
                 !cloudyWeatherSprite || !rainyWeatherSprite || !snowyWeatherSprite ||
                 !hailWeatherSprite || !lightningStormWeatherSprite || !fogWeatherSprite ||
                 !windBlizzardWeatherSprite || !dustStormWeatherSprite ||
-                !meteorWeatherSprite || !auroraWeatherSprite)
+                !meteorWeatherSprite)
             {
                 ModDebugLog.LogError("Could not find the time and weather indicator objects or sprites.");
                 enabled = false;
@@ -175,10 +174,6 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.TimeAndWeather
             else if (conditions.windSpeed >= 30.0f)
             {
                 sprite = windBlizzardWeatherSprite;
-            }
-            else if (conditions.auroraBorealisIntensity >= 0.25f)
-            {
-                sprite = auroraWeatherSprite;
             }
             else if (conditions.cloudCoverage >= 0.7f)
             {
