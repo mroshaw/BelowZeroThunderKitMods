@@ -28,4 +28,4 @@ Also available for Below Zero﻿!
 
 ## Source Code
 
-All of my mods are open source, and you can find the full source code in my [Subnautica Mods GitHub Repository](https://github.com/mroshaw/SubnauticaThunderKitMods).
+All of my mods are open source, and you can find the full source code in my [Below Zero Mods GitHub Repository](https://github.com/mroshaw/BelowZeroThunderKitMods).

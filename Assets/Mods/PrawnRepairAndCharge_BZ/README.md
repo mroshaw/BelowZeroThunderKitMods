@@ -7,12 +7,11 @@ We think you deserve the full value of your investment in your new Moonpool or S
 ## Features
 
 - Fully charges and repairs your Prawnsuit on successful docking either to the SeaTruck Dock or in a Moonpool.
-- Can be configured to draw power from the SeaTruck, with configurable “modifiers” for both charge and repair.
-- Moonpool repair and charging can optionally consume base power.
+- Can be configured to optionally draw power from the SeaTruck or Base, with configurable modifiers for both charge and repair.
 
 ## User Guide
 
-Dock a Prawn Suit in a Moonpool or SeaTruck Dock to repair and recharge it. Moonpool repair and charging draw base energy only when Consume Base Power is enabled. SeaTruck repair and charging can draw SeaTruck energy when that option is enabled.
+Dock a Prawn Suit in a Moonpool or Seatruck Dock to repair and recharge it - simple!
 
 ## Options
 

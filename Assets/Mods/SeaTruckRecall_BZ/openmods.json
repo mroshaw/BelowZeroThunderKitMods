@@ -2,13 +2,13 @@
   "$schema": "https://openmods.net/manifest.schema.json",
   "schemaVersion": 2,
 
-  "slug": "aqua-eclipse-now-bz",
-  "name": "Aqua Eclipse Now BZ",
-  "description" : "Adds an \"eclipse now\" command that accelerates game time to the next solar eclipse.",
+  "slug": "seatruck-recall-bz",
+  "name": "Seatruck Recall BZ",
+  "description" : "Lost your Seatruck? Can’t be bothered swimming out in the cold, dark ocean from the comfort of your base? Well, we’re here to help!",
   "supportedGameId": "subnautica-below-zero",
 
-  "releaseAssets": ["AquaEclipseNow_SN*.zip"],
-  "primaryAsset": "AquaEclipseNow_SN*.zip",
+  "releaseAssets": ["SeaTruckRecall_BZ*.zip"],
+  "primaryAsset": "SeaTruckRecall_BZ*.zip",
 
   "readme": "README.md",
 
@@ -20,8 +20,8 @@
   ],
 
   "media": [
-    { "type": "image", "url": "EclipseNow.png", "label": "Eclipse now!" },
-    { "type": "image", "url": "EclipseOptions.png", "label": "Eclipse options" }
+    { "type": "image", "url": "RecallConsole.png", "label": "The new recall console." },
+    { "type": "image", "url": "RecallOptions.png", "label": "Recall options." }
   ],
 
   "faq": [
@@ -39,7 +39,7 @@
     "path": "BepInEx/plugins",
     "custom-path": {
       "src/plugin.dll": "BepInEx/plugins/",
-      "config/":       "BepInEx/config/"
+      "config/": "BepInEx/config/"
     }
   }
 }

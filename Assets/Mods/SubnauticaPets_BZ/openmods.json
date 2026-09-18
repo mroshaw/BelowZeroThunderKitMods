@@ -2,13 +2,13 @@
   "$schema": "https://openmods.net/manifest.schema.json",
   "schemaVersion": 2,
 
-  "slug": "aqua-eclipse-now-bz",
-  "name": "Aqua Eclipse Now BZ",
-  "description" : "Adds an \"eclipse now\" command that accelerates game time to the next solar eclipse.",
+  "slug": "subnautica-pets-bz",
+  "name": "Subnautica Pets BZ",
+  "description" : "A failed experiment to tame and weaponise the creatures of 4546B presents an opportunity: to use the tech for good, and bring companionship and hope in your struggle to survive!.",
   "supportedGameId": "subnautica-below-zero",
 
-  "releaseAssets": ["AquaEclipseNow_SN*.zip"],
-  "primaryAsset": "AquaEclipseNow_SN*.zip",
+  "releaseAssets": ["SubnauticaPets_BZ*.zip"],
+  "primaryAsset": "SubnauticaPets_BZ*.zip",
 
   "readme": "README.md",
 
@@ -20,8 +20,9 @@
   ],
 
   "media": [
-    { "type": "image", "url": "EclipseNow.png", "label": "Eclipse now!" },
-    { "type": "image", "url": "EclipseOptions.png", "label": "Eclipse options" }
+    { "type": "image", "url": "Pet1.png", "label": "" },
+    { "type": "image", "url": "Pet2.png", "label": "" },
+    { "type": "image", "url": "DnaScreenshot.png", "label": "Pet DNA to discover!" }
   ],
 
   "faq": [
@@ -39,7 +40,7 @@
     "path": "BepInEx/plugins",
     "custom-path": {
       "src/plugin.dll": "BepInEx/plugins/",
-      "config/":       "BepInEx/config/"
+      "config/": "BepInEx/config/"
     }
   }
 }
