@@ -44,7 +44,7 @@
     "path": "BepInEx/plugins",
     "custom-path": {
       "src/plugin.dll": "BepInEx/plugins/",
-      "config/":       "BepInEx/config/"
+      "config/": "BepInEx/config/"
     }
   }
 }
