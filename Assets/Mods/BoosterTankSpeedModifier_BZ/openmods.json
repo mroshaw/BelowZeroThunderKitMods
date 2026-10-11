@@ -1,0 +1,41 @@
+{
+  "$schema": "https://openmods.net/manifest.schema.json",
+  "schemaVersion": 2,
+
+  "slug": "booster-tank-speed-modifier-bz",
+  "name": "Booster Tank Speed Modifier BZ",
+  "description" : "A simple mod to apply a configurable speed modifier to the Booster Tank.",
+  "supportedGameId": "subnautica-below-zero",
+
+  "releaseAssets": ["BoosterTankSpeedModifier_SN*.zip"],
+  "primaryAsset": "BoosterTankSpeedModifier_SN*.zip",
+
+  "readme": "README.md",
+
+  "thumbnail": "thumbnail.png",
+  
+  "links": [
+    { "label": "Discord", "icon": "chat", "url": "https://discord.gg/BJtGSdnRm" },
+    { "label": "Website", "url": "https://github.com/mroshaw/SubnauticaThunderKitMods" }
+  ],
+
+  "media": [
+    { "type": "image", "url": "BoosterSpeed.png", "label": "Booster speed!" },
+    { "type": "image", "url": "ModOptions.png", "label": "Mod options" }
+  ],
+
+  "faq": [
+    { "question": "How do I install?", "answer": "Use the OpenMods Manager or extract the zip into your game folder." }
+  ],
+
+  "dependencies": {
+    "1.0.0": [
+      { "modId": 30, "release": "1.0.0-pre.50" },
+      { "modId": 31, "release": "5.4.23.5" }
+    ]
+  },
+
+  "install": {
+    "path": "BepInEx/plugins"
+  }
+}

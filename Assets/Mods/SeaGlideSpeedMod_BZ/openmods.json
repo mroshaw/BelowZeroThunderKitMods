@@ -1,0 +1,41 @@
+{
+  "$schema": "https://openmods.net/manifest.schema.json",
+  "schemaVersion": 2,
+
+  "slug": "seaglide-speed-modifier-bz",
+  "name": "SeaGlide Speed Modifier",
+  "description" : "A simple mod to apply a configurable speed modifier to the SeaGlide.",
+  "supportedGameId": "subnautica-below-zero",
+
+  "releaseAssets": ["SeaGlideSpeedModifier*.zip"],
+  "primaryAsset": "SeaGlideSpeedModifier*.zip",
+
+  "readme": "README.md",
+
+  "thumbnail": "thumbnail.png",
+  
+  "links": [
+    { "label": "Discord", "icon": "chat", "url": "https://discord.gg/BJtGSdnRm" },
+    { "label": "Website", "url": "https://github.com/mroshaw/SubnauticaThunderKitMods" }
+  ],
+
+  "media": [
+    { "type": "image", "url": "SeaGlideSpeed.png", "label": "Seaglide speed!" },
+    { "type": "image", "url": "ModOptions.png", "label": "Mod options" }
+  ],
+
+  "faq": [
+    { "question": "How do I install?", "answer": "Use the OpenMods Manager or extract the zip into your game folder." }
+  ],
+
+  "dependencies": {
+    "1.0.0": [
+      { "modId": 30, "release": "1.0.0-pre.50" },
+      { "modId": 31, "release": "5.4.23.5" }
+    ]
+  },
+
+  "install": {
+    "path": "BepInEx/plugins"
+  }
+}
