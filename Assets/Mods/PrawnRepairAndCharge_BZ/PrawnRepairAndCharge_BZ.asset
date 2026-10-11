@@ -32,6 +32,7 @@ MonoBehaviour:
   Data:
   - {fileID: 1669160000753936738}
   - {fileID: -7429185305120216054}
+  - {fileID: 3912182343985941701}
   identity: {fileID: 1669160000753936738}
   QuickAccess: 1
 --- !u!114 &1669160000753936738
@@ -50,5 +51,22 @@ MonoBehaviour:
   Author: Daft Apple Games
   Name: PrawnRepairAndCharge_BZ
   Description: Adds repair and charging to Prawn suit when docked
-  Version: 2.3.0
+  Version: 2.3.1
   Dependencies: []
+--- !u!114 &3912182343985941701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6f7f49875894cc3b3b04dbf8b77b086, type: 3}
+  m_Name: AssemblyMergeSettings
+  m_EditorClassIdentifier: 
+  StagingPaths: []
+  primaryAssembly: {fileID: 5897886265953266890, guid: 66a7892733492d8418ad78cc069127fb,
+    type: 3}
+  dependencies:
+  - {fileID: 5897886265953266890, guid: a8101a7f788ddab4d835833e6de817ac, type: 3}

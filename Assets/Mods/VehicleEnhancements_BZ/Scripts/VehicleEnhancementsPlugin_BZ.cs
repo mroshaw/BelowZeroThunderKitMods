@@ -17,7 +17,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
         // Plugin properties
         private const string MyGuid = "com.mroshaw.vehicleenhancements";
         private const string PluginName = "Vehicle Enhancements BZ";
-        private const string VersionString = "2.0.0";
+        private const string VersionString = "2.0.1";
         private const string LegacyAssemblyFileName = "SeaTruckEnhancements_BZ.dll";
         private const string AssetBundleName = "enhancedvehiclesassetbundle";
         private const string ReversingCameraFrameSpriteName = "ReversingCameraFrame.png";

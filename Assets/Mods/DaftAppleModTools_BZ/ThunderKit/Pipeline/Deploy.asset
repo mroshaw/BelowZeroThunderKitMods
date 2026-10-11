@@ -31,9 +31,9 @@ MonoBehaviour:
   PerManifest: 0
   ListType: 0
   Manifests: []
-  Recursive: 0
+  Recursive: 1
   IsFatal: 0
-  Path: <BepInExGamePlugins>/plugins/<ManifestName>
+  Path: <BepInExGamePlugins>
 --- !u!114 &-1363876913999848018
 MonoBehaviour:
   m_ObjectHideFlags: 1

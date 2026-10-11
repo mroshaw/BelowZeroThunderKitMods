@@ -16,7 +16,7 @@ MonoBehaviour:
   Author: Daft Apple Games
   Name: AutoLockerLabels_BZ
   Description: Automatically generates locker labels based on the contents
-  Version: 1.0.4
+  Version: 1.0.5
   Dependencies: []
 --- !u!114 &11400000
 MonoBehaviour:
@@ -34,6 +34,7 @@ MonoBehaviour:
   - {fileID: -121899452589423327}
   - {fileID: 8876472120765660631}
   - {fileID: 530457045679721738}
+  - {fileID: 3912182343985941701}
   identity: {fileID: -121899452589423327}
   QuickAccess: 1
 --- !u!114 &530457045679721738
@@ -60,6 +61,23 @@ MonoBehaviour:
     - {fileID: 6463089183828032049, guid: 4008bcdf12e491b419ffe08cf17e0112, type: 3}
     - {fileID: 8809131775329224004, guid: 3ef02ab1d6bf97545847f2fb4c74388c, type: 3}
     - {fileID: 3991767097651807096, guid: f65a6c454c98a3444bcd00ed3cd15b01, type: 3}
+--- !u!114 &3912182343985941701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6f7f49875894cc3b3b04dbf8b77b086, type: 3}
+  m_Name: AssemblyMergeSettings
+  m_EditorClassIdentifier: 
+  StagingPaths: []
+  primaryAssembly: {fileID: 5897886265953266890, guid: a907e4edcfa300e4db1c7d8054b88dff,
+    type: 3}
+  dependencies:
+  - {fileID: 5897886265953266890, guid: a8101a7f788ddab4d835833e6de817ac, type: 3}
 --- !u!114 &8876472120765660631
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,4 +1,4 @@
-﻿using BepInEx;
+using BepInEx;
 using HarmonyLib;
 using DaftAppleGames.ModTools;
 using Nautilus.Handlers;
@@ -11,7 +11,7 @@ namespace DaftAppleGames.PrawnSuitRepairAndCharge_BZ
         // Plugin properties
         private const string MyGuid = "com.mroshaw.prawnsuitrepairandchargemodbz";
         private const string PluginName = "Prawn Suit Repair And Charge Mod BZ";
-        private const string VersionString = "2.3.0";
+        private const string VersionString = "2.3.1";
 
         // Config file / UI initialisation
         private static readonly Harmony Harmony = new Harmony(MyGuid);

@@ -1,5 +1,24 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-6829438743262259307
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87d65cc226c348d45aa1c6dddf3600a6, type: 3}
+  m_Name: Delete
+  m_EditorClassIdentifier: 
+  Active: 1
+  PerManifest: 0
+  ListType: 0
+  Manifests: []
+  Recursive: 1
+  IsFatal: 0
+  Path: <ManifestStagingRoot>
 --- !u!114 &-5202041662821876658
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30,7 +49,9 @@ MonoBehaviour:
   m_Name: Build
   m_EditorClassIdentifier: 
   Data:
+  - {fileID: -6829438743262259307}
   - {fileID: -5202041662821876658}
+  - {fileID: 4071545297751830446}
   - {fileID: 114520525572577756}
   - {fileID: 4156783945345151082}
   - {fileID: 7963844026012339470}
@@ -69,6 +90,21 @@ MonoBehaviour:
   m_Name: StageThunderstoreManifest
   m_EditorClassIdentifier: 
   Active: 1
+--- !u!114 &4071545297751830446
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4c94d0e20a24980b8410b17a21e6af4, type: 3}
+  m_Name: MergeAssemblies
+  m_EditorClassIdentifier: 
+  Active: 1
+  executablePath: ilrepack
+  stagingPath: <ManifestPluginStaging>
 --- !u!114 &4156783945345151082
 MonoBehaviour:
   m_ObjectHideFlags: 0

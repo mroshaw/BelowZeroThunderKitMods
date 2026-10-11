@@ -34,7 +34,7 @@ MonoBehaviour:
   Author: Daft Apple Games
   Name: StartupCommands_BZ
   Description: Adds configurable startup command scripts
-  Version: 1.0.0
+  Version: 1.2.1
   Dependencies: []
 --- !u!114 &11400000
 MonoBehaviour:

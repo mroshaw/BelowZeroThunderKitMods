@@ -12,7 +12,7 @@ namespace DaftAppleGames.SeaTruckSpeedMod_BZ
         // Plugin properties
         private const string MyGuid = "com.mroshaw.seatruckspeedmodbz";
         private const string PluginName = "Sea Truck Speed Mod BZ";
-        private const string VersionString = "2.2.1";
+        private const string VersionString = "2.2.2";
 
         // Config file / Log initialisation
 #if !UNITY_EDITOR

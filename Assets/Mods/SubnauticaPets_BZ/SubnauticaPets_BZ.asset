@@ -16,6 +16,7 @@ MonoBehaviour:
   - {fileID: 114211852988908172}
   - {fileID: 114107831304456238}
   - {fileID: 114431642618062350}
+  - {fileID: 3912182343985941701}
   identity: {fileID: 114211852988908172}
   QuickAccess: 1
 --- !u!114 &114107831304456238
@@ -52,7 +53,7 @@ MonoBehaviour:
   Author: Daft Apple Games
   Name: SubnauticaPets_BZ
   Description: 
-  Version: 2.13.1
+  Version: 2.13.2
   Dependencies: []
 --- !u!114 &114431642618062350
 MonoBehaviour:
@@ -127,3 +128,20 @@ MonoBehaviour:
     - {fileID: 2800000, guid: 21bfa293294d8f64893f0378c05b0100, type: 3}
     - {fileID: 3886682824862385625, guid: 7b216e7a6eead8344b3a699d4dd3af20, type: 3}
     - {fileID: 2800000, guid: 9b9e631202a190e4aa2e00a97dd04347, type: 3}
+--- !u!114 &3912182343985941701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6f7f49875894cc3b3b04dbf8b77b086, type: 3}
+  m_Name: AssemblyMergeSettings
+  m_EditorClassIdentifier: 
+  StagingPaths: []
+  primaryAssembly: {fileID: 5897886265953266890, guid: 5585ad1faf1e6fd42900f79b4a7f6dc5,
+    type: 3}
+  dependencies:
+  - {fileID: 5897886265953266890, guid: a8101a7f788ddab4d835833e6de817ac, type: 3}

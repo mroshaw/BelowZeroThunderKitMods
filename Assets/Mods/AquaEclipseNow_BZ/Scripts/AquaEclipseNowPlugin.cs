@@ -1,4 +1,4 @@
-﻿using BepInEx;
+using BepInEx;
 using DaftAppleGames.ModTools;
 using HarmonyLib;
 using Nautilus.Handlers;
@@ -10,7 +10,7 @@ namespace DaftAppleGames.AquaEclipseNowPlugin
     {
         private const string MyGuid = "com.mroshaw.aquaeclipsenow";
         private const string PluginName = "Aquaeclipse Now BZ";
-        private const string VersionString = "1.0.0";
+        private const string VersionString = "1.0.1";
 
         // Config file / UI initialisation
         internal static ModConfigFile ConfigFile = OptionsPanelHandler.RegisterModOptions<ModConfigFile>();

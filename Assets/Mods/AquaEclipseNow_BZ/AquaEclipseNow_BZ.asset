@@ -16,7 +16,7 @@ MonoBehaviour:
   Author: Daft Apple Games
   Name: AquaEclipseNow_BZ
   Description: Adds a command to force an eclipse to occur
-  Version: 1.0.0
+  Version: 1.0.1
   Dependencies: []
 --- !u!114 &11400000
 MonoBehaviour:
@@ -33,8 +33,26 @@ MonoBehaviour:
   Data:
   - {fileID: -121899452589423327}
   - {fileID: 8876472120765660631}
+  - {fileID: 3912182343985941701}
   identity: {fileID: -121899452589423327}
   QuickAccess: 1
+--- !u!114 &3912182343985941701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6f7f49875894cc3b3b04dbf8b77b086, type: 3}
+  m_Name: AssemblyMergeSettings
+  m_EditorClassIdentifier: 
+  StagingPaths: []
+  primaryAssembly: {fileID: 5897886265953266890, guid: cf74cd99d6692364983cd04b072e5d5a,
+    type: 3}
+  dependencies:
+  - {fileID: 5897886265953266890, guid: a8101a7f788ddab4d835833e6de817ac, type: 3}
 --- !u!114 &8876472120765660631
 MonoBehaviour:
   m_ObjectHideFlags: 0
