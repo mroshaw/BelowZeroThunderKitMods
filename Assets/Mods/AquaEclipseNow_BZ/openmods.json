@@ -7,8 +7,8 @@
   "description" : "Adds an \"eclipse now\" command that accelerates game time to the next solar eclipse.",
   "supportedGameId": "subnautica-below-zero",
 
-  "releaseAssets": ["AquaEclipseNow_SN*.zip"],
-  "primaryAsset": "AquaEclipseNow_SN*.zip",
+  "releaseAssets": ["AquaEclipseNow_BZ*.zip"],
+  "primaryAsset": "AquaEclipseNow_BZ*.zip",
 
   "readme": "README.md",
 
