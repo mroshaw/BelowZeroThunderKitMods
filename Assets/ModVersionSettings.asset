@@ -75,6 +75,37 @@ MonoBehaviour:
       draft: 0
       prerelease: 0
       generateReleaseNotes: 0
+  - name: Booster Tank Speed Modifier BZ
+    pluginScript: {fileID: 11500000, guid: 880dd633f2ab2ef4196edef5c4ccf3ca, type: 3}
+    manifest: {fileID: 11400000, guid: cd4f87d00905059449c19d50b129df10, type: 2}
+    version:
+      major: 2
+      minor: 1
+      patch: 1
+    currentPublishedVersion:
+      major: 0
+      minor: 0
+      patch: 0
+    publishingSites: -1
+    nexusMods:
+      fileGroupId: 1005124
+      gameScopedModId: 202
+      gameDomain: subnauticabelowzero
+      displayName: BoosterTankSpeedMod_BZ
+      description: Main mod file
+      fileCategory: main
+      archiveExistingVersion: 1
+      updateModVersion: 1
+      primaryModManagerDownload: 1
+      allowModManagerDownload: 1
+      showRequirementsPopup: 1
+    gitHub:
+      tagNameTemplate: '{archiveName}-v{version}'
+      releaseTitleTemplate: '{displayName} v{version}'
+      targetCommitish: 
+      draft: 0
+      prerelease: 0
+      generateReleaseNotes: 0
   - name: More Aquariums BZ
     pluginScript: {fileID: 11500000, guid: fb5ed69f47c501b4fbb5ac7df2c07fc1, type: 3}
     manifest: {fileID: 11400000, guid: 87fefca873535b841bb06e2482f7d0a4, type: 2}
@@ -354,3 +385,5 @@ MonoBehaviour:
       draft: 0
       prerelease: 0
       generateReleaseNotes: 0
+  gitHubOwner: mroshaw
+  gitHubRepository: BelowZeroThunderKitMods
