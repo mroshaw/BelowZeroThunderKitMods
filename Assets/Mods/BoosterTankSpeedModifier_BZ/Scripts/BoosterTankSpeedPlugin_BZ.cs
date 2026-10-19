@@ -1,6 +1,5 @@
-﻿using BepInEx;
-using BepInEx.Configuration;
-using BepInEx.Logging;
+using BepInEx;
+using DaftAppleGames.ModTools;
 using HarmonyLib;
 using Nautilus.Handlers;
 
@@ -12,19 +11,30 @@ namespace DaftAppleGames.BoosterTankSpeedMod_BZ
         // Plugin properties
         private const string MyGuid = "com.mroshaw.boostertankspeedmodbz";
         private const string PluginName = "Booster Tank Speed Mod BZ";
-        private const string VersionString = "2.1.0";
+        private const string VersionString = "2.1.1";
 
         // Config file / UI initialisation
+#if !UNITY_EDITOR
         internal static ModConfigFile ConfigFile = OptionsPanelHandler.RegisterModOptions<ModConfigFile>();
+        internal static ModLog ModDebugLog;
+        internal static bool DetailedLoggingEnabled => ConfigFile.DetailedLogging;
+#else
+        internal static readonly ModConfigFile ConfigFile = new ModConfigFile();
+        internal static ModLog ModDebugLog = new ModLog(null, true);
+        internal static bool DetailedLoggingEnabled => true;
+#endif
         private static readonly Harmony Harmony = new Harmony(MyGuid);
-        public static ManualLogSource Log;
 
+        /// <summary>
+        /// Initialise logging and configure the mod patches.
+        /// </summary>
         private void Awake()
         {
+            ModDebugLog = new ModLog(Logger, DetailedLoggingEnabled);
+
             // Patch in our MOD
             Harmony.PatchAll();
-            Logger.LogInfo(PluginName + " " + VersionString + " " + "loaded.");
-            Log = Logger;
+            ModDebugLog.LogInfo(PluginName + " " + VersionString + " " + "loaded.");
         }
     }
 }

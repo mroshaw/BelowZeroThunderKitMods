@@ -19,7 +19,7 @@ namespace DaftAppleGames.BoosterTankSpeedMod_BZ
         /// </summary>
         internal BoosterTankHistoryItem(SuitBoosterTank boosterInstance)
         {
-            Log.LogInfo($"Creating new BoosterTankHistoryItem. MotorForce: {boosterInstance.motor.motorForce}, Oxygen Usage: {boosterInstance.boostOxygenUsePerSecond}");
+            ModDebugLog.LogDebug($"Creating new BoosterTankHistoryItem. MotorForce: {boosterInstance.motor.motorForce}, Oxygen Usage: {boosterInstance.boostOxygenUsePerSecond}");
 
             _boosterInstance = boosterInstance;
             _originalMotorForce = boosterInstance.motor.motorForce;
@@ -35,7 +35,7 @@ namespace DaftAppleGames.BoosterTankSpeedMod_BZ
         internal void ApplySpeedMultiplier(float multiplier)
         {
             _boosterInstance.motor.motorForce = _originalMotorForce * multiplier;
-            Log.LogInfo($"Updated BoosterTank. Motor Force multiplier: {multiplier}, from: {_originalMotorForce} to: {_originalMotorForce * multiplier}");
+            ModDebugLog.LogDebug($"Updated BoosterTank. Motor Force multiplier: {multiplier}, from: {_originalMotorForce} to: {_originalMotorForce * multiplier}");
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace DaftAppleGames.BoosterTankSpeedMod_BZ
         internal void ApplyOxygenConsumptionMultiplier(float multiplier)
         {
             _boosterInstance.boostOxygenUsePerSecond = _originalOxygenConsumption * multiplier;
-            Log.LogInfo($"Updated BoosterTank. Oxygen Consumption multiplier {multiplier}, from: {_originalOxygenConsumption} to: {_originalOxygenConsumption * multiplier}");
+            ModDebugLog.LogDebug($"Updated BoosterTank. Oxygen Consumption multiplier {multiplier}, from: {_originalOxygenConsumption} to: {_originalOxygenConsumption * multiplier}");
         }
     }
 }
