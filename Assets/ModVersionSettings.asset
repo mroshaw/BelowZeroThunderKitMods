@@ -385,5 +385,36 @@ MonoBehaviour:
       draft: 0
       prerelease: 0
       generateReleaseNotes: 0
+  - name: Tame Creatures BZ
+    pluginScript: {fileID: 11500000, guid: 6593b0ed1c7200e4d9c186a3ba356efa, type: 3}
+    manifest: {fileID: 11400000, guid: b68049d16d1d6a04a8fca4cf75afe0f4, type: 2}
+    version:
+      major: 1
+      minor: 0
+      patch: 0
+    currentPublishedVersion:
+      major: 1
+      minor: 0
+      patch: 0
+    publishingSites: -1
+    nexusMods:
+      fileGroupId: 11622181505274
+      gameScopedModId: 775
+      gameDomain: subnauticabelowzero
+      displayName: TameCreatures_BZ
+      description: Main mod file
+      fileCategory: main
+      archiveExistingVersion: 1
+      updateModVersion: 1
+      primaryModManagerDownload: 1
+      allowModManagerDownload: 1
+      showRequirementsPopup: 1
+    gitHub:
+      tagNameTemplate: '{archiveName}-v{version}'
+      releaseTitleTemplate: '{displayName} v{version}'
+      targetCommitish: 
+      draft: 0
+      prerelease: 0
+      generateReleaseNotes: 0
   gitHubOwner: mroshaw
   gitHubRepository: BelowZeroThunderKitMods

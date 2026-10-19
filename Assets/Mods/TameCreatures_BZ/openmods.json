@@ -1,0 +1,41 @@
+{
+  "$schema": "https://openmods.net/manifest.schema.json",
+  "schemaVersion": 2,
+
+  "slug": "tame-creatures-bz",
+  "name": "Tame Creatures bZ",
+  "description" : "Tired of being harassed by pesky Squid Sharks? Cryptosuchus driving you crazy? Too scared to face a Leviathan? Then this is the mod for you!",
+  "supportedGameId": "subnautica-below-zero",
+
+  "releaseAssets": ["TameCreatures_BZ*.zip"],
+  "primaryAsset": "TameCreatures_BZ*.zip",
+
+  "readme": "README.md",
+
+  "thumbnail": "thumbnail.png",
+  
+  "links": [
+    { "label": "Discord", "icon": "chat", "url": "https://discord.gg/BJtGSdnRm" },
+    { "label": "Website", "url": "https://github.com/mroshaw/BelowZeroThunderKitMods" }
+  ],
+
+  "media": [
+    { "type": "image", "url": "TameCreaturesScreenshot.png", "label": "Let's all just get along!" },
+    { "type": "image", "url": "TameCreaturesModOptions.png", "label": "Mod options" }
+  ],
+
+  "faq": [
+    { "question": "How do I install?", "answer": "Use the OpenMods Manager or extract the zip into your game folder." }
+  ],
+
+  "dependencies": {
+    "1.0.0": [
+      { "modId": 30, "release": "1.0.0-pre.50" },
+      { "modId": 31, "release": "5.4.23.5" }
+    ]
+  },
+
+  "install": {
+    "path": "BepInEx/plugins"
+  }
+}
