@@ -320,23 +320,40 @@ namespace DaftAppleGames.SubnauticaPets.Pets
         internal static void ConfigureMovement(GameObject targetGameObject)
         {
             ModDebugLog.LogDebug("ConfigureMovement started...");
-            var snowStalker = targetGameObject.GetComponent<SnowStalkerBaby>();
+            SnowStalkerBaby snowStalker = targetGameObject.GetComponent<SnowStalkerBaby>();
 
             // Add a SurfaceMovement component, get that little bugger moving around!
             ModDebugLog.LogDebug("... Configuring movement components ...");
-            var onSurfaceTracker = targetGameObject.EnsureComponent<OnSurfaceTracker>();
-            var walkBehaviour = targetGameObject.EnsureComponent<WalkBehaviour>();
-            var onSurfaceMovement = targetGameObject.EnsureComponent<OnSurfaceMovement>();
-            var moveOnSurface = targetGameObject.EnsureComponent<MoveOnSurface>();
+            OnSurfaceTracker onSurfaceTracker = targetGameObject.EnsureComponent<OnSurfaceTracker>();
+            WalkBehaviour walkBehaviour = targetGameObject.EnsureComponent<WalkBehaviour>();
+            // EnsureComponent would reuse NavMeshFollowing, which also derives from OnSurfaceMovement.
+            OnSurfaceMovement onSurfaceMovement = targetGameObject.AddComponent<OnSurfaceMovement>();
+            MoveOnSurface moveOnSurface = targetGameObject.EnsureComponent<MoveOnSurface>();
 
             // Configure walking and movement components
             onSurfaceMovement.onSurfaceTracker = onSurfaceTracker;
             onSurfaceMovement.locomotion = targetGameObject.EnsureComponent<Locomotion>();
+            moveOnSurface.creature = snowStalker;
+            moveOnSurface.swimBehaviour = walkBehaviour;
+            moveOnSurface.walkBehaviour = walkBehaviour;
+            moveOnSurface.onSurfaceTracker = onSurfaceTracker;
             moveOnSurface.onSurfaceMovement = onSurfaceMovement;
             moveOnSurface.moveRadius = 7.0f;
             walkBehaviour.onSurfaceMovement = onSurfaceMovement;
             walkBehaviour.onSurfaceTracker = onSurfaceTracker;
+            walkBehaviour.allowSwimming = false;
             snowStalker.onSurfaceMovement = onSurfaceMovement;
+
+            // The controller enables its walking list on mode changes, including the vanilla NavMeshAgent.
+            SwimWalkCreatureController swimWalkController = targetGameObject.GetComponent<SwimWalkCreatureController>();
+            for (int index = 0; index < swimWalkController.walkBehaviours.Length; index++)
+            {
+                Behaviour walkComponent = swimWalkController.walkBehaviours[index];
+                if (walkComponent is NavMeshAgent || walkComponent is NavMeshFollowing || walkComponent is MoveOnNavMesh)
+                {
+                    swimWalkController.walkBehaviours[index] = onSurfaceMovement;
+                }
+            }
             ModDebugLog.LogDebug("... Configuring movement components ... Done");
 
             // Add Obstacle Avoidance components

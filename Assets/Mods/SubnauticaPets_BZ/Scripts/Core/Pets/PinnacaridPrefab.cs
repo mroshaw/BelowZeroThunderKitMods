@@ -1,3 +1,4 @@
+using DaftAppleGames.ModTools.Extensions;
 using Nautilus.Assets;
 using Nautilus.Assets.Gadgets;
 using Nautilus.Assets.PrefabTemplates;
@@ -29,6 +30,13 @@ namespace DaftAppleGames.SubnauticaPets.Pets
                 GameObject modelGameObject = obj.GetComponentInChildren<Animator>(true).gameObject;
                 PetPrefabConfigUtils.ConfigureVFXFabricating(obj, null, -0.1f, 0.9f, Vector3.zero, 1.0f, Vector3.zero);
                 PrefabUtils.AddConstructable(obj, Info.TechType, ConstructableFlags.Inside, modelGameObject);
+                obj.DestroyComponentsInChildren<Pickupable>();
+                PetPrefabConfigUtils.ConfigurePetHandTarget(obj);
+                PetPrefabConfigUtils.ConfigureLandOnlyCreature(obj);
+                PetPrefabConfigUtils.ConfigureSkyApplier(obj);
+                PetPrefabConfigUtils.ConfigureAnimator(obj, false);
+                obj.DestroyComponentsInChildren<CreatureDeath>();
+                PetPrefabConfigUtils.AddPetComponent(obj);
                 obj.name = ClassId;
                 obj.SetActive(false);
                 ModDebugLog.LogDebug($"Done modifying {Info.TechType}");

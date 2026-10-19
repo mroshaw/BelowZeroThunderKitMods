@@ -83,9 +83,9 @@ MonoBehaviour:
       minor: 1
       patch: 1
     currentPublishedVersion:
-      major: 0
-      minor: 0
-      patch: 0
+      major: 2
+      minor: 1
+      patch: 1
     publishingSites: -1
     nexusMods:
       fileGroupId: 1005124
@@ -329,11 +329,11 @@ MonoBehaviour:
     version:
       major: 2
       minor: 13
-      patch: 2
+      patch: 3
     currentPublishedVersion:
       major: 2
       minor: 13
-      patch: 2
+      patch: 3
     publishingSites: -1
     nexusMods:
       fileGroupId: 1058311
