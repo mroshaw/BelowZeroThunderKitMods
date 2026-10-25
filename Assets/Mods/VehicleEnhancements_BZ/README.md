@@ -34,7 +34,7 @@ A note on "Build inside": if you build objects that consume power, such as a bat
 
 ### Per vehicle options
 
-You can toggle features on or off per vehicle via the Options > Mods menu:
+Open Options > Mods and expand **Vehicle Enhancements BZ**. Settings are grouped beneath standard **Seatruck**, **Prawn Suit**, **Snowfox**, and **General** subheadings. Only the main mod heading collapses. Existing saved settings are retained.
 
 - **Speedometer** - toggle on to enable the speedometer and VSI enhancement.
 - **HSI** - toggle on to enable the Horizontal Situation Indicator, showing the pitch and roll of the vehicle.
@@ -42,6 +42,7 @@ You can toggle features on or off per vehicle via the Options > Mods menu:
 - **Reversing voice** - select a spoken voice audio clip to play when the vehicle is reversing. Select "None" to disable reversing voice audio.
 - **Reversing beeps** - toggle on to enable a "beep beep beep" audio when the vehicle is reversing. Can be used in addition to the reversing voice option.
 - **Reversing camera (*Seatruck only*)** - toggle on to enable the reversing camera on the Seatruck.
+- Options to **tweak the position and UI scale** of the new indicators, which works alongside the "UI Scaling" accessibility options in the game allowing you to fine tune the HUD for each vehicle.
 
 ### Global options
 

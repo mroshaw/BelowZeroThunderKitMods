@@ -74,6 +74,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Speedometer
             }
 
             speedometerRect.anchoredPosition += offset;
+            speedometerRoot.AddComponent<VehicleHudElementLayout>().Configure(vehicle, VehicleHudElementLayout.Element.Speedometer);
         }
 
         private void Awake()

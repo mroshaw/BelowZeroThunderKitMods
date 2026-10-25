@@ -31,6 +31,10 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Hsi
         internal void Configure(EnhancedVehicle selectedVehicle)
         {
             vehicle = selectedVehicle;
+            if (inclinometerRoot)
+            {
+                inclinometerRoot.AddComponent<VehicleHudElementLayout>().Configure(vehicle, VehicleHudElementLayout.Element.Hsi);
+            }
         }
 
         private void Awake()

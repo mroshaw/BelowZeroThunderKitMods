@@ -17,7 +17,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
         // Plugin properties
         private const string MyGuid = "com.mroshaw.vehicleenhancements";
         private const string PluginName = "Vehicle Enhancements BZ";
-        private const string VersionString = "2.0.1";
+        private const string VersionString = "2.1.0";
         private const string LegacyAssemblyFileName = "SeaTruckEnhancements_BZ.dll";
         private const string AssetBundleName = "enhancedvehiclesassetbundle";
         private const string ReversingCameraFrameSpriteName = "ReversingCameraFrame.png";
@@ -37,11 +37,11 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
 
         // Config file / Log initialisation
 #if !UNITY_EDITOR
-        internal static ModConfigFile ConfigFile = OptionsPanelHandler.RegisterModOptions<ModConfigFile>();
+        internal static readonly ModConfigFile ConfigFile = new ModConfigFile();
         internal static ModLog ModDebugLog;
         internal static bool DetailedLoggingEnabled => ConfigFile.DetailedLogging;
 #else
-        internal static readonly ModConfigFile ConfigFile;
+        internal static readonly ModConfigFile ConfigFile = new ModConfigFile();
         internal static ModLog ModDebugLog = new ModLog(null, true);
         internal static bool DetailedLoggingEnabled => true;
 #endif
@@ -53,10 +53,14 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
         /// </summary>
         private void Awake()
         {
+#if !UNITY_EDITOR
+            ConfigFile.Load();
+#endif
             // Initialise Logger
             ModDebugLog = new ModLog(Logger, DetailedLoggingEnabled);
 
 #if !UNITY_EDITOR
+            OptionsPanelHandler.RegisterModOptions(new VehicleEnhancementsOptions(ConfigFile));
             string legacyModFolder = FindLegacyModFolder();
             if (legacyModFolder != null)
             {

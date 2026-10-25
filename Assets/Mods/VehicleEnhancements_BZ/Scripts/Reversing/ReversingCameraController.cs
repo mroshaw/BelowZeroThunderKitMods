@@ -1,6 +1,6 @@
-using System;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
+using UWE;
 using UnityEngine;
 using UnityEngine.UI;
 using static DaftAppleGames.VehicleEnhancements_BZ.VehicleEnhancementsPlugin_BZ;
@@ -9,6 +9,8 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
 {
     internal class ReversingCameraController : MonoBehaviour
     {
+        private const float LayoutPreviewDuration = 3.0f;
+
         [SerializeField, MinValue(0.0f)]
         private float reversingSpeedThreshold = 0.1f;
 
@@ -33,6 +35,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
         private readonly List<SeaTruckSegment> seaTruckChain = new List<SeaTruckSegment>();
         private uGUI_SeaTruckHUD seaTruckHud;
         private RawImage rearViewImage;
+        private VehicleHudElementLayout rearViewLayout;
         private Camera configuredRearCamera;
         private RenderTexture originalCameraTargetTexture;
         private int originalCameraCullingMask;
@@ -45,10 +48,10 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
         private Image frameImage;
         private Sprite originalFrameSprite;
         private RenderTexture renderTexture;
-        private Texture2D diagnosticPixel;
         private float nextDiagnosticTime;
         private bool wasShowingRearView;
-        private bool diagnosticReadbackFailed;
+        private Vector3 lastCameraLayoutSettings;
+        private float previewExpiresAt;
 
         private void Awake()
         {
@@ -66,6 +69,9 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
             }
 
             ApplyCameraFrameSprite();
+            rearViewLayout = seaTruckHud.rearView.AddComponent<VehicleHudElementLayout>();
+            rearViewLayout.Configure(EnhancedVehicle.Seatruck, VehicleHudElementLayout.Element.ReversingCamera);
+            lastCameraLayoutSettings = GetCameraLayoutSettings();
             CreateRenderTexture();
         }
 
@@ -120,12 +126,20 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
 
         private void LateUpdate()
         {
-            bool showRearView = ConfigFile.EnableReversingCamera && TryRenderRearView();
+            bool preview = ShouldPreviewRearView();
+            bool showRearView = (preview || ConfigFile.EnableReversingCamera) && TryRenderRearView(preview);
             if (!showRearView)
             {
                 RestoreRearCamera();
             }
             seaTruckHud.rearView.SetActive(showRearView);
+            if (showRearView)
+            {
+                // The vanilla HUD hides this object in Update, so its own LateUpdate
+                // cannot reliably drive layout after we reactivate it here.
+                rearViewLayout.ApplyLayout();
+            }
+
             if (DetailedLoggingEnabled && showRearView &&
                 (!wasShowingRearView || Time.unscaledTime >= nextDiagnosticTime))
             {
@@ -141,11 +155,36 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
             wasShowingRearView = showRearView;
         }
 
+        private bool ShouldPreviewRearView()
+        {
+            Vector3 settings = GetCameraLayoutSettings();
+            bool changed = settings != lastCameraLayoutSettings;
+            lastCameraLayoutSettings = settings;
+            if (!FreezeTime.Contains(FreezeTime.Id.IngameMenu))
+            {
+                previewExpiresAt = 0.0f;
+                return false;
+            }
+
+            if (changed)
+            {
+                previewExpiresAt = Time.unscaledTime + LayoutPreviewDuration;
+            }
+
+            return Time.unscaledTime < previewExpiresAt;
+        }
+
+        private static Vector3 GetCameraLayoutSettings() => new Vector3(
+            ConfigFile.SeatruckCameraHorizontalAdjust,
+            ConfigFile.SeatruckCameraVerticalAdjust,
+            ConfigFile.SeatruckCameraUiScale);
+
         private void OnDisable()
         {
             RestoreRearCamera();
             seaTruckChain.Clear();
             wasShowingRearView = false;
+            previewExpiresAt = 0.0f;
 
             if (seaTruckHud && seaTruckHud.rearView)
             {
@@ -172,18 +211,12 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
                 Destroy(renderTexture);
                 renderTexture = null;
             }
-
-            if (diagnosticPixel)
-            {
-                Destroy(diagnosticPixel);
-                diagnosticPixel = null;
-            }
         }
 
-        private bool TryRenderRearView()
+        private bool TryRenderRearView(bool preview)
         {
             SeaTruckMotor seaTruckMotor = GetPilotedSeaTruckMotor();
-            if (!seaTruckMotor || GetSignedForwardSpeed(seaTruckMotor) >= -reversingSpeedThreshold)
+            if (!seaTruckMotor || (!preview && GetSignedForwardSpeed(seaTruckMotor) >= -reversingSpeedThreshold))
             {
                 return false;
             }
@@ -235,45 +268,9 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
                 $"imageEnabled={rearViewImage.enabled} imageActive={rearViewImage.gameObject.activeInHierarchy} " +
                 $"imageCull={rearViewImage.canvasRenderer.cull} imageAlpha={rearViewImage.color.a:F2} " +
                 $"imageSize={rearViewImage.rectTransform.rect.size} " +
+                $"viewPosition={seaTruckHud.rearView.transform.localPosition} " +
+                $"viewScale={seaTruckHud.rearView.transform.localScale} " +
                 $"maskActive={(mask ? mask.isActiveAndEnabled : false)}.");
-
-            if (diagnosticReadbackFailed)
-            {
-                return;
-            }
-
-            RenderTexture sampleTexture = null;
-            RenderTexture previousActive = RenderTexture.active;
-            try
-            {
-                if (!diagnosticPixel)
-                {
-                    diagnosticPixel = new Texture2D(4, 4, TextureFormat.RGBA32, false);
-                }
-
-                sampleTexture = RenderTexture.GetTemporary(4, 4, 0, RenderTextureFormat.ARGB32);
-                Graphics.Blit(renderTexture, sampleTexture);
-                RenderTexture.active = sampleTexture;
-                diagnosticPixel.ReadPixels(new Rect(0, 0, 4, 4), 0, 0, false);
-                diagnosticPixel.Apply(false, false);
-                ModDebugLog.LogDebug(
-                    $"[ReversingCamera] Pixels: center={diagnosticPixel.GetPixel(1, 1)} " +
-                    $"UL={diagnosticPixel.GetPixel(0, 3)} UR={diagnosticPixel.GetPixel(3, 3)} " +
-                    $"LL={diagnosticPixel.GetPixel(0, 0)} LR={diagnosticPixel.GetPixel(3, 0)}.");
-            }
-            catch (Exception exception)
-            {
-                diagnosticReadbackFailed = true;
-                ModDebugLog.LogError($"[ReversingCamera] Pixel readback failed: {exception}");
-            }
-            finally
-            {
-                RenderTexture.active = previousActive;
-                if (sampleTexture)
-                {
-                    RenderTexture.ReleaseTemporary(sampleTexture);
-                }
-            }
         }
 
         private void ConfigureRearCamera(Camera rearCamera)

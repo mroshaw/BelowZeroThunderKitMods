@@ -37,6 +37,10 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.TimeAndWeather
         internal void Configure(EnhancedVehicle selectedVehicle)
         {
             vehicle = selectedVehicle;
+            if (timeAndWeatherRoot)
+            {
+                timeAndWeatherRoot.AddComponent<VehicleHudElementLayout>().Configure(vehicle, VehicleHudElementLayout.Element.TimeAndWeather);
+            }
         }
 
         private void Awake()

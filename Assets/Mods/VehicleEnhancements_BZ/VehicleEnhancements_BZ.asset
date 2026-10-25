@@ -76,7 +76,7 @@ MonoBehaviour:
   Author: Daft Apple Games
   Name: VehicleEnhancements_BZ
   Description: Adds new features to vehicles in Below Zero
-  Version: 2.0.1
+  Version: 2.1.0
   Dependencies: []
 --- !u!114 &3912182343985941701
 MonoBehaviour:
