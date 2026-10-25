@@ -359,12 +359,12 @@ MonoBehaviour:
     manifest: {fileID: 11400000, guid: ff5c67e383e435d439351b4fbd59b8bf, type: 2}
     version:
       major: 2
-      minor: 0
-      patch: 1
+      minor: 1
+      patch: 0
     currentPublishedVersion:
       major: 2
-      minor: 0
-      patch: 1
+      minor: 1
+      patch: 0
     publishingSites: -1
     nexusMods:
       fileGroupId: 7964424
