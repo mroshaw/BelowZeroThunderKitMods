@@ -1,28 +1,19 @@
-# Aqua Eclipse Now BZ
+# Booster Tank Speed Modifier BZ
 
-This mod adds a new console command to accelerate time to the next solar eclipse event!
+Can't be bothered to get a SeaTruck to try out the amazing "Sea Truck Speed Mod"? Still want to careen around the oceans like a mad diver on speed? Want to rocket to the surface and beyond, like a rubber-suited rocket? Well, now you can achieve all of this and more with the Booster Trank Speed Modifier for Subnautica: Below Zero!
 
-## User Guide
+## Features
 
-Open the command prompt (usually via the tilda ~ keyboard key) and enter one of these commands:
-
-- *eclipse now* - skips time to the next eclipse event in game time.
-- *eclipse next* - shows you when the next eclipse event is due to occur in game time.
+- Configurable speed modifier.
+- Option to configure oxygen usage, to balance the benefit of the speed boost.
 
 ## Options
 
-You can set a couple of options via the Options > Mods > Menu:
+You can set a few options via the Options > Mods > Menu:
 
-- **Time Before Eclipse** - the eclipse now command will forward game time to this many seconds before the next eclipse.
-- **Time Skip Duration** - the time taken to smoothly transition from the current time to the time of the next eclipse.
-
-The mod works by running a simulation of the game time and sky managers to find a point where the code determines an eclipse is occurring. The results are dependent on the accuracy of the simulation, which can be tinkered with using these mod options:
-
-- **Simulation Iterations** - The higher the number, the longer the mod will look for an eclipse.
-- Simulation Time Step - The lower the number, the more checks the mod will do at shorter time intervals, to find a more accurate time of an eclipse.
-- **Simulation Threshold** - an eclipse occurs when the planet obscures the sun. The degree to which the planet obscures the sun is calculated in each iteration as a value between 0 and 1. The simulation ends when this value reaches the threshold set. The closer the value is to 1, the more likely you'll get a "total eclipse" rather than a partial one.
-
-> ﻿**WARNING**! Use of the command skips actual game time. In doing so, you may miss or trigger in-game events that impact your playthrough!
+- **Speed multiplier** - the larger the value, the faster the boost!
+- **Oxygen consumption multiplier** - inject some realism by consuming oxygen while boosting. Set to zero to avoid oxygen consumption altogether.
+- **Detailed logging** - Only enable this if you have an issue and want to provide useful logging when reporting a bug.
 
 ## Installation and Dependencies
 
@@ -30,5 +21,4 @@ The mod works by running a simulation of the game time and sky managers to find 
 
 ## Source Code
 
-All of my mods are open source, and you can find the full source code in my [Subnautica Mods GitHub Repository](https://github.com/mroshaw/SubnauticaThunderKitMods).
-
+All of my mods are open source, and you can find the full source code in my [Below Zero Mods GitHub Repository](https://github.com/mroshaw/BelowZeroThunderKitMods).

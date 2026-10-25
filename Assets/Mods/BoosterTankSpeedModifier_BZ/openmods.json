@@ -20,8 +20,8 @@
   ],
 
   "media": [
-    { "type": "image", "url": "BoosterSpeed.png", "label": "Booster speed!" },
-    { "type": "image", "url": "ModOptions.png", "label": "Mod options" }
+    { "type": "image", "url": "BoosterTankModScreenshot.png", "label": "Booster speed!" },
+    { "type": "image", "url": "BoosterTankModOptions.png", "label": "Mod options" }
   ],
 
   "faq": [
