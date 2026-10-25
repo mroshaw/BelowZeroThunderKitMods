@@ -7,8 +7,8 @@
   "description" : "A simple mod to apply a configurable speed modifier to the Booster Tank.",
   "supportedGameId": "subnautica-below-zero",
 
-  "releaseAssets": ["BoosterTankSpeedModifier_SN*.zip"],
-  "primaryAsset": "BoosterTankSpeedModifier_SN*.zip",
+  "releaseAssets": ["BoosterTankSpeedModifier_BZ*.zip"],
+  "primaryAsset": "BoosterTankSpeedModifier_BZ*.zip",
 
   "readme": "README.md",
 

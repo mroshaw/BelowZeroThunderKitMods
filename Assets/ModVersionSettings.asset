@@ -86,7 +86,7 @@ MonoBehaviour:
       major: 2
       minor: 1
       patch: 1
-    publishingSites: -1
+    publishingSites: 2
     nexusMods:
       fileGroupId: 1005124
       gameScopedModId: 202
