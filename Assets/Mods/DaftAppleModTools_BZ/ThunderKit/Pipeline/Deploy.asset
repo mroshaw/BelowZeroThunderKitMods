@@ -64,6 +64,7 @@ MonoBehaviour:
   Data:
   - {fileID: -2236899121766069271}
   - {fileID: 2246702635225239771}
+  - {fileID: 594310000000000005}
   - {fileID: -2486728045325611241}
   QuickAccess: 1
   manifest: {fileID: 0}
@@ -89,3 +90,25 @@ MonoBehaviour:
   EstablishDestination: 1
   Source: <ManifestStagingRoot>/plugins/<ManifestName>
   Destination: <BepInExGamePlugins>
+--- !u!114 &594310000000000005
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03063c7a6ec04cc4c82c75cf9bcc8db8, type: 3}
+  m_Name: CopyPatchers
+  m_EditorClassIdentifier:
+  Active: 1
+  PerManifest: 0
+  ListType: 0
+  Manifests: []
+  ReplaceDirectory: 1
+  Recursive: 1
+  SourceRequired: 0
+  EstablishDestination: 1
+  Source: <ManifestStagingRoot>/patchers/<ManifestName>
+  Destination: <BepInExGamePatchers>

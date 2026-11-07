@@ -57,6 +57,8 @@ MonoBehaviour:
   - {fileID: 7963844026012339470}
   - {fileID: 7782552347644210410}
   - {fileID: 5378674642182074626}
+  - {fileID: 594310000000000002}
+  - {fileID: 594310000000000003}
   QuickAccess: 1
   manifest: {fileID: 0}
 --- !u!114 &114520525572577756
@@ -182,3 +184,36 @@ MonoBehaviour:
   - '*.meta'
   Path: <ManifestPluginStaging>/<LocalisationPath>
   IsFatal: 0
+--- !u!114 &594310000000000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3570c76eb7a5c3c45942d9295a150917, type: 3}
+  m_Name: StageManifestFiles
+  m_EditorClassIdentifier: 
+  Active: 1
+--- !u!114 &594310000000000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32aab264a642c8a41a88bc3296249a6d, type: 3}
+  m_Name: RemoveUnityMetadata
+  m_EditorClassIdentifier: 
+  Active: 1
+  PerManifest: 0
+  ListType: 0
+  Manifests: []
+  fileExtensions:
+  - meta
+  Path: <ManifestPluginStaging>
+  IsFatal: 1

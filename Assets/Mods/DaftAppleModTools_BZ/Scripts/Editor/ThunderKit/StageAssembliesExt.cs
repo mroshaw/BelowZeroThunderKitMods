@@ -180,11 +180,23 @@ namespace ThunderKit.Core.Pipelines.Jobs
             if (File.Exists(assemblyOutputPath))
                 File.Delete(assemblyOutputPath);
 
-            if (builder.Build())
+            CustomCompilerBuild customCompiler = CustomCompilerBuild.TryCreate(AssetDatabase.GetAssetPath(definition.asmDefAsset));
+            if (customCompiler != null)
+            {
+                OnBuildStarted(assemblyOutputPath);
+                CompilerMessage[] messages = await customCompiler.Build(builder, definition.asm.name,
+                    assemblyOutputPath, definition.asm.sourceFiles, releaseBuild);
+                OnBuildFinished(assemblyOutputPath, messages);
+            }
+            else if (builder.Build())
             {
                 await Task.Delay(100);
                 while (builder.status == AssemblyBuilderStatus.IsCompiling)
                     await Task.Delay(100);
+            }
+            else
+            {
+                throw new InvalidOperationException("AssemblyBuilder could not start building " + assemblyName);
             }
 
             if (errors > 0)
@@ -205,8 +217,10 @@ namespace ThunderKit.Core.Pipelines.Jobs
                 if (messages.Any())
                     foreach (var message in messages.OrderBy(msg => msg.type))
                     {
-                        var extraData = $"{message.file} ({message.line}:{message.column})\r\n" +
-                            $"[{message.message}]({Pipeline.ExceptionScheme}://{Path.GetFullPath(message.file)}#{message.line})";
+                        string extraData = string.IsNullOrEmpty(message.file)
+                            ? message.message
+                            : $"{message.file} ({message.line}:{message.column})\r\n" +
+                              $"[{message.message}]({Pipeline.ExceptionScheme}://{Path.GetFullPath(message.file)}#{message.line})";
                         switch (message.type)
                         {
                             case CompilerMessageType.Error:
