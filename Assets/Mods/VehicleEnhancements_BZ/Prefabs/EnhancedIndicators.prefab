@@ -1299,9 +1299,6 @@ MonoBehaviour:
   speedText: {fileID: 8575013490120536025}
   verticalNeedle: {fileID: 8670672121634274167}
   verticalSpeedText: {fileID: 2407745977858173684}
-  seaTruckOffset: {x: 0, y: 0}
-  prawnSuitOffset: {x: 0, y: 20}
-  snowfoxOffset: {x: 0, y: -100}
   minimumNeedleAngle: 180
   maximumNeedleAngle: -80
   maximumDisplayedSpeed: 20

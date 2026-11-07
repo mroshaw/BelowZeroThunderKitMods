@@ -23,8 +23,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
         private RectTransform[] contentRects;
         private Element element;
         private EnhancedVehicle vehicle;
-        private Vector2 basePosition;
-        private Vector3 baseScale;
+        private HudLocation lastLocation;
         private bool hasLayout;
         private Vector2 lastAdjustment;
         private float lastScale;
@@ -42,8 +41,6 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
                 return;
             }
 
-            basePosition = elementRect.anchoredPosition;
-            baseScale = elementRect.localScale;
             parentRect = transform.parent as RectTransform;
             hasLayout = false;
             canvasRect = null;
@@ -78,7 +75,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
                 return;
             }
 
-            GetAdjustment(out Vector2 adjustment, out float scale);
+            GetAdjustment(out HudLocation location, out Vector2 adjustment, out float scale);
 
             adjustment.x = Mathf.Clamp(adjustment.x, ModConfigFile.MinimumHudAdjust, ModConfigFile.MaximumHudAdjust);
             adjustment.y = Mathf.Clamp(adjustment.y, ModConfigFile.MinimumHudAdjust, ModConfigFile.MaximumHudAdjust);
@@ -87,29 +84,46 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
             Matrix4x4 parentToCanvas = canvasRect
                 ? canvasRect.worldToLocalMatrix * parentRect.localToWorldMatrix
                 : parentRect.localToWorldMatrix;
-            if (hasLayout && adjustment == lastAdjustment && scale == lastScale &&
+            if (hasLayout && location == lastLocation && adjustment == lastAdjustment && scale == lastScale &&
                 parentRect.rect == lastParentRect && canvasBounds == lastCanvasRect && parentToCanvas == lastParentToCanvas)
             {
                 return;
             }
 
             hasLayout = true;
+            lastLocation = location;
             lastAdjustment = adjustment;
             lastScale = scale;
             lastParentRect = parentRect.rect;
             lastCanvasRect = canvasBounds;
             lastParentToCanvas = parentToCanvas;
-            elementRect.anchoredPosition = basePosition + adjustment;
+            Vector2 anchor;
+            if (element == Element.ReversingCamera)
+            {
+                // The native rear view uses a different parent and a vertically centered row.
+                anchor = new Vector2(location == HudLocation.Left ? 0.0f
+                    : location == HudLocation.Center ? 0.5f : 1.0f, 0.5f);
+            }
+            else
+            {
+                anchor = location == HudLocation.Left ? new Vector2(0.15f, 0.23f)
+                    : location == HudLocation.Center ? new Vector2(0.5f, 0.3f) : new Vector2(0.9f, 0.3f);
+            }
+
+            elementRect.anchorMin = anchor;
+            elementRect.anchorMax = anchor;
+            elementRect.anchoredPosition = adjustment;
 
             // Parent HUD scaling is inherited, so it is not multiplied again here.
-            elementRect.localScale = baseScale * scale;
+            elementRect.localScale = Vector3.one * scale;
             KeepOnScreen();
         }
 
-        private void GetAdjustment(out Vector2 adjustment, out float scale)
+        private void GetAdjustment(out HudLocation location, out Vector2 adjustment, out float scale)
         {
             if (element == Element.ReversingCamera)
             {
+                location = ConfigFile.SeatruckCameraLocation;
                 adjustment = new Vector2(ConfigFile.SeatruckCameraHorizontalAdjust, ConfigFile.SeatruckCameraVerticalAdjust);
                 scale = ConfigFile.SeatruckCameraUiScale;
                 return;
@@ -121,14 +135,17 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
                     switch (element)
                     {
                         case Element.Hsi:
+                            location = ConfigFile.PrawnHsiLocation;
                             adjustment = new Vector2(ConfigFile.PrawnHsiHorizontalAdjust, ConfigFile.PrawnHsiVerticalAdjust);
                             scale = ConfigFile.PrawnHsiUiScale;
                             return;
                         case Element.TimeAndWeather:
+                            location = ConfigFile.PrawnTimeLocation;
                             adjustment = new Vector2(ConfigFile.PrawnTimeHorizontalAdjust, ConfigFile.PrawnTimeVerticalAdjust);
                             scale = ConfigFile.PrawnTimeUiScale;
                             return;
                         default:
+                            location = ConfigFile.PrawnSpeedometerLocation;
                             adjustment = new Vector2(ConfigFile.PrawnSpeedometerHorizontalAdjust, ConfigFile.PrawnSpeedometerVerticalAdjust);
                             scale = ConfigFile.PrawnSpeedometerUiScale;
                             return;
@@ -137,30 +154,59 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
                     switch (element)
                     {
                         case Element.Hsi:
+                            location = ConfigFile.SnowfoxHsiLocation;
                             adjustment = new Vector2(ConfigFile.SnowfoxHsiHorizontalAdjust, ConfigFile.SnowfoxHsiVerticalAdjust);
                             scale = ConfigFile.SnowfoxHsiUiScale;
                             return;
                         case Element.TimeAndWeather:
+                            location = ConfigFile.SnowfoxTimeLocation;
                             adjustment = new Vector2(ConfigFile.SnowfoxTimeHorizontalAdjust, ConfigFile.SnowfoxTimeVerticalAdjust);
                             scale = ConfigFile.SnowfoxTimeUiScale;
                             return;
                         default:
+                            location = ConfigFile.SnowfoxSpeedometerLocation;
                             adjustment = new Vector2(ConfigFile.SnowfoxSpeedometerHorizontalAdjust, ConfigFile.SnowfoxSpeedometerVerticalAdjust);
                             scale = ConfigFile.SnowfoxSpeedometerUiScale;
+                            return;
+                    }
+                case EnhancedVehicle.CustomVehicle:
+                    CustomVehicleSettings settings = ConfigFile.CurrentCustomVehicleSettings;
+                    switch (element)
+                    {
+                        case Element.Hsi:
+                            location = settings.HsiLocation;
+                            adjustment = new Vector2(settings.HsiHorizontalAdjust,
+                                settings.HsiVerticalAdjust);
+                            scale = settings.HsiUiScale;
+                            return;
+                        case Element.TimeAndWeather:
+                            location = settings.TimeLocation;
+                            adjustment = new Vector2(settings.TimeHorizontalAdjust,
+                                settings.TimeVerticalAdjust);
+                            scale = settings.TimeUiScale;
+                            return;
+                        default:
+                            location = settings.SpeedometerLocation;
+                            adjustment = new Vector2(settings.SpeedometerHorizontalAdjust,
+                                settings.SpeedometerVerticalAdjust);
+                            scale = settings.SpeedometerUiScale;
                             return;
                     }
                 default:
                     switch (element)
                     {
                         case Element.Hsi:
+                            location = ConfigFile.SeatruckHsiLocation;
                             adjustment = new Vector2(ConfigFile.SeatruckHsiHorizontalAdjust, ConfigFile.SeatruckHsiVerticalAdjust);
                             scale = ConfigFile.SeatruckHsiUiScale;
                             return;
                         case Element.TimeAndWeather:
+                            location = ConfigFile.SeatruckTimeLocation;
                             adjustment = new Vector2(ConfigFile.SeatruckTimeHorizontalAdjust, ConfigFile.SeatruckTimeVerticalAdjust);
                             scale = ConfigFile.SeatruckTimeUiScale;
                             return;
                         default:
+                            location = ConfigFile.SeatruckSpeedometerLocation;
                             adjustment = new Vector2(ConfigFile.SeatruckSpeedometerHorizontalAdjust, ConfigFile.SeatruckSpeedometerVerticalAdjust);
                             scale = ConfigFile.SeatruckSpeedometerUiScale;
                             return;

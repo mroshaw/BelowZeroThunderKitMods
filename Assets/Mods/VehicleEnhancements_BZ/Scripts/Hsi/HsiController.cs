@@ -19,7 +19,9 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Hsi
 
         [SerializeField, MinValue(0.0f)] private float smoothTime = 0.12f;
 
-        private Vector2 hingeInitialPosition;
+        // Preserve the authored hinge baseline when VF clones an already-updated HUD.
+        [SerializeField, HideInInspector] private Vector2 hingeInitialPosition;
+        [SerializeField, HideInInspector] private bool hasHingeInitialPosition;
         private float smoothedPitch;
         private float smoothedRoll;
         private float pitchVelocity;
@@ -33,7 +35,13 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Hsi
             vehicle = selectedVehicle;
             if (inclinometerRoot)
             {
-                inclinometerRoot.AddComponent<VehicleHudElementLayout>().Configure(vehicle, VehicleHudElementLayout.Element.Hsi);
+                VehicleHudElementLayout layout = inclinometerRoot.GetComponent<VehicleHudElementLayout>();
+                if (!layout)
+                {
+                    layout = inclinometerRoot.AddComponent<VehicleHudElementLayout>();
+                }
+
+                layout.Configure(vehicle, VehicleHudElementLayout.Element.Hsi);
             }
         }
 
@@ -46,7 +54,11 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Hsi
                 return;
             }
 
-            hingeInitialPosition = rollHinge.anchoredPosition;
+            if (!hasHingeInitialPosition)
+            {
+                hingeInitialPosition = rollHinge.anchoredPosition;
+                hasHingeInitialPosition = true;
+            }
             inclinometerRoot.SetActive(ConfigFile.IsHsiEnabled(vehicle));
             SetDisplay(0.0f, 0.0f);
             SetNumericDisplay(0.0f, 0.0f);

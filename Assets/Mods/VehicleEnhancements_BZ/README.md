@@ -15,6 +15,14 @@ This mod adds some super-cool enhancements to the standard vehicles in Below Zer
 - A **time-of-day indicator** showing the passage of day into night, alongside a digital clock showing the current game time.
 - A **weather indicator** showing the current weather conditions outside - useful if you're diving down into the depths and want to know what the weather's like on the surface!
 
+### Vehicle Framework BZ support
+
+With **Vehicle Framework BZ 2.0.7 or later** installed, custom vehicles also receive the speedometer/VSI, HSI, time/weather display, reversing voice and beeps. Indicators appear in the framework's normal and storage HUDs while you control the vehicle, and hide when you stop piloting or walk inside it.
+
+Each registered custom vehicle type gets its own options section and saved settings. **Apply layout to all custom** copies instrument locations, position offsets and scales to the other custom vehicle profiles; their feature toggles and sounds stay independent. Newly registered types appear when you reopen mod options.
+
+Vehicle Framework BZ is optional. Custom vehicle enhancements currently support monitor play only, matching Enhanced Vehicles SN. The reversing camera and build-inside features remain Seatruck features.
+
 ### Available in the Seatruck only
 
 - A **reversing camera** so that you can back up the Seatruck safely.
@@ -35,6 +43,8 @@ A note on "Build inside": if you build objects that consume power, such as a bat
 ### Per vehicle options
 
 Open Options > Mods and expand **Vehicle Enhancements BZ**. Settings are grouped beneath standard **Seatruck**, **Prawn Suit**, **Snowfox**, and **General** subheadings. Only the main mod heading collapses. Existing saved settings are retained.
+
+Every instrument and the Seatruck reversing camera has a **Location** selector: Left, Center or Right. Horizontal and vertical adjustments offset the control from its selected location; positive values move right and up. UI Scale sets its size and inherits the game's HUD scaling. Defaults and slider resets reproduce the previous BZ layouts, including vehicle-specific speedometer offsets. Changing the camera location, position or scale triggers its temporary preview while the menu is open.
 
 - **Speedometer** - toggle on to enable the speedometer and VSI enhancement.
 - **HSI** - toggle on to enable the Horizontal Situation Indicator, showing the pitch and roll of the vehicle.

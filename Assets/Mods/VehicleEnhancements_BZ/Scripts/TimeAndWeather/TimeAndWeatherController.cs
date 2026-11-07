@@ -39,7 +39,13 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.TimeAndWeather
             vehicle = selectedVehicle;
             if (timeAndWeatherRoot)
             {
-                timeAndWeatherRoot.AddComponent<VehicleHudElementLayout>().Configure(vehicle, VehicleHudElementLayout.Element.TimeAndWeather);
+                VehicleHudElementLayout layout = timeAndWeatherRoot.GetComponent<VehicleHudElementLayout>();
+                if (!layout)
+                {
+                    layout = timeAndWeatherRoot.AddComponent<VehicleHudElementLayout>();
+                }
+
+                layout.Configure(vehicle, VehicleHudElementLayout.Element.TimeAndWeather);
             }
         }
 
@@ -108,7 +114,8 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.TimeAndWeather
 
         private RectTransform CreateMoon(string objectName)
         {
-            Image moonImage = Instantiate(timeImage, timeOfDayIndicator);
+            Transform existingMoon = timeOfDayIndicator.Find(objectName);
+            Image moonImage = existingMoon ? existingMoon.GetComponent<Image>() : Instantiate(timeImage, timeOfDayIndicator);
             moonImage.name = objectName;
             moonImage.sprite = nightTimeSprite;
             moonImage.raycastTarget = false;

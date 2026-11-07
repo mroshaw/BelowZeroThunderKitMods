@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using BepInEx;
 using HarmonyLib;
+using DaftAppleGames.VehicleEnhancements_BZ.Integration;
 using DaftAppleGames.ModTools;
 using Nautilus.Handlers;
 using Nautilus.Utility;
@@ -12,12 +13,13 @@ using UnityEngine;
 namespace DaftAppleGames.VehicleEnhancements_BZ
 {
     [BepInPlugin(MyGuid, PluginName, VersionString)]
+    [BepInDependency("com.mikjaw.subnautica.vehicleframework.mod", BepInDependency.DependencyFlags.SoftDependency)]
     public class VehicleEnhancementsPlugin_BZ : BaseUnityPlugin
     {
         // Plugin properties
         private const string MyGuid = "com.mroshaw.vehicleenhancements";
         private const string PluginName = "Vehicle Enhancements BZ";
-        private const string VersionString = "2.1.0";
+        private const string VersionString = "2.1.1";
         private const string LegacyAssemblyFileName = "SeaTruckEnhancements_BZ.dll";
         private const string AssetBundleName = "enhancedvehiclesassetbundle";
         private const string ReversingCameraFrameSpriteName = "ReversingCameraFrame.png";
@@ -86,6 +88,17 @@ namespace DaftAppleGames.VehicleEnhancements_BZ
             // Patch in our MOD
             Harmony.PatchAll();
             ModDebugLog.LogInfo($"PluginName: {PluginName}, VersionString: {VersionString} is loaded.");
+        }
+
+        private void Start()
+        {
+#if !UNITY_EDITOR
+            // BepInEx finishes registering plugin instances after their Awake methods.
+            if (ModAssetUtils != null)
+            {
+                VehicleFrameworkIntegration.Initialize(Harmony);
+            }
+#endif
         }
 
         private static string FindLegacyModFolder()

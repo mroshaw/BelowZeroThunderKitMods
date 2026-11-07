@@ -51,6 +51,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
         private float nextDiagnosticTime;
         private bool wasShowingRearView;
         private Vector3 lastCameraLayoutSettings;
+        private HudLocation lastCameraLocation;
         private float previewExpiresAt;
 
         private void Awake()
@@ -72,6 +73,7 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
             rearViewLayout = seaTruckHud.rearView.AddComponent<VehicleHudElementLayout>();
             rearViewLayout.Configure(EnhancedVehicle.Seatruck, VehicleHudElementLayout.Element.ReversingCamera);
             lastCameraLayoutSettings = GetCameraLayoutSettings();
+            lastCameraLocation = ConfigFile.SeatruckCameraLocation;
             CreateRenderTexture();
         }
 
@@ -158,7 +160,8 @@ namespace DaftAppleGames.VehicleEnhancements_BZ.Reversing
         private bool ShouldPreviewRearView()
         {
             Vector3 settings = GetCameraLayoutSettings();
-            bool changed = settings != lastCameraLayoutSettings;
+            bool changed = settings != lastCameraLayoutSettings || ConfigFile.SeatruckCameraLocation != lastCameraLocation;
+            lastCameraLocation = ConfigFile.SeatruckCameraLocation;
             lastCameraLayoutSettings = settings;
             if (!FreezeTime.Contains(FreezeTime.Id.IngameMenu))
             {
