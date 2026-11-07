@@ -7,3 +7,6 @@
 [submodule "Packages/ModPublisher"]
 	path = Packages/ModPublisher
 	url = https://github.com/mroshaw/ModPublisher.git
+[submodule "Assets/Mods/VehicleFramework_BZ"]
+	path = Assets/Mods/VehicleFramework_BZ
+	url = https://github.com/mroshaw/VehicleFrameworkBZ.git

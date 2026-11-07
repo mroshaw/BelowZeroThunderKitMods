@@ -298,11 +298,11 @@ MonoBehaviour:
     version:
       major: 1
       minor: 2
-      patch: 1
+      patch: 2
     currentPublishedVersion:
       major: 1
       minor: 2
-      patch: 1
+      patch: 2
     publishingSites: -1
     nexusMods:
       fileGroupId: 1462246
@@ -360,7 +360,7 @@ MonoBehaviour:
     version:
       major: 2
       minor: 1
-      patch: 0
+      patch: 1
     currentPublishedVersion:
       major: 2
       minor: 1

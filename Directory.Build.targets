@@ -1,0 +1,6 @@
+<Project>
+  <!-- Give Rider an explicit language version for the port; Unity and ThunderKit use their own compiler settings. -->
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'VehicleFramework'">
+    <LangVersion>11.0</LangVersion>
+  </PropertyGroup>
+</Project>
