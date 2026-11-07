@@ -5,12 +5,10 @@ This repository contains all of my Subnautica: Below Zero [ThunderKit](https://g
 
 I also maintain an equivalent [Subnautica repository](https://github.com/mroshaw/SubnauticaThunderKitMods), with ThunderKit mods for the original  Subnautica game.
 
-You can find non-ThunderKit Subnautica mods in my [Subnautica Mods](https://github.com/mroshaw/SubnauticaMods) repository, though these will be migrated over time to this new repo.
-
 ## Mods
 
 - [Aqua Eclipse Now BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/AquaEclipseNow_BZ) - adds new console commands to force a solar eclipse to occur.
-- Auto Locker Labels BZ - dynamic labels for lockers, based on their contents.
+- [Auto Locker Labels BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/AutoLockerLabels_BZ) - dynamic labels for lockers, based on their contents.
 - [Booster Tank Speed Mod BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/BoosterTankSpeedModifier_BZ) - adds a configurable modifier to alter the speed of the Suit Booster Tank.
 - [More Aquariums BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/MoreAquariums_BZ) - adds new buildable aquariums to the habitat builder, and a custom fish movement component.
 - [Prawn Suit Repair and Charge BZ](https://github.com/mroshaw/BelowZeroThunderKitMods/tree/main/Assets/Mods/PrawnRepairAndCharge_BZ) - the Prawn Suit will now be repaired and recharged when docked.
@@ -27,4 +25,3 @@ You can find non-ThunderKit Subnautica mods in my [Subnautica Mods](https://gith
 ## Make your own mods
 
 If you're interested in making your own mods for the Subnautica games, check out my [Beginners Guide to Modding Subnautica](https://mroshaw.github.io/Subnautica/). There's a section in here too for [setting up and using ThunderKit](https://mroshaw.github.io/Subnautica/modding-with-thunderkit/) with the Subnautica games.
-
