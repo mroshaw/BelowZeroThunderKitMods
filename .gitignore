@@ -116,3 +116,6 @@ crashlytics-build.properties
 # Include the RipperAssetImporter package submodule
 !/[Pp]ackages/RippedAssetImporter
 !/[Pp]ackages/RippedAssetImporter/**
+
+# More JetBrains files
+*.DotSettings
