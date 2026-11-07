@@ -12,7 +12,7 @@ namespace DaftAppleGames.StartupCommand
     {
         private const string MyGuid = "com.mroshaw.startupcommands";
         private const string PluginName = "Startup Commands BZ";
-        internal const string VersionString = "1.2.1";
+        internal const string VersionString = "1.2.2";
 
         // Contains the command config UI prefab
         private const string AssetBundleName = "startupcommandassetbundle";
